@@ -39,6 +39,7 @@ in
 
     programs.git = {
         enable = true;
+        lfs.enable = true;
         settings = {
         user.name = "vickydotbat";
         user.email = "vickydotbat@tutamail.com";
@@ -70,5 +71,41 @@ in
 
   services.podman = {
     enable = true;
+  };
+
+  programs.ssh = {
+    enable = true;
+    enableDefaultConfig = false;
+
+    matchBlocks = {
+      "*" = {
+        identityFile = "~/.ssh/id_ed25519";
+        setEnv = {
+          TERM = "xterm-256color";
+        };
+        addKeysToAgent = "yes";
+      };
+
+      "github.com" = {
+        user = "git";
+        identityFile = "~/.ssh/id_ed25519";
+        identitiesOnly = true;
+      };
+
+      "ovh_sow" = {
+        user = "ubuntu";
+        port = 50340;
+        hostname = "51.254.142.98";
+        identityFile = "~/.ssh/id_ed25519";
+      };
+
+      "git-ssh.westgate.pw" = {
+        hostname = "git-ssh.westgate.pw";
+        port = 2222;
+        user = "git";
+        identityFile = "~/.ssh/id_ed25519";
+        identitiesOnly = true;
+      };
+    };
   };
 }
