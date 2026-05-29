@@ -103,6 +103,8 @@ in
     enable = true;
   };
 
+  programs.keepassxc.enable = true;
+
   programs.ssh = {
     enable = true;
     enableDefaultConfig = false;
