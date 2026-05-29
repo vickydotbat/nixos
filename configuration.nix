@@ -30,7 +30,14 @@
   # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
 
   # Select internationalisation properties.
-  i18n.defaultLocale = "en_US.UTF-8";
+  i18n.defaultLocale = "en_GB.UTF-8";
+
+  i18n.supportedLocales = [
+    "en_GB.UTF-8/UTF-8"
+    "en_US.UTF-8/UTF-8"
+    "it_IT.UTF-8/UTF-8"
+  ];
+
   i18n.extraLocaleSettings = {
     LC_TIME = "it_IT.UTF-8";
     LC_MONETARY = "it_IT.UTF-8";
@@ -194,6 +201,14 @@
 
     defaultNetwork.settings.dns_enabled = true;
   };
+
+  programs.nix-ld.enable = true;
+
+  programs.nix-ld.libraries = with pkgs; [
+    stdenv.cc.cc.lib
+    zlib
+    openssl
+  ];
 
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];
