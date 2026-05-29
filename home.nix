@@ -1,10 +1,39 @@
 { config, lib, pkgs, unstable, spicetify-nix, blender40pkgs, ... }:
 let
   spicePkgs = spicetify-nix.legacyPackages.${pkgs.stdenv.hostPlatform.system};
+
+  gimpPluginPython = pkgs.python3.withPackages (ps: with ps; [
+    pygobject3
+  ]);
+
+  myGimp = pkgs.symlinkJoin {
+    name = "gimp3-with-plt-python";
+    paths = [ pkgs.gimp3-with-plugins ];
+
+    nativeBuildInputs = [ pkgs.makeWrapper ];
+
+    postBuild = ''
+      wrapProgram $out/bin/gimp \
+        --set PATH ${pkgs.lib.makeBinPath [
+          gimpPluginPython
+          pkgs.coreutils
+          pkgs.bash
+        ]} \
+        --prefix GI_TYPELIB_PATH : ${pkgs.lib.makeSearchPath "lib/girepository-1.0" [
+          pkgs.gimp
+          pkgs.gtk3
+          pkgs.gegl
+          pkgs.babl
+        ]}
+    '';
+  };
+
+  neverwinter-nim = pkgs.callPackage ./pkgs/neverwinter-nim.nix { };
 in
 {
   imports = [
     spicetify-nix.homeManagerModules.spicetify
+    
   ];
 
   home.username = "vicky";
@@ -22,8 +51,9 @@ in
     pkgs.ripgrep
     pkgs.jq
     pkgs.fastfetch
-    unstable.blender
-
+    myGimp
+    neverwinter-nim
+    
     (pkgs.writeShellScriptBin "blender40" ''
       exec ${blender40pkgs.blender}/bin/blender "$@"
     '')

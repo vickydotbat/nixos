@@ -141,6 +141,12 @@
     git
     vulkan-tools
     steam-run
+    python3
+    zip
+    unzip
+    unrar
+    p7zip
+    nix-init
   #   vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
   #   wget
   ];
