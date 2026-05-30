@@ -150,6 +150,7 @@
     p7zip
     nix-init
     wineWow64Packages.staging
+    nix-index
   ];
 
   environment.persistence."/nix/persist" = {
