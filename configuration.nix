@@ -216,6 +216,18 @@
     stdenv.cc.cc.lib
     zlib
     openssl
+    libGL
+    libglvnd
+    libX11
+    libXext
+    libXrender
+    libxcb
+    libXau
+    libXdmcp
+    zlib
+    glib
+    fontconfig
+    freetype
   ];
 
   # Open ports in the firewall.
