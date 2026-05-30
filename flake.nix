@@ -8,7 +8,7 @@
     impermanence.url = "github:nix-community/impermanence";
 
     home-manager = {
-      url = "github:nix-community/home-manager";
+      url = "github:nix-community/home-manager/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -47,7 +47,7 @@
           home-manager.useUserPackages = true;
 
           home-manager.extraSpecialArgs = {
-            inherit unstable spicetify-nix;
+            inherit stable spicetify-nix;
           };
 
           home-manager.users.vicky =
