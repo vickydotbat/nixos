@@ -1,5 +1,6 @@
 {
   lib,
+  config,
   stdenv,
   fetchurl,
   unzip,

@@ -30,7 +30,7 @@ let
   blender-402-bin = pkgs.callPackage ./pkgs/blender-402-bin.nix { };
 in
 {
-  imports = [./spicetify.nix];
+  imports = [./spicetify.nix ./pkgs/cleanmodels.nix ./pkgs/nwnexplorer.nix];
 
   home.username = "vicky";
   home.homeDirectory = "/home/vicky";
