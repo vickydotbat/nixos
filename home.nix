@@ -1,7 +1,5 @@
-{ config, lib, pkgs, unstable, spicetify-nix, blender40pkgs, ... }:
+{ config, lib, pkgs, unstable, ... }:
 let
-  spicePkgs = spicetify-nix.legacyPackages.${pkgs.stdenv.hostPlatform.system};
-
   gimpPluginPython = pkgs.python3.withPackages (ps: with ps; [
     pygobject3
   ]);
@@ -29,12 +27,10 @@ let
   };
 
   neverwinter-nim = pkgs.callPackage ./pkgs/neverwinter-nim.nix { };
+  blender-402-bin = pkgs.callPackage ./pkgs/blender-402-bin.nix { };
 in
 {
-  imports = [
-    spicetify-nix.homeManagerModules.spicetify
-    
-  ];
+  imports = [./spicetify.nix];
 
   home.username = "vicky";
   home.homeDirectory = "/home/vicky";
@@ -51,21 +47,11 @@ in
     pkgs.ripgrep
     pkgs.jq
     pkgs.fastfetch
+    pkgs.blender
     myGimp
     neverwinter-nim
-    
-    (pkgs.writeShellScriptBin "blender40" ''
-      exec ${blender40pkgs.blender}/bin/blender "$@"
-    '')
+    blender-402-bin    
   ];
-
-  xdg.desktopEntries.blender40 = {
-    name = "Blender 4.0";
-    genericName = "3D Modeler";
-    exec = "blender40 %f";
-    terminal = false;
-    categories = [ "Graphics" "3DGraphics" ];
-  };
 
     programs.git = {
         enable = true;
@@ -78,17 +64,6 @@ in
 
     programs.discord.enable = true;
     services.arrpc.enable = true;
-
-
-  programs.spicetify = {
-    enable = true;
-
-    enabledExtensions = with spicePkgs.extensions; [
-      adblockify
-      hidePodcasts
-      shuffle
-    ];
-  };
 
   programs.vscode = {
     enable = true;
@@ -105,38 +80,40 @@ in
 
   programs.keepassxc.enable = true;
 
+  services.kdeconnect.enable = true;
+
   programs.ssh = {
     enable = true;
     enableDefaultConfig = false;
 
-    matchBlocks = {
+    settings = {
       "*" = {
-        identityFile = "~/.ssh/id_ed25519";
-        setEnv = {
+        IdentityFile = "~/.ssh/id_ed25519";
+        SetEnv = {
           TERM = "xterm-256color";
         };
-        addKeysToAgent = "yes";
+        AddKeysToAgent = "yes";
       };
 
       "github.com" = {
-        user = "git";
-        identityFile = "~/.ssh/id_ed25519";
-        identitiesOnly = true;
+        User = "git";
+        IdentityFile = "~/.ssh/id_ed25519";
+        IdentitiesOnly = true;
       };
 
       "ovh_sow" = {
-        user = "ubuntu";
-        port = 50340;
-        hostname = "51.254.142.98";
-        identityFile = "~/.ssh/id_ed25519";
+        User = "ubuntu";
+        Port = 50340;
+        HostName = "51.254.142.98";
+        IdentityFile = "~/.ssh/id_ed25519";
       };
 
       "git-ssh.westgate.pw" = {
-        hostname = "git-ssh.westgate.pw";
-        port = 2222;
-        user = "git";
-        identityFile = "~/.ssh/id_ed25519";
-        identitiesOnly = true;
+        HostName = "git-ssh.westgate.pw";
+        Port = 2222;
+        User = "git";
+        IdentityFile = "~/.ssh/id_ed25519";
+        IdentitiesOnly = true;
       };
     };
   };

@@ -2,13 +2,13 @@
   description = "NixOS configuration";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
 
     impermanence.url = "github:nix-community/impermanence";
 
     home-manager = {
-      url = "github:nix-community/home-manager/release-25.11";
+      url = "github:nix-community/home-manager/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -16,20 +16,13 @@
       url = "github:Gerg-L/spicetify-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
-    nixpkgs-blender40.url = "github:NixOS/nixpkgs/ed4db9c6c75079ff3570a9e3eb6806c8f692dc26";
   };
 
-  outputs = { self, nixpkgs, nixpkgs-unstable, impermanence, home-manager, spicetify-nix, nixpkgs-blender40, ... }:
+  outputs = { self, nixpkgs, nixpkgs-unstable, impermanence, home-manager, spicetify-nix, ... }:
   let
     system = "x86_64-linux";
 
     unstable = import nixpkgs-unstable {
-      inherit system;
-      config.allowUnfree = true;
-    };
-    
-    blender40pkgs = import nixpkgs-blender40 {
       inherit system;
       config.allowUnfree = true;
     };
@@ -54,7 +47,7 @@
           home-manager.useUserPackages = true;
 
           home-manager.extraSpecialArgs = {
-            inherit unstable blender40pkgs spicetify-nix;
+            inherit unstable spicetify-nix;
           };
 
           home-manager.users.vicky =

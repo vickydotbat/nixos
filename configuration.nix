@@ -16,6 +16,7 @@
     configurationLimit = 15;
   };
   boot.loader.efi.canTouchEfiVariables = true;
+  boot.kernelPackages = pkgs.linuxPackages_6_12;
 
   networking.hostName = "solanine"; # Define your hostname.
 
@@ -130,6 +131,8 @@
   programs.appimage.enable = true;
   programs.appimage.binfmt = true;
 
+  programs.kdeconnect.enable = true;
+
   services.displayManager.sddm.enable = true;
   services.desktopManager.plasma6.enable = true;
 
@@ -147,6 +150,7 @@
     unrar
     p7zip
     nix-init
+    glibc
   #   vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
   #   wget
   ];
