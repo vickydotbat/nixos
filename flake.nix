@@ -2,13 +2,13 @@
   description = "NixOS configuration";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
-    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs-stable.url = "github:NixOS/nixpkgs/nixos-26.05";
 
     impermanence.url = "github:nix-community/impermanence";
 
     home-manager = {
-      url = "github:nix-community/home-manager/release-26.05";
+      url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -18,11 +18,11 @@
     };
   };
 
-  outputs = { self, nixpkgs, nixpkgs-unstable, impermanence, home-manager, spicetify-nix, ... }:
+  outputs = { self, nixpkgs, nixpkgs-stable, impermanence, home-manager, spicetify-nix, ... }:
   let
     system = "x86_64-linux";
 
-    unstable = import nixpkgs-unstable {
+    stable = import nixpkgs-stable {
       inherit system;
       config.allowUnfree = true;
     };
@@ -31,7 +31,7 @@
       inherit system;
 
       specialArgs = {
-        unstable = import nixpkgs-unstable {
+        stable = import nixpkgs-stable {
           inherit system;
           config.allowUnfree = true;
         };
