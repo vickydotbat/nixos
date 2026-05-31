@@ -9,4 +9,6 @@
 
   programs.keepassxc.enable = true;
   services.kdeconnect.enable = true;
+
+  programs.obsidian.enable = true;
 }
