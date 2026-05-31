@@ -212,4 +212,9 @@
     enable = true;
     enableBashIntegration = true;
   };
+
+  programs.lazygit = {
+    enable = true;
+    enableBashIntegration = true;
+  };
 }
