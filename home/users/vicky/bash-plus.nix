@@ -59,27 +59,26 @@
       bind 'set colored-stats on'
       bind 'set visible-stats on'
 
-      if [[ -r "${pkgs.blesh}/share/blesh/ble.sh" && $TERM != "dumb" ]]; then
-        source "${pkgs.blesh}/share/blesh/ble.sh" --attach=none
-        ble-face -s auto_complete fg=242,bg=none
-        ble-face -s syntax_error fg=203,bg=none
-        ble-face -s syntax_varname fg=110,bg=none
-        ble-bind -m auto_complete -f C-n auto_complete/insert-on-end
-        ble-bind -m auto_complete -f C-p auto_complete/insert-on-end
-        [[ ''${BLE_VERSION-} ]] && ble-attach
-      fi
+      # Prefix-aware history search:
+      # Type "nix", press Up, and Bash searches previous commands starting with "nix".
+      bind '"\e[A": history-search-backward'
+      bind '"\e[B": history-search-forward'
+      bind '"\e[1;5A": history-search-backward'
+      bind '"\e[1;5B": history-search-forward'
     '';
   };
 
   home.packages = [
-    pkgs.blesh
     pkgs.jq
   ];
 
   programs.atuin = {
     enable = true;
     enableBashIntegration = true;
+
+    # Keeps normal up-arrow history behavior.
     flags = [ "--disable-up-arrow" ];
+
     settings = {
       auto_sync = false;
       enter_accept = false;
@@ -145,10 +144,12 @@
   programs.fzf = {
     enable = true;
     enableBashIntegration = true;
+
     changeDirWidgetCommand = "fd --type d --hidden --follow --exclude .git";
     changeDirWidgetOptions = [
       "--preview 'eza --tree --level=2 --color=always --icons=auto {} | head -200'"
     ];
+
     defaultCommand = "fd --type f --hidden --follow --exclude .git";
     defaultOptions = [
       "--height=40%"
@@ -158,14 +159,17 @@
       "--cycle"
       "--bind=ctrl-u:preview-page-up,ctrl-d:preview-page-down"
     ];
+
     fileWidgetCommand = "fd --type f --hidden --follow --exclude .git";
     fileWidgetOptions = [
       "--preview 'bat --style=numbers --color=always --line-range=:200 {}'"
     ];
-    historyWidgetOptions = [
-      "--sort"
-      "--exact"
-    ];
+
+    # Remove this if Atuin owns history:
+    # historyWidgetOptions = [
+    #   "--sort"
+    #   "--exact"
+    # ];
   };
 
   programs.ripgrep = {
@@ -214,6 +218,11 @@
   };
 
   programs.lazygit = {
+    enable = true;
+    enableBashIntegration = true;
+  };
+
+  programs.zellij = {
     enable = true;
     enableBashIntegration = true;
   };

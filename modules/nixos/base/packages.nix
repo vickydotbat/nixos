@@ -13,18 +13,18 @@ in
 
   config = lib.mkIf cfg.enable {
     environment.systemPackages = with pkgs; [
-      ghostty
       nano
       git
-      vulkan-tools
-      steam-run
+      nix-index
       zip
       unzip
       unrar
       p7zip
+
+      vulkan-tools
+      steam-run
       nix-init
       wineWow64Packages.staging
-      nix-index
     ];
   };
 }
