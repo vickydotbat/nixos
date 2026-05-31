@@ -1,11 +1,22 @@
-{ pkgs, lib, ... }:
+{
+  cmake,
+  copyDesktopItems,
+  fetchFromGitHub,
+  lib,
+  makeDesktopItem,
+  makeWrapper,
+  qt5,
+  stdenv,
+  swi-prolog,
+  symlinkJoin,
+}:
 
 let
-  cleanmodels = pkgs.stdenv.mkDerivation rec {
+  cleanmodels = stdenv.mkDerivation rec {
     pname = "cleanmodels";
     version = "4.0.0-rc6";
 
-    src = pkgs.fetchFromGitHub {
+    src = fetchFromGitHub {
       name = "cleanmodels";
       owner = "plenarius";
       repo = "cleanmodels";
@@ -14,11 +25,11 @@ let
     };
 
     nativeBuildInputs = [
-      pkgs.makeWrapper
+      makeWrapper
     ];
 
     buildInputs = [
-      pkgs.swi-prolog
+      swi-prolog
     ];
 
     dontBuild = true;
@@ -29,7 +40,7 @@ let
       mkdir -p $out/share/cleanmodels
       cp -r ./* $out/share/cleanmodels/
 
-      makeWrapper ${pkgs.swi-prolog}/bin/swipl $out/bin/cleanmodels \
+      makeWrapper ${swi-prolog}/bin/swipl $out/bin/cleanmodels \
         --add-flags "-q" \
         --add-flags "-s $out/share/cleanmodels/cleanmodels.pl" \
         --add-flags "-g go" \
@@ -50,11 +61,11 @@ let
     };
   };
 
-  cleanmodels-qt = pkgs.stdenv.mkDerivation rec {
+  cleanmodels-qt = stdenv.mkDerivation rec {
     pname = "cleanmodels-qt";
     version = "1.0.0-rc4";
 
-    src = pkgs.fetchFromGitHub {
+    src = fetchFromGitHub {
       name = "cleanmodels-qt";
       owner = "plenarius";
       repo = "cleanmodels-qt";
@@ -63,17 +74,17 @@ let
     };
 
     nativeBuildInputs = [
-      pkgs.cmake
-      pkgs.qt5.wrapQtAppsHook
-      pkgs.copyDesktopItems
+      cmake
+      qt5.wrapQtAppsHook
+      copyDesktopItems
     ];
 
     buildInputs = [
-      pkgs.qt5.qtbase
+      qt5.qtbase
     ];
 
     desktopItems = [
-      (pkgs.makeDesktopItem {
+      (makeDesktopItem {
         name = "cleanmodels-qt";
         desktopName = "Clean Models:EE";
         genericName = "NWN:EE MDL Cleaner";
@@ -94,7 +105,6 @@ let
 
       install -Dm755 cleanmodels-qt $out/bin/cleanmodels-qt
 
-      # Put the CLI beside the Qt app too.
       ln -s ${cleanmodels}/bin/cleanmodels-cli $out/bin/cleanmodels-cli
 
       runHook postInstall
@@ -114,23 +124,17 @@ let
       mainProgram = "cleanmodels-qt";
     };
   };
-
-  cleanmodels-suite = pkgs.symlinkJoin {
-    name = "cleanmodels-suite";
-
-    paths = [
-      cleanmodels
-      cleanmodels-qt
-    ];
-
-    meta = {
-      description = "Clean Models:EE Qt frontend with CLI";
-      mainProgram = "cleanmodels-qt";
-    };
-  };
 in
-{
-  home.packages = [
-    cleanmodels-suite
+symlinkJoin {
+  name = "cleanmodels-suite";
+
+  paths = [
+    cleanmodels
+    cleanmodels-qt
   ];
+
+  meta = {
+    description = "Clean Models:EE Qt frontend with CLI";
+    mainProgram = "cleanmodels-qt";
+  };
 }

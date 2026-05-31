@@ -23,8 +23,8 @@ let
         name = "aarch64-linux-gnu";
         hash = "sha256-Clb3HXhexybrsUDZ9YfzQtGXH3X5TYB/pABDXEJbyQI=";
       };
-    }.${stdenv.hostPlatform.system}
-      or (throw "Unsupported platform: ${stdenv.hostPlatform.system}");
+    }
+    .${stdenv.hostPlatform.system} or (throw "Unsupported platform: ${stdenv.hostPlatform.system}");
 in
 
 stdenv.mkDerivation rec {
@@ -63,12 +63,14 @@ stdenv.mkDerivation rec {
 
     for exe in $out/bin/nwn_*; do
       wrapProgram "$exe" \
-        --prefix LD_LIBRARY_PATH : "$out/lib:${lib.makeLibraryPath [
-          sqlite
-          zlib
-          openssl
-          stdenv.cc.cc.lib
-        ]}"
+        --prefix LD_LIBRARY_PATH : "$out/lib:${
+          lib.makeLibraryPath [
+            sqlite
+            zlib
+            openssl
+            stdenv.cc.cc.lib
+          ]
+        }"
     done
 
     runHook postInstall

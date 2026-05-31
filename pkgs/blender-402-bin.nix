@@ -1,51 +1,52 @@
-{ lib
-, stdenv
-, fetchurl
-, makeWrapper
-, makeDesktopItem
-, copyDesktopItems
-, autoPatchelfHook
+{
+  lib,
+  stdenv,
+  fetchurl,
+  makeWrapper,
+  makeDesktopItem,
+  copyDesktopItems,
+  autoPatchelfHook,
 
-, alsa-lib
-, dbus
-, expat
-, fontconfig
-, freetype
-, glib
-, libGL
-, libGLU
-, libX11
-, libXcursor
-, libXi
-, libXinerama
-, libXrandr
-, libXrender
-, libdecor
-, libdrm
-, libglvnd
-, libpulseaudio
-, libxkbcommon
-, wayland
+  alsa-lib,
+  dbus,
+  expat,
+  fontconfig,
+  freetype,
+  glib,
+  libGL,
+  libGLU,
+  libX11,
+  libXcursor,
+  libXi,
+  libXinerama,
+  libXrandr,
+  libXrender,
+  libdecor,
+  libdrm,
+  libglvnd,
+  libpulseaudio,
+  libxkbcommon,
+  wayland,
 
-# renamed non-xorg package names
-, libxcb
-, libxext
-, libxfixes
-, libxshmfence
-, libSM
-, libICE
-, libXxf86vm
-, libXt
+  # renamed non-xorg package names
+  libxcb,
+  libxext,
+  libxfixes,
+  libxshmfence,
+  libSM,
+  libICE,
+  libXxf86vm,
+  libXt,
 
-# missing runtime deps
-, level-zero
-, zstd
-, libxcrypt-legacy
-, ncurses
+  # missing runtime deps
+  level-zero,
+  zstd,
+  libxcrypt-legacy,
+  ncurses,
 
-# compatibility
-, addDriverRunpath
-, vulkan-loader
+  # compatibility
+  addDriverRunpath,
+  vulkan-loader,
 }:
 
 stdenv.mkDerivation rec {
@@ -115,14 +116,16 @@ stdenv.mkDerivation rec {
 
     makeWrapper $out/opt/blender-${version}/blender $out/bin/blender-4.0.2 \
       --set BLENDER_SYSTEM_SCRIPTS $out/opt/blender-${version}/4.0/scripts \
-      --prefix LD_LIBRARY_PATH : "/run/opengl-driver/lib:${lib.makeLibraryPath [
-        libGL
-        libGLU
-        libglvnd
-        vulkan-loader
-        wayland
-        libxkbcommon
-      ]}"
+      --prefix LD_LIBRARY_PATH : "/run/opengl-driver/lib:${
+        lib.makeLibraryPath [
+          libGL
+          libGLU
+          libglvnd
+          vulkan-loader
+          wayland
+          libxkbcommon
+        ]
+      }"
 
     mkdir -p $out/share/icons/hicolor/scalable/apps
     cp $out/opt/blender-${version}/blender.svg \

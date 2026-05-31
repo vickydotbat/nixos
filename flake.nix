@@ -18,42 +18,65 @@
     };
   };
 
-  outputs = { self, nixpkgs, nixpkgs-stable, impermanence, home-manager, spicetify-nix, ... }:
-  let
-    system = "x86_64-linux";
+  outputs =
+    {
+      self,
+      nixpkgs,
+      nixpkgs-stable,
+      impermanence,
+      home-manager,
+      spicetify-nix,
+      ...
+    }:
+    let
+      system = "x86_64-linux";
+      pkgs = nixpkgs.legacyPackages.${system};
 
-    stable = import nixpkgs-stable {
-      inherit system;
-      config.allowUnfree = true;
-    };
-  in {
-    nixosConfigurations.solanine = nixpkgs.lib.nixosSystem {
-      inherit system;
-
-      specialArgs = {
-        stable = import nixpkgs-stable {
-          inherit system;
-          config.allowUnfree = true;
-        };
+      stable = import nixpkgs-stable {
+        inherit system;
+        config.allowUnfree = true;
+      };
+    in
+    {
+      formatter.${system} = pkgs.writeShellApplication {
+        name = "format-nix";
+        runtimeInputs = [ pkgs.nixfmt ];
+        text = ''
+          git ls-files '*.nix' | xargs nixfmt
+        '';
       };
 
-      modules = [
-        ./configuration.nix
-        impermanence.nixosModules.impermanence
+      packages.${system} = import ./pkgs { inherit pkgs; };
 
-        home-manager.nixosModules.home-manager
-        {
-          home-manager.useGlobalPkgs = true;
-          home-manager.useUserPackages = true;
+      overlays.default = final: prev: import ./pkgs { pkgs = final; };
 
-          home-manager.extraSpecialArgs = {
-            inherit stable spicetify-nix;
+      nixosConfigurations.solanine = nixpkgs.lib.nixosSystem {
+        inherit system;
+
+        specialArgs = {
+          stable = import nixpkgs-stable {
+            inherit system;
+            config.allowUnfree = true;
           };
+        };
 
-          home-manager.users.vicky =
-            import ./home.nix;
-        }
-      ];
+        modules = [
+          ./hosts/solanine
+          impermanence.nixosModules.impermanence
+          { nixpkgs.overlays = [ self.overlays.default ]; }
+
+          home-manager.nixosModules.home-manager
+          {
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+
+            home-manager.extraSpecialArgs = {
+              inherit stable spicetify-nix;
+            };
+
+            home-manager.users.vicky = import ./home/users/vicky;
+          }
+        ];
+      };
     };
-  };
 }
