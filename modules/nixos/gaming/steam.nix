@@ -1,17 +1,26 @@
+{ config, lib, ... }:
+
+let
+  cfg = config.vicky.nixos.gaming.steam;
+in
 {
-  programs.steam = {
-    enable = true;
-    remotePlay.openFirewall = true;
-    dedicatedServer.openFirewall = true;
-    localNetworkGameTransfers.openFirewall = true;
-    gamescopeSession.enable = true;
-  };
+  options.vicky.nixos.gaming.steam.enable = lib.mkEnableOption "Steam gaming profile";
 
-  programs.gamescope = {
-    enable = true;
-    capSysNice = true;
-  };
+  config = lib.mkIf cfg.enable {
+    programs.steam = {
+      enable = true;
+      remotePlay.openFirewall = true;
+      dedicatedServer.openFirewall = true;
+      localNetworkGameTransfers.openFirewall = true;
+      gamescopeSession.enable = true;
+    };
 
-  hardware.steam-hardware.enable = true;
-  programs.gamemode.enable = true;
+    programs.gamescope = {
+      enable = true;
+      capSysNice = true;
+    };
+
+    hardware.steam-hardware.enable = true;
+    programs.gamemode.enable = true;
+  };
 }

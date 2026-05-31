@@ -7,6 +7,8 @@
 
     impermanence.url = "github:nix-community/impermanence";
 
+    import-tree.url = "github:vic/import-tree";
+
     home-manager = {
       url = "github:nix-community/home-manager/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -19,20 +21,13 @@
   };
 
   outputs =
-    {
-      self,
-      nixpkgs,
-      nixpkgs-stable,
-      impermanence,
-      home-manager,
-      spicetify-nix,
-      ...
-    }:
+    inputs:
     let
+      inherit (inputs) self;
       system = "x86_64-linux";
-      pkgs = nixpkgs.legacyPackages.${system};
+      pkgs = inputs.nixpkgs.legacyPackages.${system};
 
-      stable = import nixpkgs-stable {
+      stable = import inputs.nixpkgs-stable {
         inherit system;
         config.allowUnfree = true;
       };
@@ -46,35 +41,33 @@
         '';
       };
 
-      packages.${system} = import ./pkgs { inherit pkgs; };
+      packages.${system} = import ./pkgs/packages.nix { inherit pkgs; };
 
-      overlays.default = final: prev: import ./pkgs { pkgs = final; };
+      overlays.default = final: prev: import ./pkgs/packages.nix { pkgs = final; };
 
-      nixosConfigurations.solanine = nixpkgs.lib.nixosSystem {
+      nixosConfigurations.solanine = inputs.nixpkgs.lib.nixosSystem {
         inherit system;
 
         specialArgs = {
-          stable = import nixpkgs-stable {
-            inherit system;
-            config.allowUnfree = true;
-          };
+          inherit inputs stable;
         };
 
         modules = [
-          ./hosts/solanine
-          impermanence.nixosModules.impermanence
+          (inputs.import-tree ./modules/nixos)
+          (inputs.import-tree ./hosts/solanine)
+          inputs.impermanence.nixosModules.impermanence
           { nixpkgs.overlays = [ self.overlays.default ]; }
 
-          home-manager.nixosModules.home-manager
+          inputs.home-manager.nixosModules.home-manager
           {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
 
             home-manager.extraSpecialArgs = {
-              inherit stable spicetify-nix;
+              inherit inputs stable;
             };
 
-            home-manager.users.vicky = import ./home/users/vicky;
+            home-manager.users.vicky = inputs.import-tree ./home/users/vicky;
           }
         ];
       };

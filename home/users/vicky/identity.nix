@@ -1,16 +1,6 @@
 { ... }:
 
 {
-  imports = [
-    ./desktop-apps.nix
-    ./gimp.nix
-    ./git.nix
-    ./nwn.nix
-    ./packages.nix
-    ./spicetify.nix
-    ./ssh.nix
-  ];
-
   home.username = "vicky";
   home.homeDirectory = "/home/vicky";
 

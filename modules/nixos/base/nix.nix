@@ -1,19 +1,28 @@
+{ config, lib, ... }:
+
+let
+  cfg = config.vicky.nixos.base.nix;
+in
 {
-  nixpkgs.config.allowUnfree = true;
+  options.vicky.nixos.base.nix.enable = lib.mkEnableOption "base Nix daemon configuration";
 
-  nix = {
-    settings = {
-      auto-optimise-store = true;
-      experimental-features = [
-        "nix-command"
-        "flakes"
-      ];
-    };
+  config = lib.mkIf cfg.enable {
+    nixpkgs.config.allowUnfree = true;
 
-    gc = {
-      automatic = true;
-      dates = "weekly";
-      options = "--delete-older-than 14d";
+    nix = {
+      settings = {
+        auto-optimise-store = true;
+        experimental-features = [
+          "nix-command"
+          "flakes"
+        ];
+      };
+
+      gc = {
+        automatic = true;
+        dates = "weekly";
+        options = "--delete-older-than 14d";
+      };
     };
   };
 }
