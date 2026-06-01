@@ -20,6 +20,7 @@ in
       "Desktop"
       ".local/share/Steam"
       ".local/share/systemd/timers"
+      ".config/kdeconnect"
     ];
 
     files = [
