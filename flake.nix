@@ -7,6 +7,11 @@
 
     impermanence.url = "github:nix-community/impermanence";
 
+    sops-nix = {
+      url = "github:Mic92/sops-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     import-tree.url = "github:vic/import-tree";
 
     home-manager = {
@@ -60,7 +65,13 @@
           (inputs.import-tree ./modules/nixos)
           (inputs.import-tree ./hosts/solanine)
           inputs.impermanence.nixosModules.impermanence
-          { nixpkgs.overlays = [ self.overlays.default inputs.nur.overlays.default ]; }
+          inputs.sops-nix.nixosModules.sops
+          {
+            nixpkgs.overlays = [
+              self.overlays.default
+              inputs.nur.overlays.default
+            ];
+          }
 
           inputs.home-manager.nixosModules.home-manager
           {

@@ -4,4 +4,10 @@
   home.packages = [
     pkgs.gimp3-custom
   ];
+
+  home.persistence."/nix/persist" = {
+    directories = [
+      ".config/GIMP"
+    ];
+  };
 }

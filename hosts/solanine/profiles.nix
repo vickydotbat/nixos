@@ -15,6 +15,8 @@
       bluetooth.enable = true;
       graphics.enable = true;
       plasma.enable = true;
+      appimage.enable = true;
+      flatpak.enable = false;
     };
 
     gaming.steam.enable = true;

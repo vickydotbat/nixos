@@ -46,15 +46,6 @@
     ];
   };
 
-  fileSystems."/home" = {
-    device = "/dev/disk/by-label/ROOT";
-    fsType = "btrfs";
-    options = [
-      "subvol=@home"
-      "compress=zstd:1"
-    ];
-  };
-
   fileSystems."/nix" = {
     device = "/dev/disk/by-label/ROOT";
     fsType = "btrfs";

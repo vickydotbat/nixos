@@ -1,0 +1,14 @@
+# Replace this placeholder with the public key from:
+#   age-keygen -y /nix/persist/secrets/sops/age/keys.txt
+keys:
+  - &solanine age16penp9h358n9nyk06lajtdtncks7tqd8ww4u0zuelmkzc9jfg5cszyq8em
+
+creation_rules:
+  - path_regex: secrets/solanine\.yaml$
+    key_groups:
+      - age:
+          - *solanine
+  - path_regex: secrets/ssh-vicky\.yaml$
+    key_groups:
+      - age:
+          - *solanine

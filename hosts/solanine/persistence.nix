@@ -10,7 +10,7 @@ let
     "d /nix/persist/home/${user} 0700 ${user} ${group} -";
 in
 {
-  fileSystems."/home".neededForBoot = true;
+  fileSystems."/nix".neededForBoot = true;
 
   systemd.tmpfiles.rules = lib.mapAttrsToList mkHomePersistDir config.home-manager.users;
 
@@ -22,9 +22,11 @@ in
       "/var/lib/nixos"
       "/var/lib/bluetooth"
       "/var/log"
+      "/var/lib/systemd/timers"
     ];
 
     files = [
+      "/etc/machine-id"
       "/etc/ssh/ssh_host_ed25519_key"
       "/etc/ssh/ssh_host_ed25519_key.pub"
       "/etc/ssh/ssh_host_rsa_key"

@@ -1,3 +1,10 @@
+{ config, lib, pkgs, ... }:
+
+let
+  sshDir = "${config.home.homeDirectory}/.ssh";
+  sshPrivateKeySecret = "/run/secrets/ssh-vicky-id_ed25519";
+  sshPublicKeySecret = "/run/secrets/ssh-vicky-id_ed25519.pub";
+in
 {
   programs.ssh = {
     enable = true;
@@ -35,9 +42,23 @@
     };
   };
 
-  home.persistence."/nix/persist" = {
-    directories = [
-      ".ssh"
-    ];
-  };
+  home.activation.sshDirectory = lib.hm.dag.entryBefore [ "checkLinkTargets" ] ''
+    $DRY_RUN_CMD ${pkgs.coreutils}/bin/install -d -m 0700 ${lib.escapeShellArg sshDir}
+  '';
+
+  home.activation.sshKeys = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+    ssh_dir=${lib.escapeShellArg sshDir}
+    private_key_secret=${lib.escapeShellArg sshPrivateKeySecret}
+    public_key_secret=${lib.escapeShellArg sshPublicKeySecret}
+
+    $DRY_RUN_CMD ${pkgs.coreutils}/bin/install -d -m 0700 "$ssh_dir"
+
+    if [[ -r "$private_key_secret" ]]; then
+      $DRY_RUN_CMD ${pkgs.coreutils}/bin/install -m 0600 "$private_key_secret" "$ssh_dir/id_ed25519"
+    fi
+
+    if [[ -r "$public_key_secret" ]]; then
+      $DRY_RUN_CMD ${pkgs.coreutils}/bin/install -m 0644 "$public_key_secret" "$ssh_dir/id_ed25519.pub"
+    fi
+  '';
 }

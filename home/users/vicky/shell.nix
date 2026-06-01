@@ -230,7 +230,7 @@
     settings = {
       theme = "catppuccin-mocha";
 
-      default_shell = "bash"; # or "bash", "fish", etc.
+      default_shell = "bash";
 
       simplified_ui = true;
       pane_frames = false;
@@ -253,9 +253,7 @@
     enableZshIntegration = false;
   };
 
-  /*
-    See: https://github.com/NixOS/nixpkgs/blob/master/nixos/modules/programs/nano.nix
-  */
+  # See: https://github.com/NixOS/nixpkgs/blob/master/nixos/modules/programs/nano.nix
   xdg.configFile."nano/nanorc".text = ''
     include "${pkgs.nano}/share/nano/*.nanorc"
 
