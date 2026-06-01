@@ -6,6 +6,18 @@ The Firefox backup module expects `secrets/solanine.yaml` to contain:
 
 ```yaml
 firefox-backup-age-identity: AGE-SECRET-KEY-...
+ssh:
+  host:
+    ssh_host_ed25519_key: |
+      -----BEGIN OPENSSH PRIVATE KEY-----
+      ...
+      -----END OPENSSH PRIVATE KEY-----
+    ssh_host_ed25519_key.pub: ssh-ed25519 AAAA... root@solanine
+    ssh_host_rsa_key: |
+      -----BEGIN OPENSSH PRIVATE KEY-----
+      ...
+      -----END OPENSSH PRIVATE KEY-----
+    ssh_host_rsa_key.pub: ssh-rsa AAAA... root@solanine
 ```
 
 The SSH key respawn module expects `secrets/ssh-vicky.yaml` to contain:
@@ -30,7 +42,13 @@ Bootstrap outline:
    `age-keygen -o /tmp/firefox-backup-age-identity`
 4. Create `secrets/solanine.yaml` with the private identity and encrypt it with SOPS:
    `sops secrets/solanine.yaml`
-5. Add the encrypted file to Git before rebuilding:
+5. Add the existing OpenSSH host keys to `secrets/solanine.yaml` before switching to an
+   ephemeral root/home, so SOPS recreates them under `/nix/persist/etc/ssh`:
+   `sudo cat /etc/ssh/ssh_host_ed25519_key`
+   `sudo cat /etc/ssh/ssh_host_ed25519_key.pub`
+   `sudo cat /etc/ssh/ssh_host_rsa_key`
+   `sudo cat /etc/ssh/ssh_host_rsa_key.pub`
+6. Add the encrypted file to Git before rebuilding:
    `git add secrets/solanine.yaml`
 
 Do not commit plaintext age identity files.
