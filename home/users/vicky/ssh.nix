@@ -34,4 +34,10 @@
       };
     };
   };
+
+  home.persistence."/nix/persist" = {
+    directories = [
+      ".ssh"
+    ];
+  };
 }

@@ -70,6 +70,7 @@
 
   home.packages = [
     pkgs.jq
+    pkgs.fastfetch
   ];
 
   programs.atuin = {
@@ -225,5 +226,50 @@
   programs.zellij = {
     enable = true;
     enableBashIntegration = true;
+
+    settings = {
+      theme = "catppuccin-mocha";
+
+      default_shell = "bash"; # or "bash", "fish", etc.
+
+      simplified_ui = true;
+      pane_frames = false;
+      mouse_mode = true;
+      copy_on_select = true;
+
+      scroll_buffer_size = 10000;
+
+      session_serialization = true;
+      pane_viewport_serialization = true;
+    };
   };
+
+  # nix-index allows searching for packages containing specific files
+  programs.nix-index = {
+    enable = true;
+    # disable command-not-found (checking package sources on unknown command)
+    enableBashIntegration = false;
+    enableFishIntegration = false;
+    enableZshIntegration = false;
+  };
+
+  /*
+    See: https://github.com/NixOS/nixpkgs/blob/master/nixos/modules/programs/nano.nix
+  */
+  xdg.configFile."nano/nanorc".text = ''
+    include "${pkgs.nano}/share/nano/*.nanorc"
+
+    set atblanks
+    set autoindent
+    set constantshow
+    set guidestripe 100
+    set indicator
+    set linenumbers
+    set mouse
+    set smarthome
+    set softwrap
+    set tabsize 4
+    set zap
+  '';
+
 }

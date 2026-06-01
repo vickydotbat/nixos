@@ -12,12 +12,12 @@ in
       remotePlay.openFirewall = true;
       dedicatedServer.openFirewall = true;
       localNetworkGameTransfers.openFirewall = true;
-      gamescopeSession.enable = true;
+      gamescopeSession.enable = false;
     };
 
     programs.gamescope = {
       enable = true;
-      capSysNice = true;
+      capSysNice = false;
     };
 
     hardware.steam-hardware.enable = true;

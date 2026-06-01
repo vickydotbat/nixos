@@ -7,7 +7,6 @@ in
   options.vicky.nixos.desktop.plasma.enable = lib.mkEnableOption "Plasma desktop profile";
 
   config = lib.mkIf cfg.enable {
-    programs.firefox.enable = true;
     programs.appimage.enable = true;
     programs.appimage.binfmt = true;
     programs.kdeconnect.enable = true;

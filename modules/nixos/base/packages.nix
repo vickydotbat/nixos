@@ -15,11 +15,14 @@ in
     environment.systemPackages = with pkgs; [
       nano
       git
-      nix-index
       zip
       unzip
       unrar
       p7zip
+      e2fsprogs
+      btrfs-progs
+      nvme-cli
+      smartmontools
 
       vulkan-tools
       steam-run

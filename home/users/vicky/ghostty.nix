@@ -3,7 +3,7 @@
     enable = true;
     enableBashIntegration = true;
     installBatSyntax = true;
-    
+
     settings = {
       font-family = "JetBrainsMono Nerd Font";
       font-size = 11;

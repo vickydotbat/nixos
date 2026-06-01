@@ -10,7 +10,7 @@
     import-tree.url = "github:vic/import-tree";
 
     home-manager = {
-      url = "github:nix-community/home-manager/release-26.05";
+      url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -20,6 +20,8 @@
     };
 
     codex-cli-nix.url = "github:sadjow/codex-cli-nix";
+
+    nur.url = "github:nix-community/NUR";
   };
 
   outputs =
@@ -58,7 +60,7 @@
           (inputs.import-tree ./modules/nixos)
           (inputs.import-tree ./hosts/solanine)
           inputs.impermanence.nixosModules.impermanence
-          { nixpkgs.overlays = [ self.overlays.default ]; }
+          { nixpkgs.overlays = [ self.overlays.default inputs.nur.overlays.default ]; }
 
           inputs.home-manager.nixosModules.home-manager
           {
