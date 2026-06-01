@@ -29,28 +29,28 @@ in
     })
     // (lib.optionalAttrs hostSshSecretsAvailable {
       "ssh/host/ssh_host_ed25519_key" = {
-        path = "/nix/persist/etc/ssh/ssh_host_ed25519_key";
+        path = "/etc/ssh/ssh_host_ed25519_key";
         owner = "root";
         group = "root";
         mode = "0600";
       };
 
       "ssh/host/ssh_host_ed25519_key.pub" = {
-        path = "/nix/persist/etc/ssh/ssh_host_ed25519_key.pub";
+        path = "/etc/ssh/ssh_host_ed25519_key.pub";
         owner = "root";
         group = "root";
         mode = "0644";
       };
 
       "ssh/host/ssh_host_rsa_key" = {
-        path = "/nix/persist/etc/ssh/ssh_host_rsa_key";
+        path = "/etc/ssh/ssh_host_rsa_key";
         owner = "root";
         group = "root";
         mode = "0600";
       };
 
       "ssh/host/ssh_host_rsa_key.pub" = {
-        path = "/nix/persist/etc/ssh/ssh_host_rsa_key.pub";
+        path = "/etc/ssh/ssh_host_rsa_key.pub";
         owner = "root";
         group = "root";
         mode = "0644";

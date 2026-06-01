@@ -16,7 +16,8 @@ Firefox sync places:
 
 let
   user = config.home.username;
-  profileDir = "/nix/persist/home/${user}/.config/mozilla/firefox/vicky";
+  # profileDir = "/nix/persist/home/${user}/.config/mozilla/firefox/vicky";
+  profileDir = "/nix/persist/home/${user}/.mozilla/firefox/vicky";
   backupDir = "/nix/persist/home/${user}/Backups/firefox-state";
   identityFile = "/run/secrets/firefox-backup-age-identity";
 

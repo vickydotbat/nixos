@@ -14,4 +14,10 @@ in
       shuffle
     ];
   };
+
+  home.persistence."/nix/persist" = {
+    directories = [
+      ".config/spotify"
+    ];
+  };
 }

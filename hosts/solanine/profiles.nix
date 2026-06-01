@@ -17,13 +17,20 @@
       plasma.enable = true;
       appimage.enable = true;
       flatpak.enable = false;
+      jailwolf.enable = true;
     };
 
-    gaming.steam.enable = true;
+    gaming = {
+      steam.enable = true;
+    };
 
     virtualisation = {
       nix-ld.enable = true;
       podman.enable = true;
+    };
+
+    security = {
+      firejail.enable = true;
     };
   };
 }

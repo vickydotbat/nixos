@@ -8,6 +8,7 @@
   home.persistence."/nix/persist" = {
     directories = [
       "Blender"
+      ".config/blender"
     ];
   };
 }
