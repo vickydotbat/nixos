@@ -23,7 +23,7 @@
 
         # Editing quality of life
         usernamehw.errorlens
-        streetsidesoftware.code-spell-checker
+        gruntfuggly.todo-tree
 
         # Python, if useful
         ms-python.python
@@ -107,10 +107,6 @@
         "editor.formatOnSave" = true;
         "editor.formatOnPaste" = false;
         "editor.formatOnType" = false;
-        "editor.codeActionsOnSave" = {
-          "source.fixAll" = "explicit";
-          "source.organizeImports" = "explicit";
-        };
 
         # by default, use tabs for indentation for accessibility reasons
         "editor.insertSpaces" = false;
@@ -195,6 +191,13 @@
             formatting.command = [ "nixfmt" ];
           };
         };
+        "[nix]" = {
+          "editor.defaultFormatter" = "jnoortheen.nix-ide";
+          "editor.formatOnSave" = true;
+          "editor.insertSpaces" = true;
+          "editor.tabSize" = 2;
+          "editor.codeActionsOnSave" = { };
+        };
 
         # Direnv
         "direnv.restart.automatic" = true;
@@ -212,13 +215,6 @@
           "comments" = false;
           "strings" = false;
         };
-
-        # CSpell
-        "cSpell.enabledLanguageIds" = [
-          "markdown"
-          "plaintext"
-          "git-commit"
-        ];
 
         # terminal
         "terminal.integrated.tabs.enabled" = false;
@@ -251,6 +247,19 @@
         "[haskell]"."editor.insertSpaces" = true; # GHC warns when using tabs
         "[python]"."editor.insertSpaces" = true; # black forces spaces
         "[agda]"."editor.insertSpaces" = true; # agda forces spaces
+
+        # Todo-tree
+        "todo-tree.general.tags" = [
+          "TODO"
+          "FIXME"
+          "BUG"
+          "HACK"
+          "NOTE"
+          "REVIEW"
+        ];
+        "todo-tree.regex.regex" = "(//|#|<!--|;|/\\*|^\\s*\\*)\\s*($TAGS)[: ]";
+        "todo-tree.tree.showScanModeButton" = false;
+        "todo-tree.tree.disableCompactFolders" = false;
       };
     };
   };

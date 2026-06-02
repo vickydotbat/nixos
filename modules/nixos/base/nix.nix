@@ -16,12 +16,28 @@ in
           "nix-command"
           "flakes"
         ];
+
+        # Allow DevEnv to merge binary caches with the system Nix store
+        extra-substituters = [
+          "https://devenv.cachix.org"
+        ];
+        extra-trusted-public-keys = [
+          "devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw="
+        ];
       };
 
       gc = {
         automatic = true;
         dates = "weekly";
-        options = "--delete-older-than 14d";
+        options = "--delete-older-than 7d";
+      };
+    };
+
+    programs.nh = {
+      enable = true;
+      clean = {
+        enable = true;
+        extraArgs = "--keep 5 --keep-since 7d";
       };
     };
   };

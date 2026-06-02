@@ -1,4 +1,8 @@
-{ config, lib, ... }:
+{
+  config,
+  lib,
+  ...
+}:
 
 let
   cfg = config.vicky.nixos.desktop.plasma;
@@ -13,5 +17,6 @@ in
     security.pam.services.sddm = {
       enableKwallet = true;
     };
+    programs.kdeconnect.enable = true;
   };
 }

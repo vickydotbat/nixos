@@ -5,11 +5,13 @@
     enable = true;
     enableCompletion = true;
 
+    historyFile = "$HOME/.bash_history";
+    historySize = 100000;
+    historyFileSize = 100000;
     historyControl = [
       "ignoreboth"
       "erasedups"
     ];
-    historyFileSize = 200000;
     historyIgnore = [
       "bg"
       "cd"
@@ -19,12 +21,13 @@
       "jobs"
       "ls"
       "pwd"
+      "ll"
     ];
-    historySize = 50000;
 
     shellOptions = [
       "histappend"
       "cmdhist"
+      "lithist"
       "checkjobs"
       "checkwinsize"
       "autocd"
@@ -35,13 +38,12 @@
     ];
 
     sessionVariables = {
-      BAT_PAGER = "less -FR";
-      MANPAGER = "sh -c 'col -bx | bat -l man -p'";
-      PAGER = "less -FR";
+      PAGER = "less";
+      LESS = "-FR";
+      LESSHISTFILE = "-";
     };
 
     shellAliases = {
-      cat = "bat --paging=never";
       cp = "cp -i";
       df = "df -h";
       du = "du -h";
@@ -49,9 +51,32 @@
       mkdir = "mkdir -p";
       mv = "mv -i";
       rm = "rm -I";
+
+      ls = "eza";
+      ll = "eza -lah --git";
+      la = "eza -a";
+      tree = "eza --tree";
+
+      ns = "nh os switch $NIXOS_CONFIG_FLAKE";
+      nb = "nh os boot $NIXOS_CONFIG_FLAKE";
+      nt = "nh os test $NIXOS_CONFIG_FLAKE";
+      nd = "nh os dry $NIXOS_CONFIG_FLAKE";
+
+      # Pretty please?
+      please = "sudo $(fc -ln -1)";
     };
 
     initExtra = ''
+      _bash_history_sync() {
+        history -a
+        history -n
+      }
+
+      case ";$PROMPT_COMMAND;" in
+        *";_bash_history_sync;"*) ;;
+        *) PROMPT_COMMAND="_bash_history_sync''${PROMPT_COMMAND:+;$PROMPT_COMMAND}" ;;
+      esac
+
       bind 'set completion-ignore-case on'
       bind 'set completion-map-case on'
       bind 'set mark-symlinked-directories on'
@@ -68,10 +93,13 @@
     '';
   };
 
-  home.packages = with pkgs; [
-    jq
-    fastfetch
-  ];
+  programs.jq = {
+    enable = true;
+  };
+
+  programs.fastfetch = {
+    enable = true;
+  };
 
   programs.atuin = {
     enable = true;
@@ -88,22 +116,6 @@
       style = "compact";
       update_check = false;
     };
-  };
-
-  programs.bat = {
-    enable = true;
-    config = {
-      italic-text = "always";
-      pager = "less -FR";
-      style = "numbers,changes,header";
-      theme = "TwoDark";
-    };
-    extraPackages = with pkgs.bat-extras; [
-      batdiff
-      batgrep
-      batman
-      batwatch
-    ];
   };
 
   programs.carapace = {
@@ -173,75 +185,15 @@
     # ];
   };
 
-  programs.ripgrep = {
-    enable = true;
-    arguments = [
-      "--glob=!.git/*"
-      "--hidden"
-      "--max-columns=200"
-      "--max-columns-preview"
-      "--smart-case"
-    ];
-  };
-
-  programs.starship = {
-    enable = true;
-    enableBashIntegration = true;
-    settings = {
-      add_newline = false;
-      command_timeout = 1000;
-      directory = {
-        truncation_length = 4;
-        truncate_to_repo = false;
-      };
-      git_status = {
-        ahead = "ahead ";
-        behind = "behind ";
-        conflicted = "conflicts ";
-        deleted = "deleted ";
-        diverged = "diverged ";
-        modified = "modified ";
-        renamed = "renamed ";
-        staged = "staged ";
-        stashed = "stashed ";
-        untracked = "untracked ";
-      };
-      nix_shell = {
-        format = "via [$symbol$state( \\($name\\))]($style) ";
-        symbol = "nix ";
-      };
-    };
-  };
-
   programs.zoxide = {
     enable = true;
     enableBashIntegration = true;
+    options = [ "--cmd cd" ];
   };
 
   programs.lazygit = {
     enable = true;
     enableBashIntegration = true;
-  };
-
-  programs.zellij = {
-    enable = true;
-    enableBashIntegration = true;
-
-    settings = {
-      theme = "catppuccin-mocha";
-
-      default_shell = "bash";
-
-      simplified_ui = true;
-      pane_frames = false;
-      mouse_mode = true;
-      copy_on_select = true;
-
-      scroll_buffer_size = 10000;
-
-      session_serialization = true;
-      pane_viewport_serialization = true;
-    };
   };
 
   # See: https://github.com/NixOS/nixpkgs/blob/master/nixos/modules/programs/nano.nix
@@ -260,12 +212,9 @@
     set tabsize 4
     set zap
   '';
-
   home.persistence."/nix/persist" = {
-    directories = [
-      ".cache/bat"
-      ".cache/zellij"
-      ".cache/starship"
+    files = [
+      ".bash_history"
     ];
   };
 }

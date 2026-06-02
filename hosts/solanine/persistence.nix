@@ -1,4 +1,9 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 let
   mkHomePersistDir =
@@ -9,18 +14,12 @@ let
     in
     "d /nix/persist/home/${user} 0700 ${user} ${group} -";
 
-  homeUsersWithKnownHosts =
-    lib.filterAttrs
-      (
-        _: homeConfig:
-        lib.any
-          (
-            persistence:
-            lib.any (file: file.file == ".ssh/known_hosts") (persistence.files or [ ])
-          )
-          (lib.attrValues (homeConfig.home.persistence or { }))
-      )
-      config.home-manager.users;
+  homeUsersWithKnownHosts = lib.filterAttrs (
+    _: homeConfig:
+    lib.any (persistence: lib.any (file: file.file == ".ssh/known_hosts") (persistence.files or [ ])) (
+      lib.attrValues (homeConfig.home.persistence or { })
+    )
+  ) config.home-manager.users;
 
   mkPersistedKnownHosts =
     _: homeConfig:
@@ -48,9 +47,7 @@ in
 
   system.activationScripts.persistedKnownHosts = {
     deps = [ "createPersistentStorageDirs" ];
-    text = lib.concatStringsSep "\n" (
-      lib.mapAttrsToList mkPersistedKnownHosts homeUsersWithKnownHosts
-    );
+    text = lib.concatStringsSep "\n" (lib.mapAttrsToList mkPersistedKnownHosts homeUsersWithKnownHosts);
   };
 
   system.activationScripts.persist-files.deps = [ "persistedKnownHosts" ];
@@ -60,7 +57,7 @@ in
 
     directories = [
       {
-        directory = "/tmp";
+        directory = "/tmp"; # Cleaned on boot
         mode = "1777";
       }
       { directory = "/etc/NetworkManager/system-connections"; }
@@ -76,4 +73,11 @@ in
       "/etc/machine-id"
     ];
   };
+
+  services.journald.extraConfig = ''
+    SystemMaxUse=512M
+    SystemKeepFree=1G
+    RuntimeMaxUse=128M
+    MaxFileSec=1week
+  '';
 }

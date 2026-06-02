@@ -30,6 +30,7 @@
 
     security = {
       firejail.enable = true;
+      sudo.enable = true;
     };
   };
 }

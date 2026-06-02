@@ -1,4 +1,4 @@
-{ pkgs, ... }: {
+{
   programs.keepassxc = {
     enable = true;
     autostart = true;
@@ -17,6 +17,4 @@
       PasswordGenerator.Length = 32;
     };
   };
-
-  # xdg.configFile."autostart/org.keepassxc.KeePassXC.desktop".source = "${pkgs.keepassxc}/share/applications/org.keepassxc.KeePassXC.desktop";
 }

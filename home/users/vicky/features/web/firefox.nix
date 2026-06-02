@@ -41,9 +41,14 @@ in
         # Disable "View on other devices..."
         "browser.tabs.firefox-view" = false;
 
-        /*  -------------------
-                Appearance
-            ------------------- */
+        # History kept brief
+        "places.history.expiration.max_pages" = 5000;
+
+        /*
+          -------------------
+          Appearance
+          -------------------
+        */
 
         # Enable new sidebar UI
         "sidebar.revamp" = true;
@@ -68,9 +73,11 @@ in
         # Show browser toolbar
         "browser.toolbars.bookmarks.visibility" = "always";
 
-        /*  -------------------
-            Privacy & Telemetry
-            ------------------- */
+        /*
+          -------------------
+          Privacy & Telemetry
+          -------------------
+        */
 
         # Privacy-ish, without going full breakage mode
         "privacy.donottrackheader.enabled" = true;
@@ -127,9 +134,11 @@ in
         "browser.search.serpEventTelemetry.enabled" = false;
         "browser.search.update" = false;
 
-        /*  -------------------
-                Performance
-            ------------------- */
+        /*
+          -------------------
+          Performance
+          -------------------
+        */
 
         # Disk cache lives under ~/.cache/mozilla, which is tmpfs for you.
         # Keep it enabled but bounded.

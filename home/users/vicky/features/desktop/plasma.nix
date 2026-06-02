@@ -338,11 +338,26 @@
     };
   };
 
+  services.kdeconnect.enable = true;
+
   # Persist wallet for convenience
   home.persistence."/nix/persist" = {
     directories = [
       ".local/share/kwalletd"
       ".local/share/baloo"
+      ".config/kdeconnect"
     ];
+  };
+
+  xdg.mimeApps = {
+    enable = true;
+
+    defaultApplications = {
+      "inode/directory" = [ "org.kde.dolphin.desktop" ];
+      "application/pdf" = [ "org.kde.okular.desktop" ];
+      "image/png" = [ "org.kde.gwenview.desktop" ];
+      "image/jpeg" = [ "org.kde.gwenview.desktop" ];
+      "image/webp" = [ "org.kde.gwenview.desktop" ];
+    };
   };
 }

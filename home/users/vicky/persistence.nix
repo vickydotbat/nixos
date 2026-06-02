@@ -1,4 +1,9 @@
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 let
   username = config.home.username;
   home = config.home.homeDirectory;
@@ -12,19 +17,26 @@ in
       "Documents"
       "Pictures"
       "Videos"
-      # "Downloads" # I use volatile btrfs instead
+      # "Downloads" # Volatile btrfs instead -- see below
       "Projects"
       "Music"
-      "Repositories"
       "Templates"
       "Public"
       "Desktop"
 
+      # My custom directories
+      "Repositories"
+      "Backups"
+      "Games"
+      "Applications"
+
       # Nix cache -- must keep when using tmpfs
       ".cache/nix"
 
-      ".local/share/Steam"
+      # systemd Timers
       ".local/share/systemd/timers"
+
+      ".local/share/Steam" # TODO: Give it its own module, but it's a must
     ];
 
     files = [
@@ -36,9 +48,9 @@ in
   };
 
   /*
-    Destroy ~/Downloads between reboots, but keep it on disc with CoW disabled
+    Destroy ~/Downloads between reboots
+    but keep it on disc with CoW disabled
   */
-
   home.activation.linkVolatileDownloads = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     rm -rf "$HOME/Downloads"
     mkdir -p "${backingDownloads}"
