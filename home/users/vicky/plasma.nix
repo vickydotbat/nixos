@@ -183,6 +183,27 @@
     };
 
     configFile = {
+      "baloorc" = {
+        "Basic Settings".Indexing-Enabled = true;
+
+        General = {
+          "only basic indexing" = true;
+          "exclude folders[$e]" =
+            "$HOME/.cache/,$HOME/.local/share/Trash/,$HOME/Downloads/,$HOME/.local/share/containers/,$HOME/.var/,$HOME/.steam/,$HOME/Games/,$HOME/.config/,$HOME/.local/share/baloo/";
+        };
+      };
+
+      "dolphinrc" = {
+        "KFileDialog Settings" = {
+          "Places Icons Auto-resize" = false;
+          "Places Icons Static Size" = 22;
+        };
+
+        MainWindow.MenuBar = "Disabled";
+
+        PreviewSettings.Plugins = "appimagethumbnail,audiothumbnail,comicbookthumbnail,cursorthumbnail,directorythumbnail,djvuthumbnail,ebookthumbnail,exrthumbnail,imagethumbnail,jpegthumbnail,kraorathumbnail,opendocumentthumbnail,svgthumbnail,windowsexethumbnail,windowsimagethumbnail,fontthumbnail,blenderthumbnail,ffmpegthumbs,gsthumbnail,mobithumbnail,rawthumbnail";
+      };
+
       "kcminputrc".Keyboard = {
         RepeatDelay = 300;
         RepeatRate = 50;
@@ -199,6 +220,29 @@
           frameContrast = 0.2;
         };
 
+        "KFileDialog Settings" = {
+          "Allow Expansion" = false;
+          "Automatically select filename extension" = true;
+          "Breadcrumb Navigation" = true;
+          "Decoration position" = 2;
+          "Show Full Path" = false;
+          "Show Inline Previews" = true;
+          "Show Preview" = false;
+          "Show Speedbar" = true;
+          "Show hidden files" = false;
+          "Sort by" = "Name";
+          "Sort directories first" = true;
+          "Sort hidden files last" = false;
+          "Sort reversed" = false;
+          "Speedbar Width" = 140;
+          "View Style" = "DetailTree";
+        };
+
+        PreviewSettings = {
+          EnableRemoteFolderThumbnail = false;
+          MaximumRemoteSize = 0;
+        };
+
         WM = {
           activeBackground = "227,229,231";
           activeBlend = "227,229,231";
@@ -209,7 +253,45 @@
         };
       };
 
+      "kiorc" = {
+        Confirmations = {
+          ConfirmDelete = true;
+          ConfirmEmptyTrash = true;
+          ConfirmTrash = false;
+        };
+
+        "Executable scripts".behaviourOnLaunch = "alwaysAsk";
+      };
+
+      "kservicemenurc".Show = {
+        RunGhosttyDir = true;
+        compressfileitemaction = true;
+        extractfileitemaction = true;
+        forgetfileitemaction = true;
+        hidefileitemaction = false;
+        installFont = true;
+        kactivitymanagerd_fileitem_linking_plugin = true;
+        kdeconnectfileitemaction = true;
+        kio-admin = true;
+        makefileactions = true;
+        mountisoaction = true;
+        movetonewfolderitemaction = true;
+        runInKonsole = true;
+        setfoldericonitemaction = true;
+        slideshowfileitemaction = true;
+        tagsfileitemaction = true;
+        wallpaperfileitemaction = true;
+      };
+
       "ksmserverrc".General.loginMode = "emptySession";
+
+      "ktrashrc"."/home/vicky/.local/share/Trash" = {
+        Days = 1;
+        LimitReachedAction = 1;
+        Percent = 5;
+        UseSizeLimit = true;
+        UseTimeLimit = true;
+      };
 
       "kwalletrc".Wallet."First Use" = false;
 
@@ -254,5 +336,13 @@
         };
       };
     };
+  };
+
+  # Persist wallet for convenience
+  home.persistence."/nix/persist" = {
+    directories = [
+      ".local/share/kwalletd"
+      ".local/share/baloo"
+    ];
   };
 }

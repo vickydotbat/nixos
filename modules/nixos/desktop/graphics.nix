@@ -1,4 +1,4 @@
-{ config, lib, ... }:
+{ config, lib, pkgs, ... }:
 
 let
   cfg = config.vicky.nixos.desktop.graphics;
@@ -11,5 +11,9 @@ in
       enable = true;
       enable32Bit = true;
     };
+
+    environment.systemPackages = with pkgs; [
+      vulkan-tools
+    ];
   };
 }

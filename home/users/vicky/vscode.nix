@@ -9,21 +9,81 @@
       enableUpdateCheck = false;
 
       extensions = with pkgs.vscode-extensions; [
+        # Nix
         jnoortheen.nix-ide
-        csharpier.csharpier-vscode
+        mkhl.direnv
+
+        # General config/data files
+        editorconfig.editorconfig
+        tamasfe.even-better-toml
+        redhat.vscode-yaml
+
+        # Git
+        eamodio.gitlens
+
+        # Editing quality of life
+        usernamehw.errorlens
+        streetsidesoftware.code-spell-checker
+
+        # Python, if useful
+        ms-python.python
+        ms-python.vscode-pylance
+
+        # C/C++, if useful
+        ms-vscode.cpptools
+
+        # CMake, if useful
+        ms-vscode.cmake-tools
       ];
 
       userSettings = {
-        "editor.fontSize" = 14;
+        # First-launch / welcome / sign-in / nag reduction
+        "workbench.startupEditor" = "none";
+        "workbench.welcomePage.walkthroughs.openOnInstall" = false;
+        "workbench.tips.enabled" = false;
+        "extensions.ignoreRecommendations" = true;
+        "security.workspace.trust.startupPrompt" = "never";
+        "security.workspace.trust.enabled" = false;
+        "explorer.confirmDragAndDrop" = false;
+        "update.showReleaseNotes" = false;
+
+        # Telemetry / experiments
+        "telemetry.telemetryLevel" = "off";
+        "workbench.enableExperiments" = false;
+        "workbench.settings.enableNaturalLanguageSearch" = false;
+        "update.mode" = "none";
+        "extensions.autoCheckUpdates" = false;
+        "extensions.autoUpdate" = false;
+
+        # Accounts / Settings Sync
+        "settingsSync.keybindingsPerPlatform" = false;
+
+        # Window styles
+        "window.titleBarStyle" = "native";
+        "window.customTitleBarVisibility" = "never";
+        "window.menuBarVisibility" = "toggle";
+        "window.commandCenter" = false;
+        "workbench.sideBar.location" = "right";
+
+        # Font
+        "editor.fontFamily" = "'JetBrains Mono', 'Fira Code', 'monospace'";
         "editor.fontLigatures" = true;
-        "editor.rulers" = [ 100 ];
-        "editor.wordWrapColumn" = 100; # column to wrap at, ignored by default due to wordWrap, relevant e.g. for markdown
-        "editor.wordWrap" = "on"; # by default, wrap at the viewport
-        "rewrap.wrappingColumn" = 100; # rewrap text with rewrap extension at column 100
-        "editor.cursorStyle" = "line";
-        "editor.cursorBlinking" = "solid";
+        "editor.fontSize" = 14;
+        "editor.rulers" = [ 80 ];
         "editor.renderWhitespace" = "boundary";
-        "editor.guides.bracketPairs" = true;
+        "workbench.colorCustomizations" = {
+          "editorWhitespace.foreground" = "#3a3a3a";
+        };
+
+        # Scrollbar
+        "editor.minimap.enabled" = false;
+        "editor.scrollBeyondLastLine" = false;
+        "editor.stickyScroll.enabled" = true;
+        "editor.scrollbar.vertical" = "visible";
+
+        # Brackets
+        "editor.bracketPairColorization.enabled" = true;
+        "editor.guides.bracketPairs" = "active";
         "editor.language.brackets" = [
           [
             "["
@@ -43,12 +103,108 @@
           ]
         ];
 
-        "diffEditor.maxComputationTime" = 0;
+        # Formatting
+        "editor.formatOnSave" = true;
+        "editor.formatOnPaste" = false;
+        "editor.formatOnType" = false;
+        "editor.codeActionsOnSave" = {
+          "source.fixAll" = "explicit";
+          "source.organizeImports" = "explicit";
+        };
 
         # by default, use tabs for indentation for accessibility reasons
         "editor.insertSpaces" = false;
         "editor.tabSize" = 4;
         "editor.detectIndentation" = true;
+
+        # Word Wrap
+        "editor.wordWrapColumn" = 100; # column to wrap at, ignored by default due to wordWrap, relevant e.g. for markdown
+        "editor.wordWrap" = "on"; # by default, wrap at the viewport
+        "rewrap.wrappingColumn" = 100; # rewrap text with rewrap extension at column 100
+
+        # Disable suggestions
+        "editor.inlineSuggest.enabled" = false;
+        "editor.acceptSuggestionOnEnter" = "on";
+        "editor.acceptSuggestionOnCommitCharacter" = false;
+        "editor.suggest.preview" = true;
+        "editor.suggestSelection" = "recentlyUsed";
+        "editor.copyWithSyntaxHighlighting" = false;
+
+        # Cursor style
+        "editor.cursorStyle" = "line";
+        "editor.cursorBlinking" = "solid";
+
+        # Files
+        "files.trimTrailingWhitespace" = true;
+        "files.insertFinalNewline" = true;
+        "files.trimFinalNewlines" = true;
+        "files.autoSave" = "off";
+        "files.enableTrash" = false;
+        "files.eol" = "\n";
+        "files.exclude" = {
+          "**/.direnv" = true;
+          "**/.git" = true;
+          "**/.hg" = true;
+          "**/.svn" = true;
+          "**/.DS_Store" = true;
+        };
+        "search.exclude" = {
+          "**/.direnv" = true;
+          "**/.git" = true;
+          "**/node_modules" = true;
+          "**/result" = true;
+          "**/result-*" = true;
+          "**/.devenv" = true;
+        };
+        "files.watcherExclude" = {
+          "**/.direnv/**" = true;
+          "**/.git/objects/**" = true;
+          "**/.git/subtree-cache/**" = true;
+          "**/node_modules/**" = true;
+          "**/result/**" = true;
+          "**/result-*/**" = true;
+        };
+        "files.associations" = {
+          # dotnet appsettings.json allows comments
+          "appsettings*.json" = "jsonc";
+        };
+
+        # Git
+        "git.autofetch" = "all"; # regularly fetch from all remotes of the repo
+        "git.autofetchPeriod" = 120;
+        "git.confirmSync" = false; # no confirm dialog on sync
+        "git.enableSmartCommit" = true; # commit all if nothing staged
+        "git.allowForcePush" = true;
+        "git.confirmForcePush" = false;
+        "git.openRepositoryInParentFolders" = "never";
+        "gitlens.telemetry.enabled" = false;
+
+        # Diff editor
+        "git.closeDiffOnOperation" = true; # close diff editors on commits etc.
+        "diffEditor.experimental.showMoves" = true;
+        "diffEditor.ignoreTrimWhitespace" = false;
+        "diffEditor.diffAlgorithm" = "advanced";
+        "diffEditor.maxComputationTime" = 0;
+
+        # Nix IDE
+        "nix.enableLanguageServer" = true;
+        "nix.serverPath" = "nixd";
+        "nix.formatterPath" = "nixfmt";
+        "nix.serverSettings" = {
+          nixd = {
+            formatting.command = [ "nixfmt" ];
+          };
+        };
+
+        # Direnv
+        "direnv.restart.automatic" = true;
+
+        # YAML
+        "yaml.format.enable" = true;
+        "yaml.validate" = true;
+
+        # TOML
+        "evenBetterToml.formatter.allowedBlankLines" = 2;
 
         # no pop-up suggestions
         "editor.quickSuggestions" = {
@@ -57,58 +213,12 @@
           "strings" = false;
         };
 
-        "editor.inlineSuggest.enabled" = false;
-        "editor.acceptSuggestionOnEnter" = "on";
-        "editor.acceptSuggestionOnCommitCharacter" = false;
-        "editor.suggest.preview" = true;
-        "editor.suggestSelection" = "recentlyUsed";
-        "editor.copyWithSyntaxHighlighting" = false;
-
-        "editor.scrollbar.vertical" = "visible";
-        "editor.minimap.enabled" = false;
-
-        "diffEditor.experimental.showMoves" = true;
-        "diffEditor.ignoreTrimWhitespace" = false;
-        "diffEditor.diffAlgorithm" = "advanced";
-
-        "window.titleBarStyle" = "native";
-        "window.customTitleBarVisibility" = "never";
-        "window.menuBarVisibility" = "toggle";
-        "window.commandCenter" = false;
-
-        "explorer.confirmDragAndDrop" = false;
-
-        "files.trimFinalNewlines" = true;
-        "files.trimTrailingWhitespace" = true;
-        "files.insertFinalNewline" = true;
-
-        "files.watcherExclude" = {
-          "**/.bloop" = true;
-          "**/.metals" = true;
-          "**/.ammonite" = true;
-        };
-
-        "files.associations" = {
-          # dotnet appsettings.json allows comments
-          "appsettings*.json" = "jsonc";
-        };
-        "files.enableTrash" = false;
-
-        "workbench.startupEditor" = "none";
-        "workbench.sideBar.location" = "right";
-
-        "security.workspace.trust.enabled" = false;
-        "update.showReleaseNotes" = false;
-        "extensions.autoUpdate" = false;
-
-        # git
-        "git.enableSmartCommit" = true; # commit all if nothing staged
-        "git.confirmSync" = false; # no confirm dialog on sync
-        "git.autofetch" = "all"; # regularly fetch from all remotes of the repo
-        "git.autofetchPeriod" = 120;
-        "git.closeDiffOnOperation" = true; # close diff editors on commits etc.
-        "git.allowForcePush" = true;
-        "git.confirmForcePush" = false;
+        # CSpell
+        "cSpell.enabledLanguageIds" = [
+          "markdown"
+          "plaintext"
+          "git-commit"
+        ];
 
         # terminal
         "terminal.integrated.tabs.enabled" = false;
@@ -124,6 +234,7 @@
           "workbench.action.toggleSidebarVisibility"
         ];
         "terminal.integrated.initialHint" = false;
+        "terminal.integrated.enablePersistentSessions" = false;
 
         # language specific indentation settings
         "[scala]" = {
@@ -143,4 +254,12 @@
       };
     };
   };
+
+  home.packages = with pkgs; [
+    nixd
+    nil # optional fallback LSP
+    nixfmt
+    statix
+    deadnix
+  ];
 }

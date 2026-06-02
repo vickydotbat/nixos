@@ -154,6 +154,7 @@ in
   home.persistence."/nix/persist" = {
     directories = [
       ".local/share/Neverwinter Nights"
+      ".config/blender/4.0"
     ];
   };
 

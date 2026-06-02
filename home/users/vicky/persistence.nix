@@ -8,19 +8,23 @@ in
 {
   home.persistence."/nix/persist" = {
     directories = [
+      # XDG Directories
       "Documents"
       "Pictures"
       "Videos"
-      # "Downloads" # I use a volatile btrfs instead
+      # "Downloads" # I use volatile btrfs instead
       "Projects"
       "Music"
       "Repositories"
       "Templates"
       "Public"
       "Desktop"
+
+      # Nix cache -- must keep when using tmpfs
+      ".cache/nix"
+
       ".local/share/Steam"
       ".local/share/systemd/timers"
-      ".config/kdeconnect"
     ];
 
     files = [

@@ -33,6 +33,14 @@
     codex-cli-nix.url = "github:sadjow/codex-cli-nix";
 
     nur.url = "github:nix-community/NUR";
+
+    nix-index-database.url = "github:nix-community/nix-index-database";
+    nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
+
+    run0-sudo-shim = {
+      url = "github:LordGrimmauld/run0-sudo-shim";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =

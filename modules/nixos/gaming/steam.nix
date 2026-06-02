@@ -1,4 +1,4 @@
-{ config, lib, ... }:
+{ config, lib, pkgs, ... }:
 
 let
   cfg = config.vicky.nixos.gaming.steam;
@@ -22,5 +22,9 @@ in
 
     hardware.steam-hardware.enable = true;
     programs.gamemode.enable = true;
+
+    environment.systemPackages = with pkgs; [
+      steam-run
+    ];
   };
 }

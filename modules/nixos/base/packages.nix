@@ -24,9 +24,6 @@ in
       nvme-cli
       smartmontools
 
-      vulkan-tools
-      steam-run
-      nix-init
       wineWow64Packages.staging
     ];
   };

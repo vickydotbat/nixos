@@ -2,7 +2,6 @@
   vicky.nixos = {
     base = {
       boot.enable = true;
-      locale.enable = true;
       networking.enable = true;
       nix.enable = true;
       packages.enable = true;

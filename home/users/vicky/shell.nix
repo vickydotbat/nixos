@@ -68,9 +68,9 @@
     '';
   };
 
-  home.packages = [
-    pkgs.jq
-    pkgs.fastfetch
+  home.packages = with pkgs; [
+    jq
+    fastfetch
   ];
 
   programs.atuin = {
@@ -244,15 +244,6 @@
     };
   };
 
-  # nix-index allows searching for packages containing specific files
-  programs.nix-index = {
-    enable = true;
-    # disable command-not-found (checking package sources on unknown command)
-    enableBashIntegration = false;
-    enableFishIntegration = false;
-    enableZshIntegration = false;
-  };
-
   # See: https://github.com/NixOS/nixpkgs/blob/master/nixos/modules/programs/nano.nix
   xdg.configFile."nano/nanorc".text = ''
     include "${pkgs.nano}/share/nano/*.nanorc"
@@ -270,4 +261,11 @@
     set zap
   '';
 
+  home.persistence."/nix/persist" = {
+    directories = [
+      ".cache/bat"
+      ".cache/zellij"
+      ".cache/starship"
+    ];
+  };
 }

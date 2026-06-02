@@ -4,7 +4,6 @@
 {
   config,
   lib,
-  pkgs,
   modulesPath,
   ...
 }:
@@ -25,6 +24,13 @@
   boot.initrd.kernelModules = [ ];
   boot.kernelModules = [ "kvm-amd" ];
   boot.extraModulePackages = [ ];
+  boot.kernelParams = [
+    # Forces the driver to ignore the integrated display block entirely
+    "amdgpu.sg_display=0"
+
+    # Disables Panel Self Refresh (PSR) which causes sudden frame-drop freezes on Wayland
+    "amdgpu.dcdebugmask=0x10"
+  ];
 
   fileSystems."/" = {
     device = "none";

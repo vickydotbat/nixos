@@ -1,14 +1,18 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 
+let
+  blender = pkgs.blender;
+  blenderConfigVersion = lib.versions.majorMinor blender.version;
+in
 {
-  home.packages = with pkgs; [
+  home.packages = [
     blender
   ];
 
   home.persistence."/nix/persist" = {
     directories = [
       "Blender"
-      ".config/blender"
+      ".config/blender/${blenderConfigVersion}"
     ];
   };
 }
