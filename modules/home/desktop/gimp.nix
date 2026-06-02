@@ -4,7 +4,7 @@
   lib,
   pkgs,
   ...
-}@args:
+}:
 
 let
   cfg = config.theorem.home.desktop.gimp;
@@ -12,5 +12,15 @@ in
 {
   options.theorem.home.desktop.gimp.enable = lib.mkEnableOption "GIMP";
 
-  config = lib.mkIf cfg.enable (import ../../../home/raw/vicky/features/desktop/gimp.nix args);
+  config = lib.mkIf cfg.enable {
+    home.packages = [
+      pkgs.gimp3-custom
+    ];
+
+    home.persistence."/nix/persist" = lib.mkIf config.theorem.home.base.persistence.enable {
+      directories = [
+        ".config/GIMP"
+      ];
+    };
+  };
 }

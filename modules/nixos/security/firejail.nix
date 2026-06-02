@@ -10,7 +10,12 @@ let
 in
 {
   options.theorem.nixos.security.firejail = {
-    enable = lib.mkEnableOption "Firejail sandboxing";
+    enable = lib.mkOption {
+      type = lib.types.bool;
+      default = config.theorem.nixos.desktop.jailwolf.enable;
+      defaultText = lib.literalExpression "theorem.nixos.desktop.jailwolf.enable";
+      description = "Enable Firejail sandboxing when a Firejail-backed desktop theorem needs it.";
+    };
 
     installCli = lib.mkOption {
       type = lib.types.bool;

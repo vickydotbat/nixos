@@ -6,6 +6,8 @@
 }:
 
 let
+  cfg = config.theorem.nixos.base.persistence;
+
   mkHomePersistDir =
     _: homeConfig:
     let
@@ -39,45 +41,14 @@ let
     '';
 in
 {
-  fileSystems."/nix".neededForBoot = true;
+  config = lib.mkIf cfg.enable {
+    systemd.tmpfiles.rules = lib.mapAttrsToList mkHomePersistDir config.home-manager.users;
 
-  boot.tmp.cleanOnBoot = true;
+    system.activationScripts.persistedKnownHosts = {
+      deps = [ "createPersistentStorageDirs" ];
+      text = lib.concatStringsSep "\n" (lib.mapAttrsToList mkPersistedKnownHosts homeUsersWithKnownHosts);
+    };
 
-  systemd.tmpfiles.rules = lib.mapAttrsToList mkHomePersistDir config.home-manager.users;
-
-  system.activationScripts.persistedKnownHosts = {
-    deps = [ "createPersistentStorageDirs" ];
-    text = lib.concatStringsSep "\n" (lib.mapAttrsToList mkPersistedKnownHosts homeUsersWithKnownHosts);
+    system.activationScripts.persist-files.deps = [ "persistedKnownHosts" ];
   };
-
-  system.activationScripts.persist-files.deps = [ "persistedKnownHosts" ];
-
-  environment.persistence."/nix/persist" = {
-    hideMounts = true;
-
-    directories = [
-      {
-        directory = "/tmp"; # Cleaned on boot
-        mode = "1777";
-      }
-      { directory = "/etc/NetworkManager/system-connections"; }
-      { directory = "/var/lib/nixos"; }
-      { directory = "/var/lib/bluetooth"; }
-      { directory = "/var/log"; }
-      { directory = "/var/lib/systemd/timers"; }
-      { directory = "/var/lib/systemd/coredump"; }
-      { directory = "/var/tmp"; }
-    ];
-
-    files = [
-      "/etc/machine-id"
-    ];
-  };
-
-  services.journald.extraConfig = ''
-    SystemMaxUse=512M
-    SystemKeepFree=1G
-    RuntimeMaxUse=128M
-    MaxFileSec=1week
-  '';
 }

@@ -4,7 +4,7 @@ let
   cfg = config.theorem.nixos.desktop.appimage;
 in
 {
-  options.theorem.nixos.desktop.appimage.enable = lib.mkEnableOption "Appimage usability";
+  options.theorem.nixos.desktop.appimage.enable = lib.mkEnableOption "AppImage usability";
 
   config = lib.mkIf cfg.enable {
     programs.appimage.enable = true;

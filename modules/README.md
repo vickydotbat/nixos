@@ -40,6 +40,25 @@ Enable the module from the relevant profile file after adding it:
 - NixOS: `hosts/<host>/profiles.nix`
 - Home Manager: `home/users/<user>/profiles.nix`
 
+Home Manager modules should carry their own reusable defaults. Do not make a
+module a thin import of `home/users/<user>/` or another user-owned tree. The
+user tree is for selection and calibration; the module tree is the forge where
+the shared mechanism belongs.
+
+When a mechanism is only useful as another mechanism's substrate, prefer a
+derived default over another profile switch. Examples: fonts and XDG support
+following graphical applications, Home persistence following system
+persistence, graphics/audio following a chosen desktop or gaming profile, and
+sandbox support following a sandboxed application. Keep these defaults
+overrideable with normal option assignment.
+
+Do not derive optional applications, games, backup jobs, hardware conveniences,
+or compatibility layers just because their substrate is present. Those remain
+profile choices. Steam can provide the library and persistence substrate; it
+must not silently imply a particular Steam game. Firefox can provide browser
+state; it must not silently imply an encrypted backup ritual without the user
+choosing that protection.
+
 ## Failure Modes
 
 - A module without an enable option runs as soon as `import-tree` sees it.

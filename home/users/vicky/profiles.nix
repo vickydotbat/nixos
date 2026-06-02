@@ -1,11 +1,8 @@
 {
   theorem.home = {
     base = {
-      fonts.enable = true;
-      persistence.enable = true;
       ssh.enable = true;
       virtualization.enable = true;
-      xdg.enable = true;
     };
 
     desktop = {

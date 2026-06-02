@@ -2,9 +2,18 @@
 
 let
   cfg = config.theorem.nixos.desktop.audio;
+  desktopNeedsAudio =
+    config.theorem.nixos.desktop.plasma.enable || config.theorem.nixos.gaming.steam.enable;
 in
 {
-  options.theorem.nixos.desktop.audio.enable = lib.mkEnableOption "desktop audio stack";
+  options.theorem.nixos.desktop.audio.enable = lib.mkOption {
+    type = lib.types.bool;
+    default = desktopNeedsAudio;
+    defaultText = lib.literalExpression ''
+      theorem.nixos.desktop.plasma.enable || theorem.nixos.gaming.steam.enable
+    '';
+    description = "Enable the desktop audio stack when desktop or gaming theorems need sound.";
+  };
 
   config = lib.mkIf cfg.enable {
     services.pipewire = {

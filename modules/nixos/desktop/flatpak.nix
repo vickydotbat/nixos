@@ -9,7 +9,7 @@ in
   config = lib.mkIf cfg.enable {
     services.flatpak.enable = true;
 
-    environment.persistence."/nix/persist" = {
+    environment.persistence."/nix/persist" = lib.mkIf config.theorem.nixos.base.persistence.enable {
       hideMounts = true;
       directories = [ "/var/lib/flatpak" ];
     };

@@ -70,16 +70,6 @@ in
     lib.mkEnableOption "Firejailed LibreWolf disposable browser";
 
   config = lib.mkIf cfg.enable {
-    assertions = [
-      {
-        assertion = config.programs.firejail.enable;
-        message = ''
-          theorem.nixos.desktop.jailwolf requires programs.firejail.enable = true.
-          Enable your separate Firejail module first.
-        '';
-      }
-    ];
-
     programs.firejail.wrappedBinaries = {
       ${command} = {
         executable = "${lib.getBin pkgs.librewolf}/bin/librewolf";

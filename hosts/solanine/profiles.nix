@@ -6,14 +6,13 @@
       networking.enable = true;
       nix.enable = true;
       packages.enable = true;
+      persistence.enable = true;
       ssh.enable = true;
       users.enable = true;
     };
 
     desktop = {
-      audio.enable = true;
       bluetooth.enable = true;
-      graphics.enable = true;
       plasma.enable = true;
       appimage.enable = true;
       flatpak.enable = false;
@@ -30,8 +29,6 @@
     };
 
     security = {
-      firejail.enable = true;
-      polkit.enable = true;
       sudo.enable = true;
     };
   };
