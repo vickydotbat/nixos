@@ -1,8 +1,19 @@
 # Secrets
 
-This directory is for SOPS-encrypted runtime secrets.
+This directory holds SOPS-encrypted runtime secrets.
 
-The Firefox backup module expects `secrets/solanine.yaml` to contain:
+Its purpose is stewardship: keep sensitive material out of the Nix store, out of plaintext Git history, and out of the small accidents that happen when a tired maintainer is moving too quickly.
+
+## What It Controls
+
+- `secrets/solanine.yaml` for host-level secrets used by `solanine`
+- `secrets/ssh-vicky.yaml` for `vicky` SSH identity restoration
+- encrypted password inputs used to regenerate activation hashes
+- SOPS material decrypted at rebuild or activation time
+
+## Expected Shapes
+
+The Firefox backup and SSH host key mechanisms expect `secrets/solanine.yaml` to contain:
 
 ```yaml
 firefox-backup-age-identity: AGE-SECRET-KEY-...
@@ -20,7 +31,7 @@ ssh:
     ssh_host_rsa_key.pub: ssh-rsa AAAA... root@solanine
 ```
 
-The SSH key respawn module expects `secrets/ssh-vicky.yaml` to contain:
+The SSH key respawn mechanism expects `secrets/ssh-vicky.yaml` to contain:
 
 ```yaml
 ssh:
@@ -32,7 +43,7 @@ ssh:
         id_ed25519.pub: ssh-ed25519 AAAA... comment
 ```
 
-Bootstrap outline:
+## Bootstrap Rite
 
 1. Create the SOPS host/user key outside Git:
    `mkdir -p /nix/persist/secrets/sops/age && age-keygen -o /nix/persist/secrets/sops/age/keys.txt`
@@ -52,7 +63,8 @@ Bootstrap outline:
    `git add secrets/solanine.yaml`
 
 Do not commit plaintext age identity files.
-## Password secrets
+
+## Password Secrets
 
 For readability, keep plaintext login passwords encrypted under:
 
@@ -73,3 +85,21 @@ bash scripts/update-password-hash vicky
 
 NixOS consumes `users.<name>.password-hash` through `hashedPasswordFile`; the plaintext entries are only maintenance inputs.
 Add both `users.root.password-hash` and `users.vicky.password-hash` before running `nixos-rebuild switch`; they are required for early user creation.
+
+## Failure Modes
+
+- Missing `/nix/persist/secrets/sops/age/keys.txt` means SOPS cannot decrypt the protected material.
+- Missing OpenSSH host keys can make a rebuilt host look unfamiliar to clients, which is correct and also annoying.
+- Missing password hash secrets can break early user creation during activation.
+- Plaintext age identities or private SSH keys in Git are an incident, not a warning. Rotate the exposed material and repair deliberately.
+
+## Maintenance Reminders
+
+After changing encrypted password inputs, regenerate the hash secrets before rebuilding:
+
+```bash
+bash scripts/update-password-hash root
+bash scripts/update-password-hash vicky
+```
+
+Rebuild after updating encrypted files. The machine cannot obey a theorem it has not evaluated.
