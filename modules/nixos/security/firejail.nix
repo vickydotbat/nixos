@@ -1,10 +1,15 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 let
-  cfg = config.vicky.nixos.security.firejail;
+  cfg = config.theorem.nixos.security.firejail;
 in
 {
-  options.vicky.nixos.security.firejail = {
+  options.theorem.nixos.security.firejail = {
     enable = lib.mkEnableOption "Firejail sandboxing";
 
     installCli = lib.mkOption {
@@ -17,9 +22,8 @@ in
   config = lib.mkIf cfg.enable {
     programs.firejail.enable = true;
 
-    environment.systemPackages =
-      lib.optionals cfg.installCli [
-        pkgs.firejail
-      ];
+    environment.systemPackages = lib.optionals cfg.installCli [
+      pkgs.firejail
+    ];
   };
 }

@@ -1,10 +1,15 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 let
-  cfg = config.vicky.nixos.desktop.graphics;
+  cfg = config.theorem.nixos.desktop.graphics;
 in
 {
-  options.vicky.nixos.desktop.graphics.enable = lib.mkEnableOption "desktop graphics support";
+  options.theorem.nixos.desktop.graphics.enable = lib.mkEnableOption "desktop graphics support";
 
   config = lib.mkIf cfg.enable {
     hardware.graphics = {

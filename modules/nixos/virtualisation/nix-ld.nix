@@ -6,10 +6,10 @@
 }:
 
 let
-  cfg = config.vicky.nixos.virtualisation.nix-ld;
+  cfg = config.theorem.nixos.virtualisation.nix-ld;
 in
 {
-  options.vicky.nixos.virtualisation.nix-ld.enable =
+  options.theorem.nixos.virtualisation.nix-ld.enable =
     lib.mkEnableOption "nix-ld compatibility libraries";
 
   config = lib.mkIf cfg.enable {

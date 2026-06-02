@@ -1,5 +1,12 @@
+{ config, lib, ... }:
+
+let
+  cfg = config.theorem.nixos.security.polkit;
+in
 {
-  security.polkit = {
-    enable = true;
+  options.theorem.nixos.security.polkit.enable = lib.mkEnableOption "Polkit authorization support";
+
+  config = lib.mkIf cfg.enable {
+    security.polkit.enable = true;
   };
 }

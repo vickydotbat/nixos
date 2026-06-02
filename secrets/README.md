@@ -52,3 +52,24 @@ Bootstrap outline:
    `git add secrets/solanine.yaml`
 
 Do not commit plaintext age identity files.
+## Password secrets
+
+For readability, keep plaintext login passwords encrypted under:
+
+```yaml
+users:
+  root:
+    password: "plain text password"
+  vicky:
+    password: "plain text password"
+```
+
+Regenerate the activation hash after changing either password:
+
+```bash
+bash scripts/update-password-hash root
+bash scripts/update-password-hash vicky
+```
+
+NixOS consumes `users.<name>.password-hash` through `hashedPasswordFile`; the plaintext entries are only maintenance inputs.
+Add both `users.root.password-hash` and `users.vicky.password-hash` before running `nixos-rebuild switch`; they are required for early user creation.

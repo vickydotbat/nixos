@@ -1,10 +1,10 @@
 { config, lib, ... }:
 
 let
-  cfg = config.vicky.nixos.desktop.audio;
+  cfg = config.theorem.nixos.desktop.audio;
 in
 {
-  options.vicky.nixos.desktop.audio.enable = lib.mkEnableOption "desktop audio stack";
+  options.theorem.nixos.desktop.audio.enable = lib.mkEnableOption "desktop audio stack";
 
   config = lib.mkIf cfg.enable {
     services.pipewire = {

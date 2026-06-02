@@ -1,7 +1,12 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 let
-  cfg = config.vicky.nixos.desktop.jailwolf;
+  cfg = config.theorem.nixos.desktop.jailwolf;
 
   command = "librewolf-private";
 
@@ -47,7 +52,10 @@ let
     exec = "/run/current-system/sw/bin/${command} %U";
     icon = "librewolf";
     terminal = false;
-    categories = [ "Network" "WebBrowser" ];
+    categories = [
+      "Network"
+      "WebBrowser"
+    ];
     mimeTypes = [
       "text/html"
       "text/xml"
@@ -58,7 +66,7 @@ let
   };
 in
 {
-  options.vicky.nixos.desktop.jailwolf.enable =
+  options.theorem.nixos.desktop.jailwolf.enable =
     lib.mkEnableOption "Firejailed LibreWolf disposable browser";
 
   config = lib.mkIf cfg.enable {
@@ -66,7 +74,7 @@ in
       {
         assertion = config.programs.firejail.enable;
         message = ''
-          vicky.nixos.desktop.jailwolf requires programs.firejail.enable = true.
+          theorem.nixos.desktop.jailwolf requires programs.firejail.enable = true.
           Enable your separate Firejail module first.
         '';
       }

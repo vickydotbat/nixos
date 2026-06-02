@@ -1,76 +1,74 @@
-{ pkgs, lib, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 let
-  sopsAgeKeyFile = "/nix/persist/secrets/sops/age/keys.txt";
-  secretsFile = ../../../secrets/solanine.yaml;
-  vickySshSecretsFile = ../../../secrets/ssh-vicky.yaml;
-  hostSshSecretsAvailable =
-    builtins.pathExists secretsFile && lib.hasInfix "\nssh:" (builtins.readFile secretsFile);
+  cfg = config.theorem.nixos.security.sops;
 in
 {
-  sops.age.keyFile = sopsAgeKeyFile;
-  sops.defaultSopsFormat = "yaml";
+  options.theorem.nixos.security.sops = {
+    enable = lib.mkEnableOption "SOPS secret management";
 
-  sops.defaultSopsFile = lib.mkIf (builtins.pathExists secretsFile) secretsFile;
+    ageKeyFile = lib.mkOption {
+      type = lib.types.path;
+      default = "/nix/persist/secrets/sops/age/keys.txt";
+      description = "Age identity file used by sops-nix.";
+    };
 
-  environment.sessionVariables.SOPS_AGE_KEY_FILE = sopsAgeKeyFile;
-  environment.systemPackages = [ pkgs.sops pkgs.age ];
+    defaultSopsFile = lib.mkOption {
+      type = lib.types.nullOr lib.types.path;
+      default = null;
+      description = "Default SOPS file for host secrets.";
+    };
 
-  security.sudo.extraConfig = ''
-    Defaults env_keep += "SOPS_AGE_KEY_FILE"
-  '';
+    keepAgeKeyInSudoEnvironment = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = "Preserve SOPS_AGE_KEY_FILE through sudo for maintenance commands.";
+    };
 
-  sops.secrets =
-    (lib.optionalAttrs (builtins.pathExists secretsFile) {
-      firefox-backup-age-identity = {
-        owner = "vicky";
-        mode = "0400";
-      };
-    })
-    // (lib.optionalAttrs hostSshSecretsAvailable {
-      "ssh/host/ssh_host_ed25519_key" = {
-        path = "/etc/ssh/ssh_host_ed25519_key";
-        owner = "root";
-        group = "root";
-        mode = "0600";
-      };
+    ageKeyOwner = lib.mkOption {
+      type = lib.types.str;
+      default = "root";
+      description = "Owner for the persisted age identity file.";
+    };
 
-      "ssh/host/ssh_host_ed25519_key.pub" = {
-        path = "/etc/ssh/ssh_host_ed25519_key.pub";
-        owner = "root";
-        group = "root";
-        mode = "0644";
-      };
+    ageKeyGroup = lib.mkOption {
+      type = lib.types.str;
+      default = "wheel";
+      description = "Group allowed to read the persisted age identity file.";
+    };
 
-      "ssh/host/ssh_host_rsa_key" = {
-        path = "/etc/ssh/ssh_host_rsa_key";
-        owner = "root";
-        group = "root";
-        mode = "0600";
-      };
+    ageKeyMode = lib.mkOption {
+      type = lib.types.str;
+      default = "0640";
+      description = "Mode for the persisted age identity file.";
+    };
+  };
 
-      "ssh/host/ssh_host_rsa_key.pub" = {
-        path = "/etc/ssh/ssh_host_rsa_key.pub";
-        owner = "root";
-        group = "root";
-        mode = "0644";
-      };
-    })
-    // (lib.optionalAttrs (builtins.pathExists vickySshSecretsFile) {
-      "ssh/vicky/id_ed25519" = {
-        sopsFile = vickySshSecretsFile;
-        path = "/run/secrets/ssh-vicky-id_ed25519";
-        owner = "vicky";
-        group = "users";
-        mode = "0600";
-      };
+  config = lib.mkIf cfg.enable {
+    sops.age.keyFile = cfg.ageKeyFile;
+    sops.defaultSopsFormat = "yaml";
+    sops.defaultSopsFile = lib.mkIf (cfg.defaultSopsFile != null) cfg.defaultSopsFile;
 
-      "ssh/vicky/id_ed25519.pub" = {
-        sopsFile = vickySshSecretsFile;
-        path = "/run/secrets/ssh-vicky-id_ed25519.pub";
-        owner = "vicky";
-        group = "users";
-        mode = "0644";
-      };
-    });
+    environment.sessionVariables.SOPS_AGE_KEY_FILE = cfg.ageKeyFile;
+    environment.systemPackages = [
+      pkgs.sops
+      pkgs.age
+      pkgs.mkpasswd
+    ];
+
+    security.sudo.extraConfig = lib.mkIf cfg.keepAgeKeyInSudoEnvironment ''
+      Defaults env_keep += "SOPS_AGE_KEY_FILE"
+    '';
+
+    systemd.tmpfiles.rules = [
+      "d ${builtins.dirOf (builtins.dirOf cfg.ageKeyFile)} 0750 ${cfg.ageKeyOwner} ${cfg.ageKeyGroup} - -"
+      "d ${builtins.dirOf cfg.ageKeyFile} 0750 ${cfg.ageKeyOwner} ${cfg.ageKeyGroup} - -"
+      "z ${cfg.ageKeyFile} ${cfg.ageKeyMode} ${cfg.ageKeyOwner} ${cfg.ageKeyGroup} - -"
+    ];
+  };
 }

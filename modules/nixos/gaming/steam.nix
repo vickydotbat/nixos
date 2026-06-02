@@ -1,10 +1,15 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 let
-  cfg = config.vicky.nixos.gaming.steam;
+  cfg = config.theorem.nixos.gaming.steam;
 in
 {
-  options.vicky.nixos.gaming.steam.enable = lib.mkEnableOption "Steam gaming profile";
+  options.theorem.nixos.gaming.steam.enable = lib.mkEnableOption "Steam gaming profile";
 
   config = lib.mkIf cfg.enable {
     programs.steam = {

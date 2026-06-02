@@ -1,10 +1,10 @@
 { config, lib, ... }:
 
 let
-  cfg = config.vicky.nixos.base.nix;
+  cfg = config.theorem.nixos.base.nix;
 in
 {
-  options.vicky.nixos.base.nix.enable = lib.mkEnableOption "base Nix daemon configuration";
+  options.theorem.nixos.base.nix.enable = lib.mkEnableOption "base Nix daemon configuration";
 
   config = lib.mkIf cfg.enable {
     nixpkgs.config.allowUnfree = true;
@@ -26,11 +26,6 @@ in
         ];
       };
 
-      gc = {
-        automatic = true;
-        dates = "weekly";
-        options = "--delete-older-than 7d";
-      };
     };
 
     programs.nh = {

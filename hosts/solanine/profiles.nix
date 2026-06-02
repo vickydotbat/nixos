@@ -1,7 +1,8 @@
 {
-  vicky.nixos = {
+  theorem.nixos = {
     base = {
       boot.enable = true;
+      locale.enable = true;
       networking.enable = true;
       nix.enable = true;
       packages.enable = true;
@@ -30,6 +31,7 @@
 
     security = {
       firejail.enable = true;
+      polkit.enable = true;
       sudo.enable = true;
     };
   };

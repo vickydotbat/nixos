@@ -1,10 +1,10 @@
 { config, lib, ... }:
 
 let
-  cfg = config.vicky.nixos.base.ssh;
+  cfg = config.theorem.nixos.base.ssh;
 in
 {
-  options.vicky.nixos.base.ssh.enable = lib.mkEnableOption "base OpenSSH configuration";
+  options.theorem.nixos.base.ssh.enable = lib.mkEnableOption "base OpenSSH configuration";
 
   config = lib.mkIf cfg.enable {
     services.openssh = {

@@ -1,10 +1,11 @@
 { config, lib, ... }:
 
 let
-  cfg = config.vicky.nixos.virtualisation.podman;
+  cfg = config.theorem.nixos.virtualisation.podman;
 in
 {
-  options.vicky.nixos.virtualisation.podman.enable = lib.mkEnableOption "Podman virtualisation stack";
+  options.theorem.nixos.virtualisation.podman.enable =
+    lib.mkEnableOption "Podman virtualisation stack";
 
   config = lib.mkIf cfg.enable {
     virtualisation = {

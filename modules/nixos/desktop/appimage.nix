@@ -1,10 +1,10 @@
 { config, lib, ... }:
 
 let
-  cfg = config.vicky.nixos.desktop.appimage;
+  cfg = config.theorem.nixos.desktop.appimage;
 in
 {
-  options.vicky.nixos.desktop.appimage.enable = lib.mkEnableOption "Appimage usability";
+  options.theorem.nixos.desktop.appimage.enable = lib.mkEnableOption "Appimage usability";
 
   config = lib.mkIf cfg.enable {
     programs.appimage.enable = true;

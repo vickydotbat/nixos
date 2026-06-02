@@ -1,4 +1,12 @@
+{ config, lib, ... }:
+
+let
+  cfg = config.theorem.nixos.base.locale;
+in
 {
+  options.theorem.nixos.base.locale.enable = lib.mkEnableOption "base locale configuration";
+
+  config = lib.mkIf cfg.enable {
     time.timeZone = "Europe/Rome";
 
     i18n.defaultLocale = "en_GB.UTF-8";
@@ -15,4 +23,5 @@
       LC_PAPER = "it_IT.UTF-8";
       LC_MEASUREMENT = "it_IT.UTF-8";
     };
+  };
 }

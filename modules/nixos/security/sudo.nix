@@ -4,13 +4,13 @@
   ...
 }:
 let
-  cfg = config.vicky.nixos.security.sudo;
+  cfg = config.theorem.nixos.security.sudo;
 
   swBin = "/run/current-system/sw/bin";
   wrappersBin = "/run/wrappers/bin";
 in
 {
-  options.vicky.nixos.security.sudo.enable = lib.mkEnableOption "Sudo with good defaults";
+  options.theorem.nixos.security.sudo.enable = lib.mkEnableOption "Sudo with good defaults";
 
   config = lib.mkIf cfg.enable {
     security.sudo = {

@@ -5,7 +5,11 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     nixpkgs-stable.url = "github:NixOS/nixpkgs/nixos-26.05";
 
-    impermanence.url = "github:nix-community/impermanence";
+    impermanence = {
+      url = "github:nix-community/impermanence";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.home-manager.follows = "home-manager";
+    };
 
     sops-nix = {
       url = "github:Mic92/sops-nix";
@@ -30,9 +34,15 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    codex-cli-nix.url = "github:sadjow/codex-cli-nix";
+    codex-cli-nix = {
+      url = "github:sadjow/codex-cli-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
-    nur.url = "github:nix-community/NUR";
+    nur = {
+      url = "github:nix-community/NUR";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     nix-index-database.url = "github:nix-community/nix-index-database";
     nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
@@ -46,9 +56,9 @@
   outputs =
     inputs:
     let
-      inherit (inputs) self;
       system = "x86_64-linux";
       pkgs = inputs.nixpkgs.legacyPackages.${system};
+      mkSystem = import ./lib/mkSystem.nix;
 
       stable = import inputs.nixpkgs-stable {
         inherit system;
@@ -68,41 +78,12 @@
 
       overlays.default = final: prev: import ./pkgs/packages.nix { pkgs = final; };
 
-      nixosConfigurations.solanine = inputs.nixpkgs.lib.nixosSystem {
-        inherit system;
-
-        specialArgs = {
-          inherit inputs stable;
-        };
-
-        modules = [
-          (inputs.import-tree ./modules/nixos)
-          (inputs.import-tree ./hosts/solanine)
-          inputs.impermanence.nixosModules.impermanence
-          inputs.sops-nix.nixosModules.sops
-          {
-            nixpkgs.overlays = [
-              self.overlays.default
-              inputs.nur.overlays.default
-            ];
-          }
-
-          inputs.home-manager.nixosModules.home-manager
-          {
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-
-            home-manager.extraSpecialArgs = {
-              inherit inputs stable;
-            };
-
-            home-manager.users.vicky = inputs.import-tree ./home/users/vicky;
-
-            home-manager.sharedModules = [
-              inputs.plasma-manager.homeModules.plasma-manager
-            ];
-          }
-        ];
+      nixosConfigurations.solanine = mkSystem {
+        inherit inputs system stable;
+        self = inputs.self;
+        hostPath = ./hosts/solanine;
+        userName = "vicky";
+        userPath = ./home/users/vicky;
       };
     };
 }

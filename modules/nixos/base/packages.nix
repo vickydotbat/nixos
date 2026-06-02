@@ -6,10 +6,10 @@
 }:
 
 let
-  cfg = config.vicky.nixos.base.packages;
+  cfg = config.theorem.nixos.base.packages;
 in
 {
-  options.vicky.nixos.base.packages.enable = lib.mkEnableOption "base system package set";
+  options.theorem.nixos.base.packages.enable = lib.mkEnableOption "base system package set";
 
   config = lib.mkIf cfg.enable {
     environment.systemPackages = with pkgs; [

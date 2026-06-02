@@ -6,10 +6,10 @@
 }:
 
 let
-  cfg = config.vicky.nixos.security.run0-sudo;
+  cfg = config.theorem.nixos.security.run0-sudo;
 in
 {
-  options.vicky.nixos.security.run0-sudo.enable = lib.mkEnableOption "Run0 as sudo";
+  options.theorem.nixos.security.run0-sudo.enable = lib.mkEnableOption "Run0 as sudo";
 
   config = lib.mkIf cfg.enable {
     security.sudo.enable = false;
