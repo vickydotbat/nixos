@@ -49,13 +49,14 @@ in
     home.persistence."/nix/persist" = {
       directories = [
         ".local/share/systemd/timers"
+        ".local/share/nix" # TODO: Needed? And if so, for what?
         ".cache/nix" # Nix cache -- must keep when using tmpfs
 
         # XDG Directories
         "Documents"
         "Pictures"
         "Videos"
-        # "Downloads" # Volatile btrfs instead -- see below
+        # "Downloads" # TODO: Make persistence dependant on whether volatile-downloads is enabled. If disabled, this will persist. If enabled, it will not.
         "Projects"
         "Music"
         "Templates"

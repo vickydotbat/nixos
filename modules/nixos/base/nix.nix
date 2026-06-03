@@ -41,6 +41,13 @@ in
           "nix-command"
           "flakes"
         ];
+
+        # Use prebuilt binaries
+        substituters = [ "https://cache.nixos.org" ];
+        trusted-public-keys = [ "cache.nixos.org-1:6NCHdD59X431o0gW5RANTTXz3qR3Q6Y3B2M0h4IrWH4=" ];
+
+        connect-timeout = 10;
+        fallback = true;
       };
     };
 

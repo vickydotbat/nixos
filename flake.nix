@@ -3,11 +3,11 @@
 
   nixConfig = {
     extra-substituters = [
-      "https://devenv.cachix.org"
+      "https://nix-community.cachix.org"
       "https://codex-cli.cachix.org"
     ];
     extra-trusted-public-keys = [
-      "devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw="
+      "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
       "codex-cli.cachix.org-1:1Br3H1hHoRYG22n//cGKJOk3cQXgYobUel6O8DgSing="
     ];
   };
