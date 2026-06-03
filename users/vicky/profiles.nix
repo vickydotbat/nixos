@@ -79,6 +79,7 @@ in
           ms-python.vscode-pylance
           ms-vscode.cpptools
           ms-vscode.cmake-tools
+          pkief.material-icon-theme
         ];
         extraPackages = with pkgs; [
           nixd
@@ -118,6 +119,7 @@ in
           "editor.rulers" = [ 80 ];
           "editor.renderWhitespace" = "boundary";
           "workbench.colorCustomizations"."editorWhitespace.foreground" = "#3a3a3a";
+          "workbench.iconTheme" = "material-icon-theme";
 
           "editor.minimap.enabled" = false;
           "editor.scrollBeyondLastLine" = false;

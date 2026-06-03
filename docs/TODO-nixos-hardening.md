@@ -249,7 +249,8 @@ decoration.
     and confirm rollback access.
   - Progress: `modules/nixos/security/run0.nix` now rejects simultaneous
     selection with the sudo theorem, requires at least one declared Polkit cache
-    user or group, and exposes
+    user or group, defaults that cache boundary to the repository steward group
+    such as `nixcfg`, and exposes
     `theorem.nixos.security.run0-sudo.sudoAlias.enable` instead of hard-coding
     the compatibility alias.
 

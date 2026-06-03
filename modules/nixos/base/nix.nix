@@ -35,13 +35,16 @@ in
     };
 
     nix = {
-      extraOptions = [ "gc-keep-outputs = true" ]; # Prevent immediate garbage collection
       settings = {
         auto-optimise-store = true;
         experimental-features = [
           "nix-command"
           "flakes"
         ];
+
+        # Keep build outputs reachable through live derivations, so useful
+        # repair material is not collected immediately.
+        keep-outputs = true;
 
         # Always require signatures
         require-sigs = lib.mkForce true;

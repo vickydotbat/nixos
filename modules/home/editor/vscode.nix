@@ -20,6 +20,7 @@ in
         editorconfig.editorconfig
         tamasfe.even-better-toml
         redhat.vscode-yaml
+        pkief.material-icon-theme
       ];
       description = ''
         VS Code extensions installed by the reusable editor theorem. Keep this
@@ -39,6 +40,9 @@ in
         # Keep telemetry and experiments quiet by default.
         "telemetry.telemetryLevel" = "off";
         "workbench.enableExperiments" = false;
+
+        # Use a more useful icon theme
+        "workbench.iconTheme" = "material-icon-theme";
 
         # Nix support for this repository's primary language.
         "nix.enableLanguageServer" = true;

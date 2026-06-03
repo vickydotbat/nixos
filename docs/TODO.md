@@ -15,10 +15,56 @@ the validation rite that proves it still holds.
 - Decide whether this belongs as a host-specific script, a flake app, or a
   dedicated installation profile. The correct shape should make destructive disk
   actions impossible to run without naming the target device and host.
+- Decide whether `nixcfg` should remain the repository group name or migrate to
+  a clearer stewardship name such as `forge`. The group is not a replacement for
+  `wheel`: `wheel` remains the local elevation and administrative role, while
+  the repository group owns repair access to `/nix/nixos`, shared Git writes,
+  and any narrow NixOS-operation authorization cache such as the `run0` profile.
+  Do not widen application-control groups to guests or outside accounts just
+  because the name changes.
+- If the repository group is renamed, treat it as a real host migration. Update
+  `repository.group`, user `extraGroups`, ownership and setgid state for
+  `/nix/nixos`, `core.sharedRepository`, related documentation, and any module
+  that derives access for repository stewards. Keep `admin` in every necessary
+  administrative group, and verify that both `admin` and the daily operator can
+  repair, rebuild, and commit after a fresh login.
 - Validation: boot an installer or VM, run the bootstrap against a disposable
-  disk, verify `/nix/nixos` is `root:nixcfg`, directory setgid is
-  present, `core.sharedRepository` is `group`, and both `admin` and `vicky` can
-  create and commit files after login.
+  disk, verify `/nix/nixos` is owned by `root:<repository-group>`, directory
+  setgid is present, `core.sharedRepository` is `group`, `wheel` membership
+  still grants elevation, and both `admin` and `vicky` can create and commit
+  files after login.
+
+## Repository Stewardship And Home Ownership
+
+- Keep system-flake stewardship separate from personal Home Manager ownership.
+  Membership in the repository group should mean "may repair this NixOS
+  theorem", not "is the only kind of user allowed to configure a home
+  environment". A normal local user should be able to own a personal Home
+  repository without gaining write access to `/nix/nixos`.
+- Export the shared Home Manager baseline in a shape that user-owned flakes can
+  consume from their home directories. The preferred path should let a user keep
+  something like `~/home-config` as their own Git repository, import this flake's
+  reusable Home modules and defaults, and run their own Home activation without
+  asking for membership in `nixcfg` or any future `forge` group.
+- Treat system-managed imports of user-writable Home code as a privilege
+  boundary. If `nixos-rebuild` imports a file from `/home/<user>`, that code is
+  evaluated as part of the system theorem and can affect root-owned activation
+  decisions. Do not auto-discover arbitrary home flakes. Any host-level import
+  of user-owned Home configuration should be declared by a repository steward,
+  limited to the named user and path, and reviewed for secrets, persistence, and
+  service authority.
+- Prefer a two-lane design: the system flake provides login accounts, groups,
+  persistence substrate, shared modules, and safe defaults; personal Home flakes
+  provide user-owned applications, themes, shell habits, editor posture, and
+  other private working-surface choices. When a user's Home needs system
+  integration such as service groups, SOPS material, login shell changes, or
+  persistent directories, that integration remains a system-flake change with a
+  clear reviewer and rollback path.
+- Validation: create or simulate a non-repository user, evaluate the shared Home
+  baseline without Vicky imports, and prove that the user can build or activate
+  a personal Home flake from their own directory without write access to
+  `/nix/nixos`. Separately prove that the system rebuild does not import
+  user-writable Nix unless the host explicitly declares that trust gate.
 
 ## Module Hardening Queue
 
@@ -51,9 +97,9 @@ the validation rite that proves it still holds.
   autostart choices, plugin-bearing packages, and language stacks that are only
   true for one operator.
 - Continue the option-boundary pass before adding another user: Plasma layout,
-  Ghostty key ownership, shell aliases, and KeePassXC posture still need the
-  same calibration that editors, Codex CLI policy, GIMP, Spicetify, ripgrep,
-  nix-index, Discord autostart, Home SSH, and Firefox search defaults now have.
+  Ghostty key ownership, and shell aliases still need the same calibration that
+  editors, Codex CLI policy, GIMP, Spicetify, ripgrep, nix-index, Discord
+  autostart, Home SSH, Firefox search defaults, and KeePassXC posture now have.
 - Move service-specific group membership out of static user registry entries
   where the service module can own it. A future Docker, Podman, or repository
   access module should add only the groups it creates or requires, with a clear
@@ -117,12 +163,23 @@ the validation rite that proves it still holds.
   Plasma remains available after adding a compatible window-manager profile, and
   verify GNOME-style profiles make the replacement explicit.
 
-## Hardening philosophy
+## Philosophy
 
-TODO: Fold the principles from the  below documentation into the current hardening manifest where relevant. Use research and the existing hardening principles in analysis.
+TODO: Fold the principles from the  below documentation into the current manifests where relevant. Use research and the existing principles in analysis, especially where concerns hardening.
 <https://saylesss88.github.io/nix/index.html>
 <https://saylesss88.github.io/nix/hardening_networking.html>
 <https://saylesss88.github.io/nix/browsing_security.html>
 <https://saylesss88.github.io/installation/enc/sops-nix.html>
 <https://saylesss88.github.io/nix/gpg-agent.html>
 <https://saylesss88.github.io/installation/enc/lanzaboote.html>
+<https://saylesss88.github.io/nixos_containers.html>
+<https://saylesss88.github.io/vcs/git.html>
+
+I found this interesting, let's treat it as a research topic:
+<https://saylesss88.github.io/vcs/jujutsu.html>
+<https://saylesss88.github.io/vcs/practical_jj.html>
+and the git repo <https://github.com/jj-vcs/jj>
+
+Regarding nixpkgs, some more great documentation:
+<https://saylesss88.github.io/Working_with_Nixpkgs_Locally_10.html>
+<https://saylesss88.github.io/Package_Definitions_Explained_6.html>

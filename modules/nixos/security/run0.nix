@@ -1,10 +1,12 @@
 {
   config,
   lib,
+  repository,
   ...
 }:
 let
   cfg = config.theorem.nixos.security.run0-sudo;
+  repositoryGroup = repository.group or "nixcfg";
   quotedUsers = lib.concatMapStringsSep ", " (user: ''"${user}"'') cfg.authenticationCacheUsers;
   quotedGroups = lib.concatMapStringsSep ", " (group: ''"${group}"'') cfg.authenticationCacheGroups;
 in
@@ -24,11 +26,15 @@ in
 
     authenticationCacheGroups = lib.mkOption {
       type = lib.types.listOf lib.types.str;
-      default = [ "wheel" ];
+      default = [ repositoryGroup ];
+      defaultText = lib.literalExpression "[ repository.group ]";
       description = ''
         Group names allowed to keep Polkit authentication for one NixOS
-        administrative operation. `wheel` mirrors the usual administrator
-        boundary while keeping the rule declarative.
+        administrative operation. By default this follows the repository
+        steward group, normally `nixcfg`, so rebuild authority stays bound to
+        the accounts trusted to repair this flake. Override this per host if
+        elevation should follow a different administrative boundary such as
+        `wheel`.
       '';
     };
 

@@ -7,7 +7,21 @@ let
   cfg = config.theorem.nixos.desktop.plasma;
 in
 {
-  options.theorem.nixos.desktop.plasma.enable = lib.mkEnableOption "Plasma desktop profile";
+  options.theorem.nixos.desktop.plasma = {
+    enable = lib.mkEnableOption "Plasma desktop profile";
+
+    fwupdRefreshTimer.enable = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = ''
+        Enable fwupd's unattended metadata refresh timer. Plasma enables fwupd
+        by default, but the timer runs outside an active desktop session and
+        can fail Polkit authorization during rebuild activation. Keep it off by
+        default; use Discover or `fwupdmgr refresh` deliberately when firmware
+        metadata is part of a maintenance rite.
+      '';
+    };
+  };
 
   config = lib.mkIf cfg.enable {
     services = {
@@ -30,5 +44,7 @@ in
         login.fprintAuth = lib.mkDefault false;
       };
     };
+
+    systemd.timers.fwupd-refresh.wantedBy = lib.mkIf (!cfg.fwupdRefreshTimer.enable) (lib.mkForce [ ]);
   };
 }
