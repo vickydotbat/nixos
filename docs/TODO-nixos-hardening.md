@@ -30,7 +30,7 @@ decoration.
     The profile starts with low-risk kernel protections, coredump reduction,
     bounded local journald storage, logrotate, and an opt-in dbus-broker switch.
 
-- [ ] Maintain a hardening compatibility matrix.
+- [x] Maintain a hardening compatibility matrix.
   - Why: the guide repeatedly warns that settings can break Flatpak,
     Chromium-based browsers, Firefox-family browsers, containers, WireGuard,
     virtualization, NVIDIA or VirtualBox modules, screen sharing, USB input, and
@@ -42,6 +42,9 @@ decoration.
     hammer.
   - Validation: evaluate at least one desktop host, one headless/server profile,
     and one container-capable profile.
+  - Completed: `docs/hardening-compatibility.md` records host signals, known
+    breakage, gates before enablement, and forbidden shortcuts for the current
+    hardening queue.
 
 ## Attack Surface And Package Hygiene
 
@@ -282,6 +285,9 @@ decoration.
   - Default posture: optional tool, safe when needed.
   - Validation: run `kernel-hardening-checker -l /proc/cmdline -c
     /proc/config.gz -s ./params.txt` after capturing `sysctl -a`.
+  - Progress: `theorem.nixos.security.diagnostics` now exists as an opt-in tool
+    profile. `kernel-hardening-checker` still needs exact package verification
+    against the pinned nixpkgs before it is referenced.
 
 - [x] Apply low-risk `security.*` kernel protections.
   - Why: kernel image protection, page table isolation, and namespace policy
@@ -451,7 +457,7 @@ decoration.
 
 ## Auditing, Malware Scanning, And Vulnerability Scans
 
-- [ ] Add a diagnostics/audit profile with Lynis, AIDE, ClamAV, `sbomnix`, and
+- [x] Add a diagnostics/audit profile with Lynis, AIDE, ClamAV, `sbomnix`, and
   `grype` as explicit tools.
   - Why: audit tools make hardening measurable and reveal drift, but they are
     not all necessary runtime dependencies.
@@ -461,6 +467,10 @@ decoration.
   - Default posture: optional tool profile.
   - Validation: run `lynis audit system` and the SBOM vulnerability scan on a
     test host.
+  - Completed: `modules/nixos/security/diagnostics.nix` exposes an opt-in
+    diagnostics profile. Lynis and SBOM/vulnerability tools default on when the
+    profile is enabled; AIDE and ClamAV remain explicit sub-options because
+    their databases, definitions, and scan cadence need separate stewardship.
 
 - [ ] Design an AIDE module before enabling file integrity checks.
   - Why: AIDE can detect unexpected system-file changes, but its database must
@@ -473,6 +483,9 @@ decoration.
     changing desktops unless scoped.
   - Validation: initialize database, run `aide --check`, make a controlled file
     change, confirm detection, then update database.
+  - Progress: the diagnostics profile can install the AIDE CLI for manual
+    experiments, but it still does not initialize, persist, schedule, or update
+    an AIDE database.
 
 - [ ] Decide between ClamAV daemon scanning and cron-based `clamscan`.
   - Why: malware scanning can be useful, but daemon scanning and one-shot scans
@@ -484,6 +497,9 @@ decoration.
     paths and resource limits are known.
   - Validation: test scan permissions, update frequency, log path, and resource
     usage.
+  - Progress: the diagnostics profile can install ClamAV command-line tooling
+    for manual scans, but no daemon, updater, scanner, or scheduled job is
+    enabled.
 
 ## SSH And Secrets
 
@@ -641,12 +657,14 @@ decoration.
   - Default posture: optional maintenance command.
   - Validation: run scan, archive or summarize findings, and decide patching
     actions.
+  - Progress: the diagnostics profile can install `sbomnix` and `grype` when
+    selected. A wrapper command or flake app that chooses the target closure and
+    output format remains open.
 
 ## Implementation Order
 
-1. Safe defaults still open: package hygiene review, service-disable defaults
-   derived from existing module enables, and the compatibility matrix that keeps
-   host breakage visible.
+1. Safe defaults still open: package hygiene review and service-disable defaults
+   derived from existing module enables.
 2. Derived defaults: SUID wrapper minimization, sysctl safe tier,
    Flatpak/portal posture, Fail2Ban, Chrony NTS, and selected service hardening.
 3. Host-sensitive mechanisms: USBGuard, impermanence, hardened allocator,

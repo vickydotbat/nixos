@@ -83,6 +83,7 @@ in
       hardening.enable = true;
       polkit.enable = true;
       sudo.enable = true;
+      diagnostics.enable = true;
     };
   };
 

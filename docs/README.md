@@ -8,6 +8,7 @@ These files are not the system configuration itself. They are the repair ledger:
 
 - implementation plans under `superpowers/plans/`
 - agent-facing task notes that should remain executable
+- hardening compatibility notes such as `hardening-compatibility.md`
 - historical context for structural repairs
 
 ## Writing Plan Notes
