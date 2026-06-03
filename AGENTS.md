@@ -2,7 +2,7 @@
 
 This repository carries a NixOS system theorem and the small rites needed to keep it repairable.
 
-The `nixos-managing` skill is the dedicated maintenance manual for that work: rebuilds, flakes, modules, deployment, impermanence, LUKS remote unlock, monitoring, and the usual places where a tired operator can make one sharp mistake.
+The `docs/nixos-managing` skill is the dedicated maintenance manual for that work: rebuilds, flakes, modules, deployment, impermanence, LUKS remote unlock, monitoring, and the usual places where a tired operator can make one sharp mistake.
 
 ## Documentation Voice
 
@@ -63,7 +63,7 @@ For code and documentation:
 
 Any agent that understands this `AGENTS.md` convention should:
 
-1. Treat `nixos-managing/SKILL.md` as the entry point. It contains a decision table pointing to the right reference file for the task.
+1. Treat `docs/nixos-managing/SKILL.md` as the entry point. It contains a decision table pointing to the right reference file for the task.
 2. Load reference files on demand based on that table:
    - `configuration.md` - flakes, modules, packages, services, secrets
    - `vm-management.md` - `nixos-rebuild`, generations, rollback, remote deployment
@@ -76,8 +76,8 @@ Any agent that understands this `AGENTS.md` convention should:
 3. Verify every NixOS option before suggesting it. The skill includes guidance for this, and `search.nixos.org/options` is always available.
 4. Ask the user about the execution context before suggesting commands: local NixOS host, remote deploy from Linux, remote deploy from macOS, or another crucible entirely.
 
-Do not edit `nixos-managing/` unless the user explicitly asks for skill maintenance. It is reference doctrine, and casual drift there can teach future agents the wrong repair.
+Do not edit `docs/nixos-managing/` unless the user explicitly asks for skill maintenance. It is reference doctrine, and casual drift there can teach future agents the wrong repair.
 
 This file follows the [agents.md](https://agents.md/) convention and is honored by OpenAI Codex CLI, Cursor, Aider, Zed, Amp, Gemini CLI, Google Jules, Windsurf, Factory, RooCode, and many others.
 
-For Claude Code, the richer native format is `.claude-plugin/` plus `nixos-managing/SKILL.md`.
+For Claude Code, the richer native format is `.claude-plugin/` plus `docs/nixos-managing/SKILL.md`.
