@@ -22,12 +22,27 @@ XDG_CACHE_HOME=$PWD/.cache nix eval --json \
 
 XDG_CACHE_HOME=$PWD/.cache nix eval --json \
   .#nixosConfigurations.solanine.config.theorem.nixos.base.nix.unfreePackageNames
+
+XDG_CACHE_HOME=$PWD/.cache nix eval \
+  .#nixosConfigurations.solanine.config.nixpkgs.config.allowUnfree
+
+XDG_CACHE_HOME=$PWD/.cache nix eval --impure --json --expr '
+  let
+    flake = builtins.getFlake (builtins.toString ./.);
+    cfg = flake.nixosConfigurations.solanine.config;
+    pkgs = flake.nixosConfigurations.solanine.pkgs;
+  in {
+    discord = cfg.nixpkgs.config.allowUnfreePredicate pkgs.discord;
+    hello = cfg.nixpkgs.config.allowUnfreePredicate pkgs.hello;
+  }'
 ```
 
 Use the workspace-local cache when a sandbox or hardened account cannot write
 to the user's normal Nix fetcher cache. The output should be compared against
 the changed module or profile. A package that appears without a corresponding
-mechanism is a warning light.
+mechanism is a warning light. For unfree packages, the global switch should
+evaluate to `false`; named proprietary tools should pass the predicate only when
+their exact package names are present in `theorem.nixos.base.nix.unfreePackageNames`.
 
 For rebuild confidence, follow the inventory with:
 

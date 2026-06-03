@@ -1,4 +1,5 @@
 { config, lib, ... }:
+# FIXME: Strongly opinionated and uses redundant options to set things which can be changed with normal NixOS config fucntions. This should be global, preferably at the user level, or at the host level if not possible.
 let
   cfg = config.theorem.nixos.base.locale;
 in

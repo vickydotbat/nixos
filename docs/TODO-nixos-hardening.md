@@ -64,7 +64,7 @@ decoration.
     modes. `modules/README.md` and `pkgs/README.md` point maintainers back to
     that rite before package-bearing modules or local derivations grow.
 
-- [ ] Keep `allowUnfree = false` as the repository default and require explicit
+- [x] Keep `allowUnfree = false` as the repository default and require explicit
   predicates for exceptions.
   - Why: proprietary software is harder to audit and often has weaker repair
     paths.
@@ -75,8 +75,16 @@ decoration.
   - Default posture: already safe in this repository.
   - Validation: `nix eval .#nixosConfigurations.solanine.config.nixpkgs.config.allowUnfree`
     or equivalent predicate inspection during implementation.
+  - Completed: `modules/nixos/base/nix.nix` keeps
+    `nixpkgs.config.allowUnfree = false` and admits exceptions only through
+    `allowUnfreePredicate` over
+    `theorem.nixos.base.nix.unfreePackageNames`. The current host list is
+    explicit in `hosts/solanine/profiles.nix`, with Steam-owned additions in
+    `modules/nixos/gaming/steam.nix`. Validated on 2026-06-03 by evaluating the
+    global switch, the exception list, and a predicate sample that allows
+    `discord` while rejecting `hello`.
 
-- [ ] Keep stable plus unstable package strategy explicit.
+- [x] Keep stable plus unstable package strategy explicit.
   - Why: stable channels reduce surprise, while unstable often carries faster
     fixes for browsers, kernels, and other security-sensitive applications.
   - How: document where this repository uses `nixpkgs` and `nixpkgs-stable`;
@@ -86,6 +94,14 @@ decoration.
   - Default posture: conditional. Do not migrate the whole system solely for
     hardening until package risk and rebuild risk are compared.
   - Validation: check flake inputs, then evaluate selected package origins.
+  - Completed: this repository currently uses `nixpkgs` from `nixos-unstable`
+    as the primary system package set. The `nixpkgs-stable` input is imported
+    with `allowUnfree = false` and passed as `stable` through system and Home
+    Manager special arguments, but no current module selects packages from it.
+    The base boot module now sets `boot.kernelPackages` with `mkDefault` to
+    `pkgs.linuxPackages_latest`, keeping the security-sensitive kernel on the
+    freshest pinned unstable kernel while preserving a one-line host override
+    for hardware or driver fallout.
 
 ## Install, Disk, And Persistence Posture
 

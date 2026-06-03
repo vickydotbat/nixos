@@ -10,6 +10,29 @@
 # The tmpfs root path is ready for daily use. The Btrfs root mode is present so
 # hosts can name the desired substrate, but it still needs a rollback-to-blank
 # initrd rite before it should be selected on real hardware.
+
+/*
+  TODO: Clarify differentials between tmpfs and btrfs.
+
+  For right now I can't see whether it's possible to run /nix on ext4, whether
+  /nix defaults to btrfs if ephemeral tmpfs is used... etc. Default for normal
+  drives should be btrfs impermanence for everything but this requires special
+  setup. BTRFS impermanence bootstrap is not currently explained nor configured.
+  In order to set that up, bootstrap requires an empty snapshot to be made upon
+  installation of the system, and a script that rolls back to that snapshot on
+  each reboot.
+
+  Relevant Example Docs:
+   - btrfs impermanence, no tmpfs: <https://cnx.gdn/blog/butter/>
+   - btrfs impermanence with tmpfs root:
+    - <https://gist.github.com/giuseppe998e/629774863b149521e2efa855f7042418>
+    - <https://news.ycombinator.com/item?id=31269972>
+   - tmpfs root with ext4: <https://elis.nu/blog/2020/05/nixos-tmpfs-as-root/>
+
+  For most of my systems currently, I use btrfs by default for all drives except
+  for /, which is on tmpfs. Tmpfs root requires the full spread of persistence
+  simply to keep directories that get large off ram. Things to consider.
+*/
 let
   cfg = config.theorem.nixos.base.persistence;
 

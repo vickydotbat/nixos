@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }:
 let
@@ -8,7 +9,7 @@ let
 in
 {
   options.theorem.nixos.base.boot = {
-    enable = lib.mkEnableOption "base boot configuration";
+    enable = lib.mkEnableOption "base boot configuration"; # FIXME: Boot modules are always necessary. This should at least be enabled by default, especially because it sets the default kernel.
 
     loader = lib.mkOption {
       type = lib.types.enum [
@@ -24,6 +25,8 @@ in
   };
 
   config = lib.mkIf cfg.enable {
+    boot.kernelPackages = lib.mkDefault pkgs.linuxPackages_latest;
+
     boot.loader.systemd-boot = lib.mkIf (cfg.loader == "systemd-boot") {
       enable = true;
       configurationLimit = lib.mkDefault 10;
