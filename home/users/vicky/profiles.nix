@@ -1,7 +1,6 @@
 {
   theorem.home = {
     base = {
-      ssh.enable = true;
       virtualization.enable = true;
     };
 
