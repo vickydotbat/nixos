@@ -1,6 +1,5 @@
 {
   config,
-  inputs,
   lib,
   osConfig ? null,
   pkgs,
@@ -9,7 +8,8 @@
 
 let
   cfg = config.theorem.home.base.persistence;
-  systemPersistenceEnabled = (osConfig.theorem.nixos.base.persistence.enable or false);
+  systemPersistenceEnabled =
+    if osConfig == null then false else osConfig.theorem.nixos.base.persistence.enable or false;
 
   username = config.home.username;
   home = config.home.homeDirectory;
@@ -21,7 +21,11 @@ in
   options.theorem.home.base.persistence.enable = lib.mkOption {
     type = lib.types.bool;
     default = systemPersistenceEnabled;
-    defaultText = lib.literalExpression "osConfig.theorem.nixos.base.persistence.enable or false";
+    defaultText = lib.literalExpression ''
+      if osConfig == null
+      then false
+      else osConfig.theorem.nixos.base.persistence.enable or false
+    '';
     description = ''
       Enable Home Manager persistence. Defaults to the system persistence
       theorem so user bind mounts are only declared when the persistence
@@ -32,6 +36,9 @@ in
   config = lib.mkIf cfg.enable {
     home.persistence."/nix/persist" = {
       directories = [
+        ".local/share/systemd/timers"
+        ".cache/nix" # Nix cache -- must keep when using tmpfs
+
         # XDG Directories
         "Documents"
         "Pictures"
@@ -49,11 +56,6 @@ in
         "Games"
         "Applications"
 
-        # Nix cache -- must keep when using tmpfs
-        ".cache/nix"
-
-        # systemd Timers
-        ".local/share/systemd/timers"
       ];
 
       files = [

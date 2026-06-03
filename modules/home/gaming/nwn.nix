@@ -1,6 +1,5 @@
 {
   config,
-  inputs,
   lib,
   pkgs,
   ...
@@ -8,6 +7,8 @@
 
 let
   cfg = config.theorem.home.gaming.nwn;
+
+  persistenceEnabled = (config.theorem.home.base.persistence.enable or false);
 
   # Default mechanism, kept in the reusable module; home/ may override it.
   nwnDataDir = "${config.home.homeDirectory}/.local/share/Neverwinter Nights";
@@ -136,7 +137,7 @@ in
       })
     ];
 
-    home.persistence."/nix/persist" = lib.mkIf config.theorem.home.base.persistence.enable {
+    home.persistence."/nix/persist" = lib.mkIf persistenceEnabled {
       directories = [
         ".local/share/Neverwinter Nights"
         ".config/blender/4.0"

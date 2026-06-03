@@ -24,7 +24,6 @@
     };
 
     virtualisation = {
-      nix-ld.enable = true;
       podman.enable = true;
     };
 

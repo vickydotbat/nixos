@@ -1,6 +1,5 @@
 {
   config,
-  inputs,
   lib,
   osConfig ? null,
   pkgs,
