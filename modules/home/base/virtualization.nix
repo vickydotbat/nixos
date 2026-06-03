@@ -1,30 +1,31 @@
 {
   config,
-  inputs,
+  osConfig ? null,
   lib,
-  pkgs,
   ...
 }:
 
 let
-  cfg = config.theorem.home.base.virtualization;
+  cfg = config.theorem.home.base.distrobox;
+
+  podmanEnabled = (osConfig.theorem.nixos.virtualisation.podman.enable or false);
+
+  persistenceEnabled = (config.theorem.home.base.persistence.enable or false);
 in
 {
-  options.theorem.home.base.virtualization.enable = lib.mkEnableOption "user virtualization tools";
+  options.theorem.home.base.distrobox.enable = lib.mkEnableOption "Distrobox";
 
-  config = lib.mkIf cfg.enable {
-    programs.distrobox = {
-      enable = true;
-    };
+  config = lib.mkIf podmanEnabled {
+    services.podman.enable = true;
 
-    services.podman = {
-      enable = true;
-    };
-
-    home.persistence."/nix/persist" = lib.mkIf config.theorem.home.base.persistence.enable {
+    home.persistence."/nix/persist" = lib.mkIf persistenceEnabled {
       directories = [
         ".local/share/containers"
       ];
+    };
+
+    programs.distrobox = lib.mkIf cfg.enable {
+      enable = true;
     };
   };
 }

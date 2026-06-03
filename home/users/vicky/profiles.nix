@@ -1,7 +1,7 @@
 {
   theorem.home = {
     base = {
-      virtualization.enable = true;
+      distrobox.enable = true;
     };
 
     desktop = {
