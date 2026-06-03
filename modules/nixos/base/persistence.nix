@@ -10,29 +10,33 @@
 # The tmpfs root path is ready for daily use. The Btrfs root mode is present so
 # hosts can name the desired substrate, but it still needs a rollback-to-blank
 # initrd rite before it should be selected on real hardware.
-
-/*
-  TODO: Clarify differentials between tmpfs and btrfs.
-
-  For right now I can't see whether it's possible to run /nix on ext4, whether
-  /nix defaults to btrfs if ephemeral tmpfs is used... etc. Default for normal
-  drives should be btrfs impermanence for everything but this requires special
-  setup. BTRFS impermanence bootstrap is not currently explained nor configured.
-  In order to set that up, bootstrap requires an empty snapshot to be made upon
-  installation of the system, and a script that rolls back to that snapshot on
-  each reboot.
-
-  Relevant Example Docs:
-   - btrfs impermanence, no tmpfs: <https://cnx.gdn/blog/butter/>
-   - btrfs impermanence with tmpfs root:
-    - <https://gist.github.com/giuseppe998e/629774863b149521e2efa855f7042418>
-    - <https://news.ycombinator.com/item?id=31269972>
-   - tmpfs root with ext4: <https://elis.nu/blog/2020/05/nixos-tmpfs-as-root/>
-
-  For most of my systems currently, I use btrfs by default for all drives except
-  for /, which is on tmpfs. Tmpfs root requires the full spread of persistence
-  simply to keep directories that get large off ram. Things to consider.
-*/
+#
+# Root substrate and persistent storage are separate choices:
+#
+# - `root.mode = "tmpfs"` mounts `/` in memory. It starts clean without an
+#   initrd rollback script, but every large or required state path must be
+#   persisted away from RAM. This is Solanine's current rite.
+# - `root.mode = "btrfs"` mounts a disk-backed root subvolume. It is only
+#   impermanent after an installer creates a blank snapshot and the initrd rolls
+#   the root back to that snapshot before activation. Until that mechanism
+#   exists, this module accepts the option but warns maintainers not to select
+#   it for real hosts.
+# - `storage.fsType` controls the durable `/nix` and persistence substrate.
+#   Btrfs uses named subvolumes and compression; non-Btrfs storage can still
+#   carry `/nix` through `storage.mountOptions`, but it does not provide the
+#   Btrfs-root rollback mechanism.
+#
+# The configured modes are deliberately narrow:
+#
+# - Btrfs-backed `/nix` with tmpfs `/`, used by Solanine today.
+# - Non-Btrfs disk-backed `/nix` with tmpfs `/`, available through
+#   `storage.fsType` and `storage.mountOptions`.
+# - Btrfs-backed `/`, reserved for future snapshot rollback work.
+#
+# `/nix` must stay disk-backed in every mode. Swap is host-owned because size
+# and placement depend on storage layout. Home persistence is owned by Home
+# Manager persistence modules; this module prepares `/nix/persist/home/<user>`
+# when a selected user declares persisted Home state.
 let
   cfg = config.theorem.nixos.base.persistence;
 

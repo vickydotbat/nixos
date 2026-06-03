@@ -41,6 +41,8 @@ and the host signal that proves it is safe.
 | USBGuard | Disabled | Bad rules can block keyboards, mice, docks, and recovery devices. | Create a no-USBGuard boot specialization before enabling. |
 | AIDE checks | Tool-only optional profile | Database churn is noisy on desktops and useless without persistence/update rites. | Design database paths, update command, and persistence before scheduling checks. |
 | ClamAV scans | Tool-only optional profile | Daemons and broad scans can consume resources and create noisy logs. | Choose daemon or scheduled `clamscan`, not both by accident. |
+| Flatpak browsers | Research only | Flatpak confinement and built-in browser sandboxes can trade strength in non-obvious ways. | Compare native and Flatpak variants with browser sandbox diagnostics before moving browsers into Flatpak. |
+| SELinux baseline | Out of scope | SELinux on NixOS is not mature enough for this conservative baseline. | Open a separate project before evaluating SELinux policy, labels, and recovery behavior. |
 
 ## Forbidden Shortcuts
 
@@ -49,11 +51,15 @@ and the host signal that proves it is safe.
 - Do not combine Firejail with Flatpak for the same application unless a
   specific profile has been tested. Layered sandbox names do not equal layered
   safety.
+- Do not move browsers into Flatpak as a fashion default. Compare the native
+  browser sandbox with the Flatpak variant first.
 - Do not force `kernel.unprivileged_userns_clone = 0` on hosts with Flatpak,
   rootless containers, Chromium-family browsers, or tools that need user
   namespaces.
 - Do not import a broad external hardening module without diffing its settings
   against this repository's explicit profile.
+- Do not add SELinux defaults to the baseline. Treat SELinux as a separate
+  research project with its own recovery plan.
 
 ## Review Rite
 

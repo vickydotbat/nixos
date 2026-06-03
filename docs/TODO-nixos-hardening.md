@@ -230,13 +230,16 @@ decoration.
   - Validation: `find /run/wrappers -perm -4000 -ls` before and after; test
     AppImage, Podman, Flatpak, and mount workflows as applicable.
 
-- [ ] Do not disable `unix_chkpwd`.
+- [x] Do not disable `unix_chkpwd`.
   - Why: it is a core PAM helper for checking passwords against shadow data.
   - How: add it to the hardening compatibility matrix as forbidden to disable.
   - Achieves: avoids breaking local authentication in pursuit of a false
     reduction.
   - Default posture: never disable.
   - Validation: confirm it remains available after wrapper hardening.
+  - Completed: `docs/hardening-compatibility.md` names this as a forbidden
+    shortcut. Future SUID wrapper minimization must preserve the PAM helper and
+    verify authentication after any wrapper change.
 
 - [ ] Treat Linux capabilities as a research path, not an immediate default.
   - Why: capabilities can replace broad SUID root with narrower privileges, but
@@ -296,7 +299,7 @@ decoration.
   - Validation: build and boot a specialization with `boot.kernelPackages =
     pkgs.linuxPackages_hardened`, then test declared workloads.
 
-- [ ] Add kernel hardening checker tooling to a diagnostics profile.
+- [x] Add kernel hardening checker tooling to a diagnostics profile.
   - Why: `kernel-hardening-checker` gives a repeatable way to compare kernel
     config, command line, and sysctl posture.
   - How: expose `pkgs.kernel-hardening-checker` through an optional diagnostics
@@ -308,6 +311,11 @@ decoration.
   - Progress: `theorem.nixos.security.diagnostics` now exists as an opt-in tool
     profile. `kernel-hardening-checker` still needs exact package verification
     against the pinned nixpkgs before it is referenced.
+  - Completed: `modules/nixos/security/diagnostics.nix` now exposes
+    `theorem.nixos.security.diagnostics.kernelAudit.enable`, defaulting on when
+    the diagnostics profile is enabled. The pinned package set contains
+    `pkgs.kernel-hardening-checker`, and Solanine's diagnostics profile installs
+    it as a manual audit tool.
 
 - [x] Apply low-risk `security.*` kernel protections.
   - Why: kernel image protection, page table isolation, and namespace policy
@@ -552,15 +560,19 @@ decoration.
     unnecessary or annoying on trusted-only networks.
   - Validation: inspect jail status and confirm trusted addresses are not banned.
 
-- [ ] Standardize SSH key guidance on Ed25519.
+- [x] Standardize SSH key guidance on Ed25519.
   - Why: Ed25519 keys are modern, small, fast, and strong for normal SSH use.
   - How: document `ssh-keygen -t ed25519 -a 32` in user/host README guidance;
     choose either `ssh-agent` or `gpg-agent`, not both, per user profile.
   - Achieves: better key hygiene and fewer agent conflicts.
   - Default posture: documentation default.
   - Validation: generate a test key, verify agent loading, and test SSH auth.
+  - Completed: `users/README.md` now documents the Ed25519 key-generation rite
+    and the one-agent rule. The existing Home Manager SSH module restores
+    `id_ed25519` from SOPS-backed secrets, and the system SSH module uses the
+    OpenSSH agent by default.
 
-- [ ] Keep secrets encrypted with `sops-nix`; do not introduce plaintext secret
+- [x] Keep secrets encrypted with `sops-nix`; do not introduce plaintext secret
   paths.
   - Why: secrets in the repository must not enter the Nix store or Git history
     unencrypted.
@@ -570,6 +582,11 @@ decoration.
   - Default posture: already safe; keep enforcing it.
   - Validation: `rg` for likely secret literals, `sops` decrypt test on intended
     host, and dry-build.
+  - Completed: `modules/nixos/security/sops.nix`, `hosts/solanine/secrets.nix`,
+    and `secrets/README.md` keep secret material under SOPS and document the
+    plaintext failure modes. The repository scan should keep ignoring encrypted
+    `secrets/*.yaml` payloads while checking Nix and script files for obvious
+    private keys, age identities, passwords, tokens, and API keys.
 
 ## USB And Physical-Port Protection
 
@@ -589,7 +606,7 @@ decoration.
 
 ## Application Sandboxing
 
-- [ ] Treat Firejail as an explicit per-application profile, not a blanket
+- [x] Treat Firejail as an explicit per-application profile, not a blanket
   default.
   - Why: Firejail can sandbox applications but is itself SUID and has critics
     who treat it as additional privilege-escalation surface.
@@ -601,6 +618,11 @@ decoration.
   - Default posture: conditional; never wrap unknown workloads blindly.
   - Validation: launch each wrapped app normally, inspect confinement, and test
     file access expectations.
+  - Completed: `modules/nixos/security/firejail.nix` only enables the substrate
+    and optional CLI. `modules/nixos/desktop/jailwolf.nix` owns the single
+    current wrapped binary, `librewolf-private`, with an explicit profile and
+    desktop entry. Evaluated Solanine currently has Firejail enabled, Flatpak
+    disabled, and only that named wrapped binary.
 
 - [ ] Evaluate Bubblewrap/nix-bwrapper as a lower-SUID sandboxing research path.
   - Why: Bubblewrap has a smaller design and may avoid some Firejail concerns.
@@ -622,15 +644,18 @@ decoration.
   - Validation: install a test app, inspect permissions, verify portals, and
     launch under the selected desktop.
 
-- [ ] Do not combine Firejail with Flatpak applications.
+- [x] Do not combine Firejail with Flatpak applications.
   - Why: the guide notes that the sandboxing technologies do not layer cleanly.
   - How: encode mutual exclusion in documentation or module assertions if both
     systems try to own the same app.
   - Achieves: fewer false assurances and less launch breakage.
   - Default posture: safe rule.
   - Validation: evaluate app ownership lists.
+  - Completed: `docs/hardening-compatibility.md` names this as a forbidden
+    shortcut. If future modules grow explicit Flatpak app lists and Firejail
+    wrapped binaries for the same application, add module assertions then.
 
-- [ ] Treat Flatpak browsers as a specific research item.
+- [x] Treat Flatpak browsers as a specific research item.
   - Why: browser sandboxes and Flatpak sandboxing may trade off in non-obvious
     ways; the guide notes concern that Flatpak can reduce built-in browser
     sandboxing.
@@ -639,6 +664,9 @@ decoration.
   - Achieves: browser isolation chosen by evidence, not fashion.
   - Default posture: research only.
   - Validation: inspect sandbox status and browser security diagnostics.
+  - Completed: `docs/hardening-compatibility.md` records Flatpak browsers as a
+    research-only mechanism and forbids moving browsers into Flatpak without
+    comparing native and Flatpak sandbox diagnostics.
 
 ## MAC Frameworks And External Baselines
 
@@ -651,13 +679,16 @@ decoration.
   - Default posture: research only.
   - Validation: profile load status, service behavior, and denials in logs.
 
-- [ ] Treat SELinux as out of baseline scope.
+- [x] Treat SELinux as out of baseline scope.
   - Why: SELinux remains experimental and not fully integrated for normal NixOS
     systems.
   - How: keep references for advanced research, but do not add module defaults.
   - Achieves: avoids spending the conservative baseline on rough edges.
   - Default posture: no default.
   - Validation: none until a separate SELinux project is opened.
+  - Completed: `docs/hardening-compatibility.md` keeps SELinux out of the
+    conservative baseline and requires a separate project before any policy,
+    labeling, or recovery work is attempted.
 
 - [ ] Review `nix-mineral` as an external reference, not an import target.
   - Why: it is a broad community hardening module and the guide describes it as
@@ -668,7 +699,7 @@ decoration.
   - Default posture: research only.
   - Validation: diff settings, evaluate test host, and record breakages.
 
-- [ ] Add vulnerability/SBOM scan command as a maintenance rite.
+- [x] Add vulnerability/SBOM scan command as a maintenance rite.
   - Why: SBOM plus vulnerability scanning can reveal known vulnerable packages in
     the current system closure.
   - How: package a flake app or documented command using `sbomnix` and `grype`
@@ -680,6 +711,10 @@ decoration.
   - Progress: the diagnostics profile can install `sbomnix` and `grype` when
     selected. A wrapper command or flake app that chooses the target closure and
     output format remains open.
+  - Completed: `flake.nix` exposes `.#vulnerability-scan`, a flake app that
+    defaults to `/run/current-system`, writes a CycloneDX SBOM with `sbomnix`,
+    and scans that SBOM with `grype`. Use `nix run .#vulnerability-scan -- --help`
+    to inspect the rite without running a scan.
 
 ## Implementation Order
 

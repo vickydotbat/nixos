@@ -9,6 +9,7 @@ let
 
   packageNames = {
     systemAudit = [ "lynis" ];
+    kernelAudit = [ "kernel-hardening-checker" ];
     fileIntegrity = [ "aide" ];
     malwareScan = [ "clamav" ];
     vulnerabilityScan = [
@@ -23,6 +24,7 @@ let
 
   selectedPackageNames =
     lib.optionals cfg.systemAudit.enable packageNames.systemAudit
+    ++ lib.optionals cfg.kernelAudit.enable packageNames.kernelAudit
     ++ lib.optionals cfg.fileIntegrity.enable packageNames.fileIntegrity
     ++ lib.optionals cfg.malwareScan.enable packageNames.malwareScan
     ++ lib.optionals cfg.vulnerabilityScan.enable packageNames.vulnerabilityScan;
@@ -40,6 +42,16 @@ in
         Install general host audit tooling such as Lynis when diagnostics are
         enabled. This is a manual inspection aid, not a daemon and not a proof
         that the host is hardened.
+      '';
+    };
+
+    kernelAudit.enable = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = ''
+        Install kernel-hardening-checker for manual comparison of kernel config,
+        command-line parameters, and sysctl posture. This is an inspection tool,
+        not an automatic hardening mechanism.
       '';
     };
 

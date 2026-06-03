@@ -9,7 +9,15 @@ let
 in
 {
   options.theorem.nixos.base.boot = {
-    enable = lib.mkEnableOption "base boot configuration"; # FIXME: Boot modules are always necessary. This should at least be enabled by default, especially because it sets the default kernel.
+    enable = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = ''
+        Enable the base boot profile. This defaults on because the profile owns
+        bootloader defaults and the repository's kernel selection; hosts should
+        disable it only when another boot mechanism provides both explicitly.
+      '';
+    };
 
     loader = lib.mkOption {
       type = lib.types.enum [

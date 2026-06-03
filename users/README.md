@@ -69,6 +69,22 @@ is the intended mechanism. Without these steps, the group exists but the
 repository may still answer only to the account that fetched it, or Git may
 refuse the worktree as unsafe.
 
+## SSH Key Doctrine
+
+Use Ed25519 keys for normal user SSH identities unless a specific legacy host
+requires another algorithm:
+
+```bash
+ssh-keygen -t ed25519 -a 32 -f ~/.ssh/id_ed25519
+```
+
+The reusable Home Manager SSH module restores `id_ed25519` and
+`id_ed25519.pub` from SOPS-backed secrets, and Vicky's Git/SSH profiles point at
+that identity. Keep agent ownership singular per user profile. This repository
+uses the OpenSSH agent through `programs.ssh.startAgent`; do not also enable a
+competing `gpg-agent` SSH socket unless the user profile is deliberately moved
+to that model.
+
 ## Failure Modes
 
 - Do not put host hardware, host package choices, or machine-specific secrets

@@ -86,6 +86,57 @@
         '';
       };
 
+      apps.${system}.vulnerability-scan =
+        let
+          scanSystemVulnerabilities = pkgs.writeShellApplication {
+            name = "scan-system-vulnerabilities";
+            runtimeInputs = [
+              pkgs.coreutils
+              pkgs.grype
+              pkgs.sbomnix
+            ];
+            text = ''
+              usage() {
+                printf '%s\n' \
+                  'Usage: scan-system-vulnerabilities [TARGET] [OUTPUT_DIR]' \
+                  "" \
+                  'Generate a CycloneDX SBOM with sbomnix, then scan it with grype.' \
+                  "" \
+                  'TARGET defaults to /run/current-system.' \
+                  'OUTPUT_DIR defaults to ./vulnerability-scan.' \
+                  "" \
+                  'Example:' \
+                  '  nix run .#vulnerability-scan -- /run/current-system ./reports/solanine'
+              }
+
+              case "''${1:-}" in
+                -h|--help)
+                  usage
+                  exit 0
+                  ;;
+              esac
+
+              target="''${1:-/run/current-system}"
+              output_dir="''${2:-./vulnerability-scan}"
+              sbom="$output_dir/sbom.cdx.json"
+              report="$output_dir/grype.txt"
+
+              mkdir -p "$output_dir"
+
+              sbomnix --cdx "$sbom" "$target"
+              grype "sbom:$sbom" --output table --file "$report"
+
+              echo "SBOM written to $sbom"
+              echo "Vulnerability report written to $report"
+            '';
+          };
+        in
+        {
+          type = "app";
+          program = "${scanSystemVulnerabilities}/bin/scan-system-vulnerabilities";
+          meta.description = "Generate a system SBOM with sbomnix and scan it with grype.";
+        };
+
       packages.${system} = import ./pkgs/packages.nix { inherit pkgs; };
 
       devShells.${system} =
