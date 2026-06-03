@@ -104,6 +104,16 @@ in
     };
   };
 
+  specialisation.run0-sudo = {
+    inheritParentConfig = true;
+    configuration = {
+      theorem.nixos.security = {
+        sudo.enable = lib.mkForce false;
+        run0-sudo.enable = true;
+      };
+    };
+  };
+
   environment.systemPackages = with pkgs; [
     unrar
     p7zip

@@ -38,8 +38,10 @@ in
   config = lib.mkIf cfg.enable {
     programs.zellij = {
       enable = true;
-      enableBashIntegration = cfg.bashIntegration.enable;
-      attachExistingSession = true;
+      # Home Manager's generated hook starts Zellij in every interactive Bash.
+      # The guarded hook below keeps editor-embedded terminals usable.
+      enableBashIntegration = false;
+      attachExistingSession = false;
       exitShellOnExit = false;
 
       settings = {
@@ -105,6 +107,36 @@ in
         }
       '';
     };
+
+    home.sessionVariables = {
+      ZELLIJ_AUTO_ATTACH = "true";
+      ZELLIJ_AUTO_EXIT = "false";
+    };
+
+    programs.bash.initExtra = lib.mkIf cfg.bashIntegration.enable ''
+      _theorem_zellij_should_start() {
+        case "$-" in
+          *i*) ;;
+          *) return 1 ;;
+        esac
+
+        [ -t 0 ] && [ -t 1 ] || return 1
+        [ -z "''${ZELLIJ:-}" ] || return 1
+        [ "''${TERM:-}" != "dumb" ] || return 1
+
+        case "''${TERM_PROGRAM:-}" in
+          vscode|vscode-insiders) return 1 ;;
+        esac
+
+        [ -z "''${VSCODE_INJECTION:-}" ] || return 1
+        [ -z "''${VSCODE_IPC_HOOK_CLI:-}" ] || return 1
+        [ -z "''${INSIDE_EMACS:-}" ] || return 1
+      }
+
+      if _theorem_zellij_should_start; then
+        eval "$(${lib.getExe config.programs.zellij.package} setup --generate-auto-start bash)"
+      fi
+    '';
 
     home.persistence."/nix/persist" = lib.mkIf config.theorem.home.base.persistence.enable {
       directories = [

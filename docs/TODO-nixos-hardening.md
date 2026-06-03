@@ -252,7 +252,12 @@ decoration.
     user or group, defaults that cache boundary to the repository steward group
     such as `nixcfg`, and exposes
     `theorem.nixos.security.run0-sudo.sudoAlias.enable` instead of hard-coding
-    the compatibility alias.
+    the compatibility alias. `hosts/solanine/profiles.nix` now also builds a
+    `run0-sudo` specialisation that inherits the normal host profile, disables
+    the active sudo theorem only inside that trial generation, and enables the
+    run0 profile there. This gives the operator a reversible boot or
+    `switch-to-configuration test` path before the default elevation rite is
+    changed.
 
 - [ ] Separate daily users from administrator accounts where the host can bear
   it.

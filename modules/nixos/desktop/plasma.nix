@@ -45,6 +45,18 @@ in
       };
     };
 
-    systemd.timers.fwupd-refresh.wantedBy = lib.mkIf (!cfg.fwupdRefreshTimer.enable) (lib.mkForce [ ]);
+    systemd = lib.mkIf (!cfg.fwupdRefreshTimer.enable) {
+      services.fwupd-refresh.enable = lib.mkForce false;
+      timers.fwupd-refresh.enable = lib.mkForce false;
+    };
+
+    system.activationScripts.clearFwupdRefreshFailure = lib.mkIf (!cfg.fwupdRefreshTimer.enable) {
+      supportsDryActivation = false;
+      text = ''
+        if [ -d /run/systemd/system ]; then
+          ${config.systemd.package}/bin/systemctl reset-failed fwupd-refresh.service fwupd-refresh.timer 2>/dev/null || true
+        fi
+      '';
+    };
   };
 }
