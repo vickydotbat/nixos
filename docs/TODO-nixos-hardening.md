@@ -666,9 +666,10 @@ decoration.
   - Default posture: documentation default.
   - Validation: generate a test key, verify agent loading, and test SSH auth.
   - Completed: `users/README.md` now documents the Ed25519 key-generation rite
-    and the one-agent rule. The existing Home Manager SSH module restores
-    `id_ed25519` from SOPS-backed secrets, and the system SSH module uses the
-    OpenSSH agent by default.
+    and the one-agent rule. The Home Manager SSH module restores `id_ed25519`
+    from SOPS-backed secrets for outbound SSH and Git signing without requiring
+    the system OpenSSH server. The system SSH module remains responsible for
+    inbound `sshd`, host keys, firewall exposure, and remote-login posture.
 
 - [x] Keep secrets encrypted with `sops-nix`; do not introduce plaintext secret
   paths.

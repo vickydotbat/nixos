@@ -17,8 +17,8 @@ XDG_CACHE_HOME=$PWD/.cache nix eval --json \
   --apply 'pkgs: map (p: p.pname or p.name) pkgs'
 
 XDG_CACHE_HOME=$PWD/.cache nix eval --json \
-  .#nixosConfigurations.solanine.config.home-manager.users.vicky.home.packages \
-  --apply 'pkgs: map (p: p.pname or p.name) pkgs'
+  .#nixosConfigurations.solanine.config.home-manager.users \
+  --apply 'users: builtins.mapAttrs (_: cfg: map (p: p.pname or p.name) cfg.home.packages) users'
 
 XDG_CACHE_HOME=$PWD/.cache nix eval --json \
   .#nixosConfigurations.solanine.config.theorem.nixos.base.nix.unfreePackageNames
@@ -38,11 +38,14 @@ XDG_CACHE_HOME=$PWD/.cache nix eval --impure --json --expr '
 ```
 
 Use the workspace-local cache when a sandbox or hardened account cannot write
-to the user's normal Nix fetcher cache. The output should be compared against
-the changed module or profile. A package that appears without a corresponding
-mechanism is a warning light. For unfree packages, the global switch should
-evaluate to `false`; named proprietary tools should pass the predicate only when
-their exact package names are present in `theorem.nixos.base.nix.unfreePackageNames`.
+to the user's normal Nix fetcher cache. The Home package inventory is keyed by
+selected Home Manager user, so minimal repair accounts such as `admin` are
+reviewed beside full daily-driver profiles such as `vicky`. The output should
+be compared against the changed module or profile. A package that appears
+without a corresponding mechanism is a warning light. For unfree packages, the
+global switch should evaluate to `false`; named proprietary tools should pass
+the predicate only when their exact package names are present in
+`theorem.nixos.base.nix.unfreePackageNames`.
 
 For rebuild confidence, follow the inventory with:
 
@@ -70,6 +73,26 @@ pretending the rite was completed.
 | `modules/home/**` | User package mechanisms such as browsers, fonts, editors, Blender, GIMP, Neverwinter tooling, and backup helpers. | Shared Home modules carry reusable mechanisms; personal package stacks stay in `users/<user>/profiles.nix`. |
 | `pkgs/packages.nix` | Local package derivations and overlay exports. | Package recipes build artifacts; NixOS and Home Manager modules decide whether to install them. |
 
+## Local Nixpkgs And Overlay Work
+
+Local nixpkgs work is a repair tool, not a permanent hiding place. When a
+package needs a local patch, override, or new derivation, keep the path
+visible:
+
+- A temporary local nixpkgs checkout or worktree should be named in the review
+  note, and the final diff should prove the flake no longer depends on an
+  unreviewed local path unless that is the explicit purpose of the change.
+- An overlay should explain why it needs to alter the package set instead of
+  adding a narrow local derivation under `pkgs/`. Use overlays for package-set
+  relationships; use `callPackage` for ordinary local recipes.
+- Package definitions should keep source selection, lockfiles, wrappers,
+  runtime dependencies, metadata, and tests visible. Rust packages should use a
+  committed `Cargo.lock` where practical. Wrapped binaries should name the tools
+  injected into `PATH`.
+- Debugging a package or module should leave behind the smallest useful rite:
+  the `nix build`, `nix eval`, `nix why-depends`, or `nix repl` expression that
+  exposed the problem.
+
 ## Review Questions
 
 Before adding a package, answer these in the module, profile, or review note:
@@ -83,6 +106,10 @@ Before adding a package, answer these in the module, profile, or review note:
   a recovery path?
 - Is the package already available through a narrower module option or profile
   selection?
+- Does this need an overlay, or would a normal `pkgs.callPackage` derivation be
+  easier to audit?
+- If a local nixpkgs checkout was used, has the final flake input been restored
+  or deliberately pinned?
 
 ## Failure Modes
 
@@ -98,3 +125,5 @@ Before adding a package, answer these in the module, profile, or review note:
   defeats the repository's audit posture.
 - Diagnostic tools can become noisy daemons if scheduling, databases, and
   persistence are added without a separate rite.
+- A local nixpkgs path can make the host depend on a developer checkout that is
+  not available during reinstall, remote deploy, or another operator's review.

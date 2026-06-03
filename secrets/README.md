@@ -44,6 +44,13 @@ sops edit secrets/ssh-vicky.yaml
 After creating a new per-user secret file, add it to Git before rebuilding; a
 flake cannot evaluate a file it cannot see.
 
+Per-user SSH secrets are not host OpenSSH server secrets. They restore a user's
+outbound identity for SSH clients, Git remotes, and Git commit signing. A host
+may expose these SOPS secrets to a selected Home Manager profile without
+enabling `theorem.nixos.base.ssh`. Host SSH keys still belong in
+`secrets/solanine.yaml` and are only useful when the system OpenSSH server is
+selected.
+
 The SSH key mechanism expects `secrets/ssh-<user>.yaml` to contain:
 
 ```yaml

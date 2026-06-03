@@ -9,7 +9,8 @@ Its purpose is not glamour. It is memory: the machine should be rebuilt from che
 ## What It Controls
 
 - NixOS system configuration for `solanine`
-- Home Manager configuration for `vicky`
+- Home Manager configuration for selected users: a full daily-driver profile
+  for `vicky`, and a minimal repair profile for `admin`
 - local packages and package overlays
 - SOPS-managed runtime secrets
 - persistence and recovery mechanisms for state that must survive rebuilds
@@ -19,7 +20,9 @@ Its purpose is not glamour. It is memory: the machine should be rebuilt from che
 For a reinstall, preserve the secret material before asking the forge to evaluate the system again:
 
 1. Restore or keep `/nix/persist/secrets/sops/age/keys.txt`.
-2. Clone this repository, including committed encrypted files such as `secrets/solanine.yaml`.
+2. Clone this repository, including committed encrypted files such as
+   `secrets/solanine.yaml` and per-user SSH files such as
+   `secrets/ssh-admin.yaml`.
 3. Rebuild the system in the appropriate execution context.
 4. Let `sops-nix` decrypt `firefox-backup-age-identity` back into `/run/secrets/...`.
 5. Let `firefox-state-restore` decrypt the Firefox archives.
@@ -27,7 +30,10 @@ For a reinstall, preserve the secret material before asking the forge to evaluat
 ## Failure Modes
 
 - If `/nix/persist/secrets/sops/age/keys.txt` is missing, SOPS cannot decrypt the repository secrets. The system may still evaluate, but the protected mechanisms will arrive empty-handed.
-- If encrypted secret files are not present in the clone, rebuilds that depend on them will fail or produce a machine without the intended state.
+- If encrypted secret files are not present in the clone, rebuilds that depend
+  on them will fail or produce a machine without the intended state. User SSH
+  identities are part of this protected material even when the host does not
+  run `sshd`.
 - If plaintext identities are committed, stewardship has failed. Remove them, rotate what was exposed, and repair the history only with deliberate care.
 
 ## Maintenance Reminders

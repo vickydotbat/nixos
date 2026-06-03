@@ -10,10 +10,17 @@ autostart habits, language stacks, and private workflow choices in
 `users/<user>/`.
 
 When a Home module depends on system substrate, make that dependency visible.
-Examples include persistence, Podman or Distrobox support, SSH secret material,
-desktop portals, and terminal key ownership. If the system side is absent, the
-module should either remain quiet or fail with a clear boundary rather than
-silently creating half a mechanism.
+Examples include persistence, Podman or Distrobox support, desktop portals, and
+terminal key ownership. If the system side is absent, the module should either
+remain quiet or fail with a clear boundary rather than silently creating half a
+mechanism.
+
+Per-user SSH identity is a deliberately narrower case. `theorem.home.base.ssh`
+restores SOPS-backed key material for outbound SSH, Git remotes, and Git
+signing. That mechanism needs declared secret material, but it does not require
+the system OpenSSH server. Keep inbound `sshd`, host keys, firewall exposure,
+and remote-login posture under `theorem.nixos.base.ssh`; keep user identity and
+agent ownership under Home Manager.
 
 If a feature is absent from `users/<user>/profiles.nix`, check the reusable
 module defaults before assuming it is dormant. Some substrates, such as fonts,

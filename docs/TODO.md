@@ -183,7 +183,226 @@ the validation rite that proves it still holds.
 
 ## Philosophy
 
-TODO: Fold the principles from the  below documentation into the current manifests where relevant. Use research and the existing principles in analysis, especially where concerns hardening.
+- Treat hardening as calibrated stewardship, not as a pile of switches. Start
+  each security mechanism with the local threat it answers, the workflow it can
+  break, the recovery path, and the command or boot test that proves it still
+  serves the host. This matches the direction of
+  [`docs/TODO-nixos-hardening.md`](./TODO-nixos-hardening.md) and
+  [`docs/hardening-compatibility.md`](./hardening-compatibility.md): sharp
+  options belong behind host signals, overrides, and rollback.
+- Fold the external hardening notes below into local mechanisms only when they
+  survive this repository's doctrine: explicit enablement, least privilege,
+  declared persistence, secret material outside the Nix store, and no hidden
+  dependence on one user's working surface. The useful question is not "can this
+  be enabled?" but "what does this protect, what does it cost, and how does a
+  tired operator reverse it?"
+- Baseline system hardening queue:
+  - Convert any remaining implicit security assumptions into named checks:
+    firewall posture, user account mutability, root-login avoidance, log review,
+    update cadence, and password-manager expectations.
+  - Add an explicit threat-model note before broad hardening work. The baseline
+    should name likely local risks first: physical theft, hostile networks,
+    browser compromise, leaked secrets, broken rebuild paths, and accidental
+    operator damage. Do not spend repair time defending against every possible
+    attacker when the host still has simpler failure modes unmeasured.
+  - Audit whether `users.mutableUsers = false` belongs in the base user module
+    or as a host-selected hardening tier. Declarative users reduce account
+    drift, but password rotation, rescue accounts, and guest enablement need a
+    tested maintenance path before this becomes a default.
+  - Fold XDG directory posture into the Home baseline review. Keeping ordinary
+    files in declared directories such as `Documents`, `Downloads`, and
+    project-specific trees makes future persistence, backup, and confinement
+    rules easier to reason about than a flat home directory full of loose state.
+  - Compare these against existing modules before adding new options. If native
+    NixOS options already describe the behavior cleanly, document the expected
+    host setting instead of wrapping it.
+  - Validation: targeted `nix eval`, `nix flake check`, dry build, and an
+    activation test that includes login, elevation, network recovery, and
+    rollback.
+- Networking and DNS queue:
+  - Keep the current firewall doctrine explicit. Future encrypted DNS,
+    dnscrypt-proxy, nftables, OpenSnitch, Tailscale, or MAC-randomization work
+    should be separate mechanisms with clear failure modes for captive portals,
+    VPNs, local discovery, split DNS, and emergency remote access.
+  - If adding `dnscrypt-proxy`, treat it as a DNS-routing mechanism rather than
+    a standalone privacy guarantee. It may point system DNS at localhost, use
+    resolver and relay lists with cached state, require DNSSEC/no-log/no-filter
+    choices, and optionally consume blocklists. Frequently changing blocklist
+    inputs can produce flake hash churn or `NarHash` mismatches, so blocklist
+    updates need the same lockfile discipline as any other input.
+  - Browser DNS must be reviewed separately from system DNS. A browser configured
+    for strict DoH can bypass or contradict the local resolver; a browser left
+    at vendor defaults can leak around a carefully built system resolver.
+  - If enforcing DNS with nftables, gate it behind a tested module. Blocking all
+    outbound port 53 or 853 except a local resolver process can protect against
+    leaks, but it can also break captive portals, VPN bootstrap, Tailscale DNS,
+    local lab devices, and emergency troubleshooting.
+  - Tailscale should be its own profile with explicit DNS behavior. Trusting
+    `tailscale0`, accepting MagicDNS, using exit nodes, or setting
+    `--accept-dns=false` are different choices; each affects name resolution and
+    remote recovery differently.
+  - MAC randomization belongs behind a travel or untrusted-network profile, not
+    as an unexamined desktop default. NetworkManager can randomize scan and
+    connection MACs, but home routers, allow-lists, and location-specific
+    networks may interpret the host as a new device.
+  - Do not collapse privacy tools into the base networking module. A workstation,
+    a travel laptop, and a server have different network rites.
+  - Validation: `ss -lnp` for local DNS listeners, `dig @127.0.0.1 example.com
+    +short`, `journalctl -u dnscrypt-proxy2`, browser DNS inspection,
+    LAN-discovery check where needed, `tailscale status` where selected, and a
+    recovery path when name resolution fails.
+- Browser and desktop privacy queue:
+  - Keep native Firefox, ungoogled Chromium, Firejail, Flatpak, and portal
+    choices comparable rather than fashionable. Browser sandbox strength,
+    screen-sharing behavior, password-manager integration, downloads, and
+    profile persistence all interact.
+  - Name the browser goal before changing prefs: security, privacy, anonymity,
+    or convenience. Standardized fingerprints such as Tor or Mullvad Browser
+    serve anonymity but can break sites and invite CAPTCHAs; randomized
+    fingerprints such as Brave's model reduce linkability but can still be
+    correlated by accounts, IP ranges, behavior, and logs.
+  - Keep extension count low. Every privileged browser extension increases
+    attack surface and fingerprint uniqueness. Prefer built-in browser controls
+    and one well-understood content blocker over a drawer full of small helpers.
+  - If importing Arkenfox or STIG-like Firefox policy, treat it as a reviewed
+    policy source, not a trusted include by default. Track upstream changes, put
+    local overrides after imported `user.js` material when order matters, and
+    test actual `about:config` values after activation.
+  - Browser compartmentalization should be deliberate: one daily browser, one
+    hardened or amnesic browser, and one anonymity browser are different tools.
+    Do not let MIME defaults, XDG handlers, sync accounts, or password-manager
+    integration blur those boundaries without a reason.
+  - Treat Xwayland, desktop portals, and screenshot/screencast protocols as
+    desktop threat-model topics. Plasma and Wayland are useful defaults, but
+    each desktop profile should name what it exposes.
+  - Validation: browser sandbox diagnostics, fingerprint sanity checks such as
+    Cover Your Tracks or Am I Unique without overfitting to them, portal
+    screen-share test, download persistence check, password-manager workflow,
+    declared search defaults, and profile restore.
+- Secrets and identity queue:
+  - Keep `sops-nix` as the repository's secret substrate. Secret files need
+    creation rules before `sops edit`, declared runtime paths before rebuilds,
+    and Git visibility before flakes can evaluate them.
+  - Preserve the distinction between encryption strength and secret entropy.
+    SOPS protects the file at rest, but a low-entropy cleartext secret, reused
+    password, weak age key handling, or committed plaintext still defeats the
+    rite. Secret review must look at the plaintext shape before encryption, not
+    only at the encrypted file.
+  - Keep `.sops.yaml` creation rules close to the file layout. When a new class
+    of secret appears, add the rule first, then create the encrypted file from
+    the repository root, then add it to Git before asking Nix to evaluate it.
+  - Prefer Ed25519 SSH host keys where SOPS derives age recipients from host
+    SSH material. RSA host keys may still exist for SSH compatibility, but they
+    should not become the assumed decryption substrate.
+  - Continue separating identity classes: SOPS age keys decrypt repository
+    secrets; host SSH keys identify inbound servers; user SSH keys identify
+    outbound users and Git signing. One name, one authority, one recovery rite.
+  - Validation: `sops` decrypt/edit from the intended account, `nix eval` of
+    declared secret paths, activation check that runtime files exist with the
+    expected owner and mode, and a Git signing test for users that enable it.
+- Agent and signing queue:
+  - Keep the current OpenSSH-agent path as the default for SSH commit signing.
+    If a future profile adds `gpg-agent` with SSH support, make it a separate
+    option that replaces agent ownership instead of competing with
+    `programs.ssh.startAgent`.
+  - A GPG profile needs its own pinentry, `GPG_TTY`, agent socket, keygrip, and
+    restart diagnostics. Missing pinentry often looks like a Git signing
+    failure, not like a desktop integration problem, so the failure text should
+    be documented beside the option.
+  - Treat OpenPGP verification as "verify and inspect what was verified".
+    Automation should not equate a valid cryptographic signature with the
+    displayed payload being the intended payload after parsing, extraction, or
+    mail-client handling.
+  - Validation: `ssh-add -L`, matching `SSH_AUTH_SOCK`, `gpgconf --list-dirs
+    agent-ssh-socket` for GPG-agent profiles, `gpg --card-status` for hardware
+    token profiles, and a signed Git commit from the selected account.
+- Secure boot and disk chain queue:
+  - Treat lanzaboote, UEFI admin passwords, LUKS, initrd unlock, and Btrfs
+    rollback as one boot-chain research area with several gates. Secure boot is
+    not repair if it prevents the operator from booting a recovery generation.
+  - Lanzaboote requires UEFI and systemd-boot posture before migration. The
+    first pass should inspect `bootctl status`, install `sbctl` as a diagnostic
+    tool, create or migrate keys outside the Nix store, force-disable
+    `systemd-boot` only inside the Lanzaboote module, and point
+    `boot.lanzaboote.pkiBundle` at the runtime key bundle.
+  - Secure Boot without full-disk encryption only verifies part of the boot
+    chain. It does not verify userspace in the Nix store after boot, and it does
+    not by itself stop someone with firmware access from disabling the feature.
+    UEFI admin password posture and LUKS belong in the same plan.
+  - Validation: disposable-machine enrollment, `sbctl verify`, `sbctl status`,
+    dbx presence check when enrolling vendor keys, reboot, rollback generation,
+    recovery media, and a documented reset path before selecting it on the main
+    host.
+- Containers and sandboxing queue:
+  - Keep Podman, Docker compatibility, Firejail, Flatpak, AppImage/FUSE, and
+    browser sandboxes in the compatibility matrix. Many of these need user
+    namespaces or SUID helpers; removing those globally can quietly break the
+    exact containment tools meant to improve safety.
+  - NixOS `containers.*` are useful for declarative service separation,
+    disposable tests, and small localhost services, but they are not a full
+    security boundary by default. A privileged root inside a weakly configured
+    container can still become a host problem.
+  - Prefer `ephemeral = true`, read-only bind mounts, narrow ports, and explicit
+    state paths for simple service containers. If state must persist, name where
+    it lives and how to remove it safely; container state under
+    `/var/lib/nixos-containers` may need attribute cleanup before deletion.
+  - For OCI containers built from local derivations, keep secrets in
+    `environmentFiles`, avoid network pulls with `--pull=never` where using a
+    locally built image, and use hardening flags such as `--cap-drop=ALL` and
+    `--security-opt=no-new-privileges` when the workload can bear them.
+  - Validation: rootless container run, Docker-socket authority check when
+    enabled, wrapper inventory, Flatpak portal test, named application launch
+    under its intended sandbox, `nixos-container status` for NixOS containers,
+    service health inside the container, and host bind-mount permissions.
+- Git and repository workflow queue:
+  - Keep Git commit signing tied to declared user identity rather than copied
+    per-user snippets. SSH signing now follows `theorem.home.base.ssh` through
+    `theorem.home.shell.git.sshSigning`; future Git options should preserve that
+    shared mechanism.
+  - Keep Git as the configuration-history layer beside NixOS generations. A
+    NixOS rollback changes the active system generation, not the flake files,
+    service data, or user data that caused the next rebuild. Commit before risky
+    experiments, review with `git diff`, and use revert/branch workflows for
+    configuration repair instead of relying on bootloader rollback alone.
+  - Preserve the current Git defaults that favor linear, inspectable repair:
+    fast-forward-only pulls, explicit rebase workflow, shared safe-directory
+    posture, and signed commits where the user has a restored SSH identity.
+  - Research Jujutsu as a local workflow tool before integrating it into the
+    flake. The first question is whether it improves repair and review without
+    confusing repository stewardship, commit signing, or shared worktree
+    permissions.
+  - The JJ trial should use a disposable clone or a deliberate collocated
+    workspace via `jj git init --colocate`. Record that JJ uses the working copy
+    as a commit, has no Git index, stores bookmarks differently from Git
+    branches, snapshots operations for undo, and can represent conflicts inside
+    commits. These features may help repair work, but they also change the
+    operator's habits at the exact place this repository needs discipline.
+  - Do not add JJ aliases or packages globally until submodule behavior, large
+    repository performance, Git signing, GitHub push/fetch, shared repository
+    permissions, and fallback to ordinary Git have been tested.
+  - Validation: signed commit, shared `/nix/nixos` write test for `admin` and
+    daily operator, safe-directory behavior, and any JJ/Git interop check before
+    adding packages or aliases.
+- Nixpkgs and local package work queue:
+  - Use the linked nixpkgs material to improve local package review, overlays,
+    and derivation literacy. The local doctrine remains: recipes live under
+    `pkgs/`, modules and profiles decide installation, and package-bearing
+    changes go through [`docs/package-inventory.md`](./package-inventory.md).
+  - Document a local-nixpkgs repair workflow before using one for production
+    fixes: clone or worktree location, how the flake input is temporarily
+    pointed at it, how overlays differ from direct package definitions, and how
+    to prove the final host is no longer depending on an unreviewed local path.
+  - Package definitions should keep source, lockfiles, runtime wrappers,
+    metadata, and tests visible. For Rust packages, commit and use `Cargo.lock`
+    when possible; for wrapped tools, name every runtime binary injected into
+    `PATH` so the closure is not a surprise.
+  - Overlay notes should explain `final` versus `prev`, when `callPackage` is
+    enough, and when an overlay is too broad for a one-off local package.
+  - Validation: package build, package inventory eval, unfree predicate check
+    where relevant, `nix why-depends` for surprising closures, and dry build for
+    any module that installs the package.
+
+Research sources to revisit and distill when working a specific slice:
 <https://saylesss88.github.io/nix/index.html>
 <https://saylesss88.github.io/nix/hardening_networking.html>
 <https://saylesss88.github.io/nix/browsing_security.html>
@@ -192,12 +411,8 @@ TODO: Fold the principles from the  below documentation into the current manifes
 <https://saylesss88.github.io/installation/enc/lanzaboote.html>
 <https://saylesss88.github.io/nixos_containers.html>
 <https://saylesss88.github.io/vcs/git.html>
-
-I found this interesting, let's treat it as a research topic:
 <https://saylesss88.github.io/vcs/jujutsu.html>
 <https://saylesss88.github.io/vcs/practical_jj.html>
-and the git repo <https://github.com/jj-vcs/jj>
-
-Regarding nixpkgs, some more great documentation:
+<https://github.com/jj-vcs/jj>
 <https://saylesss88.github.io/Working_with_Nixpkgs_Locally_10.html>
 <https://saylesss88.github.io/Package_Definitions_Explained_6.html>
