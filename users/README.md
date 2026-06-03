@@ -17,6 +17,47 @@ Home Manager modules consume the chosen user's home profile.
 - `vicky/` is the current daily-driver user, including her Home Manager profile
   and SSH client settings.
 
+## Shared Configuration Access
+
+`admin` and `vicky` both belong to the `nixcfg` group. The group is declared by
+`modules/nixos/base/users.nix` so selected users can share stewardship of the
+system flake without making either account own the repository alone.
+The same module prepares `/nix/nixos` as a `root:nixcfg`
+group-writable setgid directory when the system activates.
+
+Group membership is only half the mechanism. Git's ownership check does not
+trust a repository merely because the user belongs to the owning group, so the
+Home Manager Git profile marks `/nix/nixos` as a safe directory.
+A fresh clone also keeps the ownership and mode chosen by the command that
+created it. During reinstall or first deployment, clone the repository into its
+intended path, then set its owner, group, and write bit before asking Home
+Manager users to alter it:
+
+Use the host's active privilege mechanism for the elevated commands below.
+`solanine` currently enables the `sudo` security profile. If a host selects the
+`run0-sudo` profile instead, `sudo` may be absent or deliberately inert; run the
+same commands through `run0`, or through the configured `sudo` alias if that
+profile provides one.
+
+```bash
+priv=sudo # use run0 on hosts where sudo is disabled
+
+$priv chown -R root:nixcfg /nix/nixos
+$priv chmod -R g+rwX /nix/nixos
+$priv chmod -R o-rwx /nix/nixos/.git
+$priv find /nix/nixos -type d -exec chmod g+s {} +
+git -c safe.directory=/nix/nixos -C /nix/nixos config core.sharedRepository group
+```
+
+For less handwork, the future spawning rite should either clone as a member of
+`nixcfg` with an appropriate umask, or run the ownership calibration immediately
+after the clone. The setgid bit keeps new directories under the shared group;
+`core.sharedRepository` teaches Git to preserve group write access inside its own
+machinery. The `.git` directory should not be world-writable; group stewardship
+is the intended mechanism. Without these steps, the group exists but the
+repository may still answer only to the account that fetched it, or Git may
+refuse the worktree as unsafe.
+
 ## Failure Modes
 
 - Do not put host hardware, host package choices, or machine-specific secrets
@@ -24,6 +65,6 @@ Home Manager modules consume the chosen user's home profile.
   given machine.
 - Do not give a daily-driver account duties that belong to `admin`. Repair needs
   a separate grip when personal configuration is the broken mechanism.
-- `admin` currently reuses the root password hash secret on Solanine. Split this
-  into a dedicated `users/admin/password-hash` secret when the encrypted file is
-  next opened for secret maintenance.
+- `admin` owns UID 1000 by doctrine. Daily-driver accounts must use later fixed
+  UIDs, and existing persisted files must be migrated by numeric owner before
+  activating a host that changes an established user's UID.

@@ -51,18 +51,10 @@ in
     defaultSopsFile = hostSecretsFile;
   };
 
-  theorem.nixos.base.users = {
-    rootPasswordHashFile = "/run/secrets-for-users/users/root/password-hash";
-  };
-
   sops.secrets = {
     firefox-backup-age-identity = {
       owner = "vicky";
       mode = "0400";
-    };
-
-    "users/root/password-hash" = {
-      neededForUsers = true;
     };
   }
   // builtins.listToAttrs (lib.mapAttrsToList mkPasswordSecret usersWithPasswordSecrets)

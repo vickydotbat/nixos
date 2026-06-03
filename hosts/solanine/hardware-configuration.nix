@@ -34,69 +34,6 @@
     "amdgpu.dcdebugmask=0x10"
   ];
 
-  # TODO: If we use a reproducible disko module, or even set ephemeral models in stone, some of this can bep ut into the systemwide Persistence modules. When tmpfs is activated, this filesystems."/" is automatically assigned, with size=25%.
-  fileSystems."/" = {
-    device = "none";
-    fsType = "tmpfs";
-    options = [
-      "defaults"
-      "size=25%"
-      "mode=755"
-    ];
-  };
-
-  # TODO: Likewise, this is a good default. If we go by labels, this doesn't need to be configured per-system in hardware-configuration. disko modules can further facilitate. This could be put in a generic boot module.
-  fileSystems."/boot" = {
-    device = "/dev/disk/by-label/EFI";
-    fsType = "vfat";
-    options = [
-      "fmask=0077"
-      "dmask=0077"
-      "defaults"
-    ];
-  };
-
-  # TODO: Again, for systems with BTRFS, this can always be present, especially when paired with a disko module. but mind the label. Also ensure the compression defaults to "zstd:1" for any btrfs subvolume (as I feel that is the best default overall) but let configurations decide it too.
-  fileSystems."/nix" = {
-    device = "/dev/disk/by-label/ROOT";
-    fsType = "btrfs";
-    options = [
-      "subvol=@nix"
-      "compress=zstd:1"
-    ];
-  };
-
-  # Temporary.
-  fileSystems."/homeold" = {
-    device = "/dev/disk/by-label/ROOT";
-    fsType = "btrfs";
-    options = [
-      "subvol=@home"
-      "compress=zstd:1"
-    ];
-  };
-
-  # TODO: Reconsider the swap method for better global configuration. If a subvolume is not needed, put it in /nix instead. If a system is encrypted, consider that too. Etc.
-  fileSystems."/swap" = {
-    device = "/dev/disk/by-label/ROOT";
-    fsType = "btrfs";
-    options = [
-      "subvol=@swap"
-      "nodatacow"
-    ];
-  };
-
-  # TODO: Same here.
-  swapDevices = [
-    {
-      device = "/swap/swapfile";
-      size = 16 * 1024;
-    }
-  ];
-
-  # TODO: This should only apply if we use NVME drives. Make this a per-host configuration? Possibly nixos hardware repo can assist with this.
-  services.fstrim.enable = true;
-
   # TODO: Same, per host config.
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
   hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;

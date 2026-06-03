@@ -1,7 +1,7 @@
 {
   username = "guest";
   description = "Low-access guest account";
-  uid = 1002;
+  uid = 29999;
   homeDirectory = "/home/guest";
   extraGroups = [ ];
   passwordHashSecret = null;

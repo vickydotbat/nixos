@@ -84,6 +84,12 @@ in
   config = lib.mkIf cfg.enable {
     users.mutableUsers = false;
 
+    users.groups.nixcfg = { };
+
+    systemd.tmpfiles.rules = [
+      "d /nix/nixos 2775 root nixcfg - -" # TODO: Global "Flake" variable in the upper reaches of the repository that this uses.
+    ];
+
     users.users =
       lib.optionalAttrs (cfg.rootPasswordHashFile != null) {
         root.hashedPasswordFile = cfg.rootPasswordHashFile;

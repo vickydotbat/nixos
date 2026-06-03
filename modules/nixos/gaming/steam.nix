@@ -9,7 +9,41 @@ let
   cfg = config.theorem.nixos.gaming.steam;
 in
 {
-  options.theorem.nixos.gaming.steam.enable = lib.mkEnableOption "Steam gaming profile";
+  options.theorem.nixos.gaming.steam = {
+    enable = lib.mkEnableOption "Steam gaming profile";
+
+    remotePlayOpenFirewall = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = ''
+        Open firewall ports for Steam Remote Play. Leave closed unless this
+        host intentionally accepts game streaming traffic from the local network.
+      '';
+    };
+
+    dedicatedServerOpenFirewall = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = ''
+        Open firewall ports for Steam dedicated server discovery. This is a
+        service-facing posture, not a desktop default.
+      '';
+    };
+
+    localNetworkGameTransfersOpenFirewall = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = ''
+        Open firewall ports for Steam local network game transfers.
+      '';
+    };
+
+    gamescope.enable = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = "Enable Gamescope support for Steam sessions.";
+    };
+  };
 
   config = lib.mkIf cfg.enable {
     theorem.nixos.base.nix.unfreePackageNames = [
@@ -21,15 +55,13 @@ in
 
     programs.steam = {
       enable = true;
-      # TODO: Don't open the firewall by default.
-      remotePlay.openFirewall = true;
-      dedicatedServer.openFirewall = true;
-      localNetworkGameTransfers.openFirewall = true;
-      gamescopeSession.enable = false; # TODO: Gamescope should be optional
+      remotePlay.openFirewall = cfg.remotePlayOpenFirewall;
+      dedicatedServer.openFirewall = cfg.dedicatedServerOpenFirewall;
+      localNetworkGameTransfers.openFirewall = cfg.localNetworkGameTransfersOpenFirewall;
+      gamescopeSession.enable = cfg.gamescope.enable;
     };
 
-    # TODO: Gamescope should be optional
-    programs.gamescope = {
+    programs.gamescope = lib.mkIf cfg.gamescope.enable {
       enable = true;
       capSysNice = false;
     };

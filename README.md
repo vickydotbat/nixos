@@ -1,4 +1,4 @@
-# nixos-configuration
+# nixos
 
 This repository declares the NixOS configuration for `solanine`.
 
