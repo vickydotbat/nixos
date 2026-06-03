@@ -10,7 +10,6 @@ in
   avatar = ./avatar.png;
   extraGroups = [
     "wheel"
-    "networkmanager"
     "nixcfg"
   ];
   passwordHashSecret = "users/${thisUser}/password-hash";

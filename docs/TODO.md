@@ -57,6 +57,10 @@ the validation rite that proves it still holds.
   where the service module can own it. A future Docker, Podman, or repository
   access module should add only the groups it creates or requires, with a clear
   failure mode when the backing service is disabled.
+- NetworkManager is the first calibrated case: the base networking module grants
+  the `networkmanager` group to selected users that already belong to `nixcfg`,
+  keeping network control with repository stewards rather than with every local
+  account or a single personal profile.
 - Validation: evaluate a second user with the shared Home modules enabled and no
   Vicky profile imports. The result should install plain mechanisms, not Vicky's
   editor theme, VS Code workflow, GIMP plugin build, Spotify extensions, Discord

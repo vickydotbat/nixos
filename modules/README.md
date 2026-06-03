@@ -76,6 +76,26 @@ must not silently imply a particular Steam game. Firefox can provide browser
 state; it must not silently imply an encrypted backup ritual without the user
 choosing that protection.
 
+## Access Groups
+
+When a module enables an application or service that is only usable through a
+local access group, the module should grant that group to selected `nixcfg`
+users by default. This keeps service-specific authority with the service
+mechanism instead of freezing it into static user declarations.
+
+Use this rule for groups that open ordinary operation of installed tools:
+NetworkManager control, scanner or media device access, container engine
+compatibility, virtualization consoles, and similar application-facing
+surfaces. `admin` belongs to `nixcfg` by doctrine and should receive these
+groups too; a repair account without access to the installed mechanism is a
+locked toolbox.
+
+Do not grant these groups to `guest` or outside accounts unless a host names a
+specific workflow and accepts the risk. Some groups can change network state,
+reach private devices, or become close to root-equivalent. The default rite is:
+installed mechanism grants access to repository stewards; broader access needs
+an explicit host decision.
+
 ## Package Review
 
 Package-bearing modules should make the need visible at the same boundary that

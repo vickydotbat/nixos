@@ -69,6 +69,34 @@ is the intended mechanism. Without these steps, the group exists but the
 repository may still answer only to the account that fetched it, or Git may
 refuse the worktree as unsafe.
 
+## Application Access Groups
+
+`nixcfg` is also the default boundary for local application access groups that
+make installed desktop or operator tools usable. If an enabled module creates or
+requires a group such as `networkmanager`, `video`, `scanner`, `docker`, or a
+similar service-facing access group, the module should grant that group to the
+selected users that already belong to `nixcfg`.
+
+This is deliberate. Users trusted to maintain the system theorem should be able
+to operate the applications and services that theorem installs, and the repair
+account must not be left without the groups needed to diagnose or restore the
+host. `admin` should receive every required usability group unless a module has
+a documented reason to keep even the repair account away from that surface.
+
+Do not expand these groups to `guest` or other outside accounts by default. A
+non-steward account may receive an application access group only when the host
+names the workflow and accepts the failure mode. Some groups are broad authority,
+not decoration: `networkmanager` can change network and VPN state, container
+groups can expose root-equivalent control paths, and hardware groups may expose
+screens, cameras, disks, or attached devices. Give those keys to the hands that
+are meant to carry them.
+
+Static user declarations should carry durable identity facts and permanent
+account doctrine: UID, home directory, administrative posture, repository
+stewardship, and selected Home Manager profile. Service modules should own the
+groups that become necessary only because that service or application is
+enabled. When the service is disabled, the access should disappear with it.
+
 ## SSH Key Doctrine
 
 Use Ed25519 keys for normal user SSH identities unless a specific legacy host
