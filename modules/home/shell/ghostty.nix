@@ -22,6 +22,14 @@ in
   };
 
   config = lib.mkIf cfg.enable {
+    home.sessionVariables.TERMINFO_DIRS = lib.mkForce (
+      lib.concatStringsSep ":" [
+        "${config.programs.ghostty.package.terminfo}/share/terminfo"
+        "${config.home.profileDirectory}/share/terminfo"
+        "/run/current-system/sw/share/terminfo"
+      ]
+    );
+
     programs.ghostty = {
       enable = true;
       enableBashIntegration = true;
