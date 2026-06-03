@@ -1,4 +1,9 @@
-{ inputs, pkgs, ... }:
+{
+  config,
+  inputs,
+  pkgs,
+  ...
+}:
 
 let
   spicePkgs = inputs.spicetify-nix.legacyPackages.${pkgs.stdenv.hostPlatform.system};
@@ -306,6 +311,15 @@ in
           };
 
           shell_environment_policy."inherit" = "core";
+
+          projects = {
+            "${config.home.homeDirectory}/Projects" = {
+              trust_level = "trusted";
+            };
+            "${config.home.homeDirectory}/Repositories" = {
+              trust_level = "trusted";
+            };
+          };
         };
 
         context = ''

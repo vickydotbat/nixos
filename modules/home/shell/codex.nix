@@ -3,6 +3,9 @@
   inputs,
   lib,
   pkgs,
+  repository ? {
+    path = "/nix/nixos";
+  },
   ...
 }:
 
@@ -12,10 +15,9 @@ let
   system = pkgs.stdenv.hostPlatform.system;
   toml = pkgs.formats.toml { };
   initialConfigFile = toml.generate "codex-config.toml" cfg.initialConfig.settings;
-  superpowersSkills =
-    lib.mapAttrs
-      (name: _type: lib.mkDefault (cfg.superpowers.source + "/${name}"))
-      (builtins.readDir cfg.superpowers.source);
+  superpowersSkills = lib.mapAttrs (
+    name: _type: lib.mkDefault (cfg.superpowers.source + "/${name}")
+  ) (builtins.readDir cfg.superpowers.source);
 in
 {
   options.theorem.home.shell.codex = {
@@ -43,9 +45,9 @@ in
       type = lib.types.bool;
       default = true;
       description = ''
-        Trust `/nix/nixos` as a Codex project. Disable this on hosts where the
-        repository is mounted for inspection only, or where trust should be
-        granted by hand after checking the local worktree.
+        Trust `repository.path` as a Codex project. Disable this on hosts where
+        the configured flake repository is mounted for inspection only, or where
+        trust should be granted by hand after checking the local worktree.
       '';
     };
 
@@ -159,7 +161,7 @@ in
           shell_environment_policy."inherit" = lib.mkDefault "core";
         }
         (lib.mkIf cfg.trustNixosConfiguration {
-          projects."/nix/nixos".trust_level = lib.mkDefault "trusted";
+          projects.${repository.path}.trust_level = lib.mkDefault "trusted";
         })
         cfg.settings
       ];
