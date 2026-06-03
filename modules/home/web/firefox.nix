@@ -6,10 +6,11 @@
 }:
 let
   cfg = config.theorem.home.web.firefox;
+  profileName = config.home.username;
 
   # Default mechanism, kept in the reusable module; home/ may override it.
   firefox = [ "firefox-devedition.desktop" ];
-  profilePath = "${config.home.homeDirectory}/.mozilla/firefox/vicky";
+  profilePath = "${config.home.homeDirectory}/.mozilla/firefox/${profileName}";
 in
 {
   options.theorem.home.web.firefox.enable = lib.mkEnableOption "Firefox";
@@ -20,17 +21,92 @@ in
       package = pkgs.firefox-devedition;
       configPath = ".mozilla/firefox";
 
-      profiles.vicky = {
+      profiles.${profileName} = {
         id = 0;
-        name = "vicky";
-        path = "vicky";
+        name = profileName;
+        path = profileName;
         isDefault = true;
 
-        extensions.packages = with pkgs.nur.repos.rycee.firefox-addons; [
-          ublock-origin
-          plasma-integration
-          consent-o-matic
-        ];
+        extensions.packages =
+          with pkgs.nur.repos.rycee.firefox-addons;
+          [
+            ublock-origin
+            consent-o-matic
+          ]
+          ++ lib.optionals (config.theorem.home.desktop.plasma.enable or false) [
+            plasma-integration
+          ];
+
+        search = {
+          force = true;
+          default = "ddg";
+          privateDefault = "ddg";
+          order = [
+            "ddg"
+            "nix-packages"
+            "nixos-options"
+            "nixos-wiki"
+            "google"
+          ];
+
+          engines = {
+            nix-packages = {
+              name = "Nix Packages";
+              urls = [
+                {
+                  template = "https://search.nixos.org/packages";
+                  params = [
+                    {
+                      name = "type";
+                      value = "packages";
+                    }
+                    {
+                      name = "query";
+                      value = "{searchTerms}";
+                    }
+                  ];
+                }
+              ];
+              definedAliases = [ "@np" ];
+            };
+
+            nixos-options = {
+              name = "NixOS Options";
+              urls = [
+                {
+                  template = "https://search.nixos.org/options";
+                  params = [
+                    {
+                      name = "query";
+                      value = "{searchTerms}";
+                    }
+                  ];
+                }
+              ];
+              definedAliases = [ "@no" ];
+            };
+
+            nixos-wiki = {
+              name = "NixOS Wiki";
+              urls = [
+                {
+                  template = "https://wiki.nixos.org/w/index.php";
+                  params = [
+                    {
+                      name = "search";
+                      value = "{searchTerms}";
+                    }
+                  ];
+                }
+              ];
+              definedAliases = [ "@nw" ];
+            };
+
+            ddg.metaData.alias = "@d";
+            google.metaData.alias = "@g";
+            bing.metaData.hidden = true;
+          };
+        };
 
         settings = {
           # stop nagging me!

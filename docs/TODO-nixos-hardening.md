@@ -192,7 +192,7 @@ decoration.
     inspect `about:policies` or generated profile preferences, and test login,
     downloads, PDF handling, and at least one WebAuthn flow.
 
-- [ ] Add secure browser search defaults without deleting fallback engines.
+- [x] Add secure browser search defaults without deleting fallback engines.
   - Why: default search engines leak routine intent. Removing every mainstream
     fallback can also make repair harder when privacy engines fail.
   - How: set a privacy-preserving default such as Startpage or a chosen SearXNG
@@ -206,6 +206,12 @@ decoration.
   - Validation: verify the generated browser profile contains the expected
     default engine, run searches through the configured shortcuts, and confirm
     fallback engines are present but not selected.
+  - Completed: `modules/home/web/firefox.nix` now forces the Vicky Firefox
+    profile to use DuckDuckGo for normal and private search, adds `@np`, `@no`,
+    and `@nw` repair shortcuts for Nix package, NixOS option, and NixOS Wiki
+    searches, keeps Google as an explicit `@g` fallback, and hides Bing from the
+    normal engine list. The mechanism is declarative; launch-time profile checks
+    remain part of the browser policy validation rite.
 
 - [ ] Add a Sway-only hardening task for disabling Xwayland where practical.
   - Why: disabling Xwayland removes an older compatibility surface when the user
@@ -507,7 +513,7 @@ decoration.
     `theorem.nixos.security.hardening.dbusBroker.enable`, but leaves it disabled
     until the desktop and portal path is tested.
 
-- [ ] Calibrate journald and log retention.
+- [x] Calibrate journald and log retention.
   - Why: logs can leak sensitive data and fill disks, but volatile-only logs
     weaken post-reboot debugging and auditing.
   - How: set `services.journald.upload.enable = false`; set size limits through
@@ -518,9 +524,10 @@ decoration.
     conditional.
   - Validation: `journalctl --disk-usage`, reboot log availability check, and
     incident-response needs review.
-  - Progress: the hardening profile disables journal upload by default and sets
-    bounded local journal storage. Volatile-only storage remains host-specific
-    because it changes post-reboot diagnosis.
+  - Completed: the hardening profile disables journal upload by default and
+    sets bounded local journal storage. Volatile-only storage remains
+    host-specific because it changes post-reboot diagnosis and belongs with a
+    host's incident-response rite.
 
 - [x] Enable logrotate where legacy logs exist.
   - Why: classic text logs can grow until they consume disk.
@@ -547,6 +554,12 @@ decoration.
   - Default posture: mostly safe for servers; conditional for desktops.
   - Validation: `systemctl status` for removed services and desktop workflow
     tests for removable media, user switching, discovery, and Bluetooth.
+  - Progress: `modules/nixos/security/hardening.nix` now defaults Avahi,
+    Geoclue, ModemManager, and unattended auto-upgrade off with priority high
+    enough to beat upstream desktop convenience defaults but low enough for
+    explicit host config to win. Bluetooth is already explicit through the
+    repository desktop module. UDisks2 and accounts-daemon still need desktop
+    workflow review before tightening.
 
 - [ ] Add a service-hardening review loop using `systemd-analyze security`.
   - Why: service sandboxing raises the baseline for long-running daemons.

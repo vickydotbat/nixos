@@ -51,9 +51,9 @@ the validation rite that proves it still holds.
   autostart choices, plugin-bearing packages, and language stacks that are only
   true for one operator.
 - Continue the option-boundary pass before adding another user: Plasma layout,
-  Ghostty key ownership, shell aliases, browser defaults, and KeePassXC posture
-  still need the same calibration that editors, Codex CLI policy, GIMP,
-  Spicetify, ripgrep, nix-index, Discord autostart, and Home SSH now have.
+  Ghostty key ownership, shell aliases, and KeePassXC posture still need the
+  same calibration that editors, Codex CLI policy, GIMP, Spicetify, ripgrep,
+  nix-index, Discord autostart, Home SSH, and Firefox search defaults now have.
 - Move service-specific group membership out of static user registry entries
   where the service module can own it. A future Docker, Podman, or repository
   access module should add only the groups it creates or requires, with a clear

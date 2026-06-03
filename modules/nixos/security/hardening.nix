@@ -143,6 +143,59 @@ in
         been tested on the host.
       '';
     };
+
+    unusedServices = {
+      enable = lib.mkOption {
+        type = lib.types.bool;
+        default = true;
+        description = ''
+          Disable common ambient services unless the host explicitly declares a
+          need for them. These defaults override upstream desktop convenience
+          defaults, but ordinary host configuration still wins when location,
+          service discovery, WWAN, or unattended upgrade rites are intentional.
+        '';
+      };
+
+      disableAvahi = lib.mkOption {
+        type = lib.types.bool;
+        default = true;
+        description = ''
+          Default Avahi service discovery off. Enable Avahi explicitly on hosts
+          that publish or consume mDNS services, printers, media receivers, or
+          other local-discovery mechanisms.
+        '';
+      };
+
+      disableGeoclue = lib.mkOption {
+        type = lib.types.bool;
+        default = true;
+        description = ''
+          Default Geoclue location services off. Enable it explicitly for
+          hosts that use automatic timezone, redshift-style location, desktop
+          weather, maps, or other location-aware applications.
+        '';
+      };
+
+      disableModemManager = lib.mkOption {
+        type = lib.types.bool;
+        default = true;
+        description = ''
+          Default ModemManager off. Enable it explicitly on WWAN-capable hosts;
+          otherwise NetworkManager's convenience default can leave an idle
+          hardware-facing daemon in the session.
+        '';
+      };
+
+      disableAutoUpgrade = lib.mkOption {
+        type = lib.types.bool;
+        default = true;
+        description = ''
+          Default unattended system upgrades off. Enable auto-upgrade only on
+          hosts with a declared maintenance window, rollback path, and alerting
+          plan.
+        '';
+      };
+    };
   };
 
   config = lib.mkIf cfg.enable (
@@ -198,6 +251,26 @@ in
       (lib.mkIf cfg.dbusBroker.enable {
         services.dbus.implementation = lib.mkDefault "broker";
       })
+
+      (lib.mkIf cfg.unusedServices.enable (
+        lib.mkMerge [
+          (lib.mkIf cfg.unusedServices.disableAvahi {
+            services.avahi.enable = lib.mkOverride 900 false;
+          })
+
+          (lib.mkIf cfg.unusedServices.disableGeoclue {
+            services.geoclue2.enable = lib.mkOverride 900 false;
+          })
+
+          (lib.mkIf cfg.unusedServices.disableModemManager {
+            networking.modemmanager.enable = lib.mkOverride 900 false;
+          })
+
+          (lib.mkIf cfg.unusedServices.disableAutoUpgrade {
+            system.autoUpgrade.enable = lib.mkOverride 900 false;
+          })
+        ]
+      ))
     ]
   );
 }
