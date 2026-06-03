@@ -135,11 +135,18 @@ ssh-keygen -t ed25519 -a 32 -f ~/.ssh/id_ed25519
 ```
 
 The reusable Home Manager SSH module restores `id_ed25519` and
-`id_ed25519.pub` from SOPS-backed secrets, and Vicky's Git/SSH profiles point at
-that identity. Keep agent ownership singular per user profile. This repository
-uses the OpenSSH agent through `programs.ssh.startAgent`; do not also enable a
-competing `gpg-agent` SSH socket unless the user profile is deliberately moved
-to that model.
+`id_ed25519.pub` from SOPS-backed secrets for outbound SSH, Git remotes, and
+Git signing. This user identity mechanism is independent of whether the host
+runs the system OpenSSH server. The system SSH module owns inbound `sshd`,
+host keys, firewall exposure, and remote-login posture.
+
+When `theorem.home.shell.git.enable` and `theorem.home.base.ssh.enable` are both
+selected, the shared Git module signs commits with `~/.ssh/id_ed25519` by
+default. User Git files should still own personal identity such as name and
+email. Keep agent ownership singular per user profile. This repository uses the
+OpenSSH agent through `programs.ssh.startAgent`; do not also enable a competing
+`gpg-agent` SSH socket unless the user profile is deliberately moved to that
+model.
 
 ## Failure Modes
 

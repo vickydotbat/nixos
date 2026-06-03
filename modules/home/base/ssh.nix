@@ -1,16 +1,14 @@
 {
   config,
-  osConfig ? null,
   lib,
   pkgs,
   ...
 }:
 let
   cfg = config.theorem.home.base.ssh;
-  sshEnabled = (osConfig.theorem.nixos.base.ssh.enable or false);
   username = config.home.username;
 
-  # Default mechanism, kept in the reusable module; home/ may override it.
+  # Default mechanism, kept in the reusable module; user profiles may override it.
   sshDir = "${config.home.homeDirectory}/.ssh";
   sshPrivateKeySecret = "/run/secrets/ssh-${username}-id_ed25519";
   sshPublicKeySecret = "/run/secrets/ssh-${username}-id_ed25519.pub";
@@ -35,23 +33,14 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    assertions = [
-      {
-        assertion = sshEnabled;
-        message = ''
-          theorem.home.base.ssh.enable requires theorem.nixos.base.ssh.enable.
-          The user SSH rite should not spawn key material unless the host has
-          deliberately enabled the system SSH mechanism.
-        '';
-      }
-    ];
-
     programs.ssh = {
       enable = true;
       enableDefaultConfig = lib.mkDefault false; # Respect per-user mandates in users/.
     };
 
-    # Spawn SSH Keys from SOPS generation in the /home/user/.ssh directory.
+    # Restore per-user SSH keys from SOPS material into the user's own profile.
+    # This is an outbound identity and Git-signing mechanism; it does not imply
+    # that the host runs an OpenSSH server.
     home.activation.sshDirectory = lib.hm.dag.entryBefore [ "checkLinkTargets" ] ''
       $DRY_RUN_CMD ${pkgs.coreutils}/bin/install -d -m 0700 ${lib.escapeShellArg sshDir}
     '';

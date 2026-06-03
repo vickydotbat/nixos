@@ -9,7 +9,28 @@ let
   cfg = config.theorem.home.shell.git;
 in
 {
-  options.theorem.home.shell.git.enable = lib.mkEnableOption "Git";
+  options.theorem.home.shell.git = {
+    enable = lib.mkEnableOption "Git";
+
+    sshSigning = {
+      enable = lib.mkOption {
+        type = lib.types.bool;
+        default = config.theorem.home.base.ssh.enable or false;
+        defaultText = lib.literalExpression "theorem.home.base.ssh.enable";
+        description = ''
+          Sign Git commits with the user's restored SSH identity. This follows
+          the Home SSH key rite by default and does not imply that the system
+          OpenSSH server is enabled.
+        '';
+      };
+
+      keyPath = lib.mkOption {
+        type = lib.types.str;
+        default = "~/.ssh/id_ed25519";
+        description = "SSH public/private identity path Git should use for commit signing.";
+      };
+    };
+  };
 
   config = lib.mkIf cfg.enable {
     programs.git = {
@@ -79,7 +100,11 @@ in
           untrackedCache = true;
           fsmonitor = true;
         };
-
+      }
+      // lib.optionalAttrs cfg.sshSigning.enable {
+        user.signingkey = cfg.sshSigning.keyPath;
+        gpg.format = "ssh";
+        commit.gpgsign = true;
       };
     };
   };

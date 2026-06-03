@@ -89,7 +89,5 @@ in
           mode = "0644";
         };
       }
-  // lib.optionalAttrs config.theorem.nixos.base.ssh.enable (
-    lib.foldl' lib.recursiveUpdate { } (lib.mapAttrsToList mkUserSshSecrets usersWithSshSecrets)
-  );
+  // lib.foldl' lib.recursiveUpdate { } (lib.mapAttrsToList mkUserSshSecrets usersWithSshSecrets);
 }
