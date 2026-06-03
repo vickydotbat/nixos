@@ -46,11 +46,6 @@
 
     nix-index-database.url = "github:nix-community/nix-index-database";
     nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
-
-    run0-sudo-shim = {
-      url = "github:LordGrimmauld/run0-sudo-shim";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
   };
 
   outputs =
@@ -62,7 +57,7 @@
 
       stable = import inputs.nixpkgs-stable {
         inherit system;
-        config.allowUnfree = false;
+        config.allowUnfree = false; # Use predicates
       };
     in
     {
