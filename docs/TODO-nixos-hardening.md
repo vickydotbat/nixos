@@ -48,7 +48,7 @@ decoration.
 
 ## Attack Surface And Package Hygiene
 
-- [ ] Keep software installation minimal and auditable.
+- [x] Keep software installation minimal and auditable.
   - Why: every installed service or package can carry vulnerabilities, and Linux
     desktop applications usually run with the full authority of the user.
   - How: keep packages in profiles that explain their need; prefer maintained
@@ -59,6 +59,10 @@ decoration.
     reason.
   - Validation: add a package inventory check to the hardening review and keep
     security-sensitive packages visible in module READMEs.
+  - Completed: `docs/package-inventory.md` now records the package inventory
+    evaluation commands, package entry points, review questions, and failure
+    modes. `modules/README.md` and `pkgs/README.md` point maintainers back to
+    that rite before package-bearing modules or local derivations grow.
 
 - [ ] Keep `allowUnfree = false` as the repository default and require explicit
   predicates for exceptions.

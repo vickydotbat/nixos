@@ -25,6 +25,11 @@ Add a focused derivation file, then expose it from `pkgs/packages.nix`:
 
 Install the package from a NixOS or Home Manager module. Do not turn package derivations into Home Manager modules.
 
+After exposing a package, use the package inventory rite in
+[`docs/package-inventory.md`](../docs/package-inventory.md) to confirm it is
+installed only by the intended module or profile. A derivation in `pkgs/` is an
+available tool, not consent to add it to every host.
+
 ## Failure Modes
 
 - Files not exposed from `pkgs/packages.nix` will not appear in the overlay or flake packages.

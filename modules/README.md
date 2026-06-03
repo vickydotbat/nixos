@@ -76,6 +76,22 @@ must not silently imply a particular Steam game. Firefox can provide browser
 state; it must not silently imply an encrypted backup ritual without the user
 choosing that protection.
 
+## Package Review
+
+Package-bearing modules should make the need visible at the same boundary that
+installs the package. A system package belongs in `environment.systemPackages`
+only when the mechanism is system-wide or needs root-owned integration. A user
+package belongs in `home.packages` when the tool is part of one user's working
+surface. Local recipes belong under `pkgs/`, then modules or profiles decide
+whether to install them.
+
+Before adding packages, run the package inventory rite in
+[`docs/package-inventory.md`](../docs/package-inventory.md). Security-sensitive
+packages deserve an explicit note in the module: secret tooling, SUID or
+capability-bearing tools, browsers, container substrates, scanners, daemons, and
+anything that opens a firewall port should state the failure mode it protects
+against and the workflow it may break.
+
 ## Failure Modes
 
 - A module without an enable option runs as soon as `import-tree` sees it.
