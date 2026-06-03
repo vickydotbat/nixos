@@ -13,6 +13,9 @@ let
       home = user.homeDirectory;
       extraGroups = user.extraGroups;
     }
+    // lib.optionalAttrs ((user.avatar or null) != null) {
+      avatar = user.avatar;
+    }
     // lib.optionalAttrs (user.passwordHashSecret != null) {
       passwordHashFile = "/run/secrets-for-users/${user.passwordHashSecret}";
     };

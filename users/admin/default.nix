@@ -6,6 +6,7 @@ in
   description = "Administrator";
   uid = 1000;
   homeDirectory = "/home/${thisUser}";
+  avatar = ./avatar.png;
   extraGroups = [
     "wheel"
     "nixcfg"

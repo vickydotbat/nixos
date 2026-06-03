@@ -7,6 +7,7 @@ in
   description = "${thisUserName}";
   uid = 1001;
   homeDirectory = "/home/${thisUser}";
+  avatar = ./avatar.png;
   extraGroups = [
     "wheel"
     "networkmanager"
