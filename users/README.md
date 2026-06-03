@@ -11,7 +11,8 @@ Home Manager modules consume the chosen user's home profile.
 
 - `admin/` is the mandatory repair account. It belongs to `wheel` and exists so
   a host has a known administrative handhold even when daily-driver users are
-  being recalibrated.
+  being recalibrated. Its Home Manager profile is intentionally minimal: SSH key
+  restoration plus Git stewardship for committing repairs in `/nix/nixos`.
 - `guest/` is an opt-in low-access account. It should not receive SSH private
   key material or administrative groups.
 - `vicky/` is the current daily-driver user, including her Home Manager profile

@@ -7,6 +7,7 @@ Its purpose is stewardship: keep sensitive material out of the Nix store, out of
 ## What It Controls
 
 - `secrets/solanine.yaml` for host-level secrets used by `solanine`
+- `secrets/ssh-admin.yaml` for `admin` SSH identity material
 - `secrets/ssh-vicky.yaml` for `vicky` SSH identity restoration
 - encrypted password inputs used to regenerate activation hashes
 - SOPS material decrypted at rebuild or activation time
@@ -31,17 +32,34 @@ ssh:
     ssh_host_rsa_key.pub: ssh-rsa AAAA... root@solanine
 ```
 
-The SSH key respawn mechanism expects `secrets/ssh-vicky.yaml` to contain:
+Per-user SSH secret files are selected from `users/<name>/default.nix` and must
+match `.sops.yaml` creation rules. Create or edit them from the repository root
+with a repository-relative path, not `/secrets/...`:
+
+```bash
+sops edit secrets/ssh-admin.yaml
+sops edit secrets/ssh-vicky.yaml
+```
+
+After creating a new per-user secret file, add it to Git before rebuilding; a
+flake cannot evaluate a file it cannot see.
+
+The SSH key mechanism expects `secrets/ssh-<user>.yaml` to contain:
 
 ```yaml
 ssh:
-    vicky:
+    <user>:
         id_ed25519: |
             -----BEGIN OPENSSH PRIVATE KEY-----
             ...
             -----END OPENSSH PRIVATE KEY-----
         id_ed25519.pub: ssh-ed25519 AAAA... comment
 ```
+
+For example, `secrets/ssh-admin.yaml` should use `ssh.admin.id_ed25519` and
+`ssh.admin.id_ed25519.pub`. Admin's Home Manager profile is deliberately
+minimal: it restores these keys into `/home/admin/.ssh` and configures Git for
+repository repair, without enabling Vicky's working surface.
 
 ## Bootstrap Rite
 

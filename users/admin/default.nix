@@ -14,10 +14,16 @@ in
   passwordHashSecret = "users/${thisUser}/password-hash";
 
   home = {
-    enable = false;
+    enable = true;
+    module = ./home.nix;
   };
 
   ssh = {
-    enable = false;
+    enable = true;
+    sopsFile = ../../secrets/ssh-${thisUser}.yaml;
+    privateKeySecret = "ssh/${thisUser}/id_ed25519";
+    publicKeySecret = "ssh/${thisUser}/id_ed25519.pub";
+    privateKeyPath = "/run/secrets/ssh-${thisUser}-id_ed25519";
+    publicKeyPath = "/run/secrets/ssh-${thisUser}-id_ed25519.pub";
   };
 }

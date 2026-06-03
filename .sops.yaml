@@ -12,3 +12,7 @@ creation_rules:
     key_groups:
       - age:
           - *solanine
+  - path_regex: secrets/ssh-admin\.yaml$
+    key_groups:
+      - age:
+          - *solanine

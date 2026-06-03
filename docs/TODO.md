@@ -100,6 +100,19 @@ the validation rite that proves it still holds.
   Ghostty key ownership, and shell aliases still need the same calibration that
   editors, Codex CLI policy, GIMP, Spicetify, ripgrep, nix-index, Discord
   autostart, Home SSH, Firefox search defaults, and KeePassXC posture now have.
+- Split user SSH identity restoration from the system OpenSSH service. A user
+  should be able to spawn `~/.ssh/id_ed25519` from SOPS-backed Home Manager
+  material for Git commits, private repository access, and outbound SSH even
+  when the host does not run `sshd`. The current Home SSH module asserts
+  `theorem.nixos.base.ssh.enable`; replace that coupling with a user-secret
+  substrate that depends only on declared secret material, while the NixOS SSH
+  module continues to own server daemon posture, host keys, firewall exposure,
+  and inbound access.
+- Fold Git and SSH identity together deliberately. Git signing and repository
+  remotes often use the same per-user SSH key, so the Git module should be able
+  to consume the user SSH identity path or require an explicit signing key when
+  commit signing is enabled. Keep agent ownership singular, and avoid making
+  Git imply `sshd`.
 - Move service-specific group membership out of static user registry entries
   where the service module can own it. A future Docker, Podman, or repository
   access module should add only the groups it creates or requires, with a clear
