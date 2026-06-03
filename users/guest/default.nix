@@ -3,7 +3,7 @@ let
 in
 {
   username = "${thisUser}";
-  description = "Low-access guest account";
+  description = "Guest";
   uid = 29999;
   homeDirectory = "/home/${thisUser}";
   avatar = ./avatar.png;
