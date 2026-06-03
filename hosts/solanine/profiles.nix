@@ -1,4 +1,22 @@
-{ pkgs, ... }:
+{
+  lib,
+  pkgs,
+  selectedUsers,
+  ...
+}:
+let
+  mkAccount =
+    _: user:
+    {
+      description = user.description;
+      uid = user.uid;
+      home = user.homeDirectory;
+      extraGroups = user.extraGroups;
+    }
+    // lib.optionalAttrs (user.passwordHashSecret != null) {
+      passwordHashFile = "/run/secrets-for-users/${user.passwordHashSecret}";
+    };
+in
 {
   theorem.nixos = {
     base = {
@@ -21,7 +39,10 @@
       packages.enable = true;
       persistence.enable = true;
       ssh.enable = true;
-      users.enable = true;
+      users = {
+        enable = true;
+        accounts = lib.mapAttrs mkAccount selectedUsers;
+      };
     };
 
     desktop = {

@@ -54,6 +54,7 @@
       system = "x86_64-linux";
       pkgs = inputs.nixpkgs.legacyPackages.${system};
       mkSystem = import ./lib/mkSystem.nix;
+      userRegistry = import ./users;
 
       stable = import inputs.nixpkgs-stable {
         inherit system;
@@ -74,11 +75,17 @@
       overlays.default = final: prev: import ./pkgs/packages.nix { pkgs = final; };
 
       nixosConfigurations.solanine = mkSystem {
-        inherit inputs system stable;
+        inherit
+          inputs
+          system
+          stable
+          userRegistry
+          ;
         self = inputs.self;
         hostPath = ./hosts/solanine;
-        userName = "vicky";
-        userPath = ./home/users/vicky;
+        selectedUsers = {
+          inherit (userRegistry) admin vicky;
+        };
       };
     };
 }

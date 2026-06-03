@@ -18,11 +18,6 @@ in
       lfs.enable = true;
 
       settings = {
-        user = {
-          name = "vickydotbat";
-          email = "vickydotbat@tutamail.com";
-        };
-
         init.defaultBranch = "main";
         /*
           - only pull if fast-forward is possible, i.e. there is no divergent history
@@ -83,11 +78,6 @@ in
           untrackedCache = true;
           fsmonitor = true;
         };
-
-        # config signing manually, home-manager doesn't support SSH signing
-        gpg.format = "ssh";
-        user.signingkey = "~/.ssh/id_ed25519";
-        commit.gpgsign = true; # enable signing by default
 
       };
     };

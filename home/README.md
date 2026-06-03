@@ -1,12 +1,13 @@
 # Home
 
-This directory holds user identity, profile selection, and user-specific
-overrides.
+This directory is kept for Home Manager context. Repository-level user identity,
+profile selection, and user-specific overrides now live under `users/`.
 
-The current user is `vicky`. Her identity module declares who she is; her
-profile module declares which reusable Home Manager theorems should be enabled.
-Reusable defaults live under `modules/home/`, not here. This keeps the repair
-boundary visible: modules provide the mechanism, users choose and calibrate it.
+The current daily-driver user is `vicky`. Her identity module declares who she
+is; her profile module declares which reusable Home Manager theorems should be
+enabled. Reusable defaults live under `modules/home/`, not in the user tree.
+This keeps the repair boundary visible: modules provide the mechanism, users
+choose and calibrate it.
 
 ## What It Controls
 
@@ -16,14 +17,14 @@ boundary visible: modules provide the mechanism, users choose and calibrate it.
 
 ## Layout
 
-- `users/vicky/identity.nix` declares username, home directory, Home Manager state, and session variables.
-- `users/vicky/profiles.nix` enables reusable Home Manager mechanisms and
+- `../users/vicky/identity.nix` declares username, home directory, Home Manager state, and session variables.
+- `../users/vicky/profiles.nix` enables reusable Home Manager mechanisms and
   records deliberate overrides. Some modules also derive sane defaults from
   system or user theorems.
 
 ## Failure Modes
 
-- Do not put reusable defaults here. A setting placed in `home/users/<user>/`
+- Do not put reusable defaults in `users/<user>/`. A user-owned setting
   should be personal calibration, not the default theorem future users inherit.
 - Do not change `home.stateVersion` as an ordinary upgrade habit. It preserves Home Manager compatibility.
 - If a feature is absent from `users/vicky/profiles.nix`, check its module
@@ -38,4 +39,4 @@ boundary visible: modules provide the mechanism, users choose and calibrate it.
 
 Prefer adding reusable behavior under `modules/home/`, then enabling it in the
 user profile. Put only identity, profile selection, and user-specific
-calibration directly under `home/users/vicky/`.
+calibration directly under `users/vicky/`.

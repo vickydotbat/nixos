@@ -38,10 +38,10 @@ For Home Manager modules, use `theorem.home.category.name` instead.
 Enable the module from the relevant profile file after adding it:
 
 - NixOS: `hosts/<host>/profiles.nix`
-- Home Manager: `home/users/<user>/profiles.nix`
+- Home Manager: `users/<user>/profiles.nix`
 
 Home Manager modules should carry their own reusable defaults. Do not make a
-module a thin import of `home/users/<user>/` or another user-owned tree. The
+module a thin import of `users/<user>/` or another user-owned tree. The
 user tree is for selection and calibration; the module tree is the forge where
 the shared mechanism belongs.
 

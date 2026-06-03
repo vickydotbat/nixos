@@ -1,17 +1,69 @@
 { config, lib, ... }:
-# TODO: Let a list of users be controlled exclusively by hosts. This module should always generate an "admin" user in the "Wheel" group and then automatically populate passwords from SOPS for all users. I would consider having most user-specific settings be in a /users directory somewhere in the repository to set up THAT user. Meanwhile, this file just configures the Admin user.
 let
   cfg = config.theorem.nixos.base.users;
+  accountType = lib.types.submodule (
+    { name, ... }:
+    {
+      options = {
+        enable = lib.mkOption {
+          type = lib.types.bool;
+          default = true;
+          description = "Create this user account.";
+        };
+
+        description = lib.mkOption {
+          type = lib.types.str;
+          default = name;
+          description = "Human-readable account description.";
+        };
+
+        uid = lib.mkOption {
+          type = lib.types.nullOr lib.types.int;
+          default = null;
+          description = "Numeric uid for this account.";
+        };
+
+        home = lib.mkOption {
+          type = lib.types.nullOr lib.types.str;
+          default = null;
+          description = "Home directory for this account.";
+        };
+
+        extraGroups = lib.mkOption {
+          type = lib.types.listOf lib.types.str;
+          default = [ ];
+          description = "Supplementary groups for this account.";
+        };
+
+        passwordHashFile = lib.mkOption {
+          type = lib.types.nullOr lib.types.path;
+          default = null;
+          description = "Path to a file containing this account's hashed password.";
+        };
+      };
+    }
+  );
+
+  mkUser =
+    name: account:
+    {
+      isNormalUser = true;
+      description = account.description;
+      extraGroups = account.extraGroups;
+    }
+    // lib.optionalAttrs (account.uid != null) {
+      uid = account.uid;
+    }
+    // lib.optionalAttrs (account.home != null) {
+      home = account.home;
+    }
+    // lib.optionalAttrs (account.passwordHashFile != null) {
+      hashedPasswordFile = account.passwordHashFile;
+    };
 in
 {
   options.theorem.nixos.base.users = {
     enable = lib.mkEnableOption "base user accounts";
-
-    primaryUser = lib.mkOption {
-      type = lib.types.str;
-      default = "vicky";
-      description = "Primary normal user account.";
-    };
 
     rootPasswordHashFile = lib.mkOption {
       type = lib.types.nullOr lib.types.path;
@@ -19,30 +71,23 @@ in
       description = "Path to a file containing root's hashed password.";
     };
 
-    primaryUserPasswordHashFile = lib.mkOption {
-      type = lib.types.nullOr lib.types.path;
-      default = null;
-      description = "Path to a file containing the primary user's hashed password.";
+    accounts = lib.mkOption {
+      type = lib.types.attrsOf accountType;
+      default = { };
+      description = ''
+        User accounts accepted by this host. Hosts select from the repository
+        user doctrine, then this module performs the account creation rite.
+      '';
     };
   };
 
   config = lib.mkIf cfg.enable {
     users.mutableUsers = false;
 
-    users.users.root = lib.mkIf (cfg.rootPasswordHashFile != null) {
-      hashedPasswordFile = cfg.rootPasswordHashFile;
-    };
-
-    users.users.${cfg.primaryUser} = {
-      uid = 1000;
-      isNormalUser = true;
-      extraGroups = [
-        "wheel"
-        "networkmanager"
-      ];
-    }
-    // lib.optionalAttrs (cfg.primaryUserPasswordHashFile != null) {
-      hashedPasswordFile = cfg.primaryUserPasswordHashFile;
-    };
+    users.users =
+      lib.optionalAttrs (cfg.rootPasswordHashFile != null) {
+        root.hashedPasswordFile = cfg.rootPasswordHashFile;
+      }
+      // lib.mapAttrs mkUser (lib.filterAttrs (_: account: account.enable) cfg.accounts);
   };
 }

@@ -20,7 +20,7 @@ in
   config = lib.mkIf sshEnabled {
     programs.ssh = {
       enable = true;
-      enableDefaultConfig = lib.mkDefault false; # Respect per-use mandates in home/users.
+      enableDefaultConfig = lib.mkDefault false; # Respect per-user mandates in users/.
     };
 
     # Spawn SSH Keys from SOPS generation in the /home/user/.ssh directory.
