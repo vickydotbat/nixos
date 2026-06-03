@@ -1,3 +1,5 @@
+![banner](./assets/banner.png)
+
 # nixos
 
 This repository declares the NixOS configuration for `solanine`.
