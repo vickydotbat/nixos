@@ -67,7 +67,6 @@ in
     };
 
     hardware.steam-hardware.enable = true;
-    programs.gamemode.enable = true; # TODO: Move to a general "Gaming" module with Mangohud and others. Have that module enabled whenever any gaming module is enabled.
 
     environment.systemPackages = with pkgs; [
       steam-run

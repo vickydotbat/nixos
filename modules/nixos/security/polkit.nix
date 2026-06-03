@@ -1,5 +1,8 @@
 { config, lib, ... }:
-# TODO: Rethink this, understand what polkit is good for and where it needs to be enabled.
+# Polkit is an authorization substrate, not a general desktop decoration.
+# Plasma needs it for ordinary privileged desktop actions, while run0 enables
+# it separately for administrative elevation. Keep new dependencies explicit so
+# this service does not become ambient privilege by accident.
 let
   cfg = config.theorem.nixos.security.polkit;
 in

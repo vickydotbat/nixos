@@ -58,7 +58,11 @@ in
     };
 
     virtualisation = {
-      podman.enable = true;
+      podman = {
+        enable = true;
+        dockerCompat.enable = true;
+        composeDns.enable = true;
+      };
     };
 
     security = {

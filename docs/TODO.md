@@ -31,9 +31,10 @@ the validation rite that proves it still holds.
   and Polkit may follow Plasma. Optional applications, firewall openings, backup
   jobs, and hardware conveniences should remain explicit choices.
 - Turn remaining host-shaped defaults into options before adding the next host:
-  boot loader family, networking backend, SSH exposure, Bluetooth posture,
-  Podman compatibility features, and GPU vendor support all deserve sane defaults
-  with host override points.
+  boot loader family, networking backend, and GPU vendor support still deserve
+  sane defaults with host override points. SSH exposure, Bluetooth posture, and
+  Podman compatibility features now have explicit module options; keep future
+  host-shaped defaults on that same repair path.
 - Treat `run0` as a separate security profile until the per-user authorization
   model is real. A placeholder username in an authorization rule is not a
   mechanism; it is a warning light.

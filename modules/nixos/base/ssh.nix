@@ -1,10 +1,29 @@
 { config, lib, ... }:
-# TODO: SSH needs hardening. SSH should also be disabled by default. Also, how is it populating systemwide SSH keys? If this is disabled, those keys should cease to exist on the system. Make sure any systemwide ssh key evaluation is done here, where able.
 let
   cfg = config.theorem.nixos.base.ssh;
 in
 {
-  options.theorem.nixos.base.ssh.enable = lib.mkEnableOption "base OpenSSH configuration";
+  options.theorem.nixos.base.ssh = {
+    enable = lib.mkEnableOption "base OpenSSH configuration";
+
+    openFirewall = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = ''
+        Open the firewall for OpenSSH. Keep this explicit on hosts where SSH is
+        only needed over a private overlay or during a narrow maintenance rite.
+      '';
+    };
+
+    startAgent = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = ''
+        Start the system SSH agent program. Disable this when user or desktop
+        configuration owns agent lifetime instead.
+      '';
+    };
+  };
 
   config = lib.mkIf cfg.enable {
     services.openssh = {
@@ -18,9 +37,9 @@ in
         UseDns = false;
       };
 
-      openFirewall = true;
+      openFirewall = cfg.openFirewall;
     };
 
-    programs.ssh.startAgent = true;
+    programs.ssh.startAgent = cfg.startAgent;
   };
 }

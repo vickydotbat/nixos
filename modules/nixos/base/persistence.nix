@@ -4,7 +4,12 @@
   pkgs,
   ...
 }:
-# TODO: Document this!
+# Impermanence substrate for hosts that keep `/nix` and selected state on
+# durable storage while letting `/` return to a clean shape at boot.
+#
+# The tmpfs root path is ready for daily use. The Btrfs root mode is present so
+# hosts can name the desired substrate, but it still needs a rollback-to-blank
+# initrd rite before it should be selected on real hardware.
 let
   cfg = config.theorem.nixos.base.persistence;
 

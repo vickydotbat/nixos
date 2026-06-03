@@ -17,7 +17,8 @@ The reusable mechanisms live elsewhere. A host should declare which theorems it 
 - `solanine/` is the current NixOS host.
 - `solanine/system.nix` declares host identity and `system.stateVersion`.
 - `solanine/profiles.nix` enables reusable `theorem.nixos.*` mechanisms.
-- `solanine/persistence.nix` protects state that must survive impermanence.
+- `solanine/storage.nix` declares filesystem and persistence details that must
+  survive impermanence.
 - `solanine/secrets.nix` binds encrypted secret names to their runtime destinations.
 
 ## Failure Modes

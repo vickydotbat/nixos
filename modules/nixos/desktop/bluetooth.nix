@@ -4,17 +4,36 @@ let
   cfg = config.theorem.nixos.desktop.bluetooth;
 in
 {
-  options.theorem.nixos.desktop.bluetooth.enable = lib.mkEnableOption "desktop Bluetooth support";
+  options.theorem.nixos.desktop.bluetooth = {
+    enable = lib.mkEnableOption "desktop Bluetooth support";
 
-  config = lib.mkIf cfg.enable {
-    # TODO: Add hardened defaults. It should never enable by itself. User input always required. By default, make the system undiscoverable: it will just be used to connect to other devices.
-    hardware.bluetooth = {
-      enable = true;
-      powerOnBoot = false;
+    powerOnBoot = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = ''
+        Power on Bluetooth automatically during boot. The default keeps radios
+        quiet until the operator asks for them.
+      '';
     };
 
-    # TODO: Potentially use these as hardening defaults. Evaluate and confirm, use lib.mkDefault for things that can be safely overriden.
-    systemd.services.bluetooth.serviceConfig = {
+    hardenService = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = ''
+        Apply a narrow systemd sandbox to the Bluetooth service. Disable only
+        when a specific adapter or pairing workflow proves which guard blocks
+        it.
+      '';
+    };
+  };
+
+  config = lib.mkIf cfg.enable {
+    hardware.bluetooth = {
+      enable = true;
+      powerOnBoot = cfg.powerOnBoot;
+    };
+
+    systemd.services.bluetooth.serviceConfig = lib.mkIf cfg.hardenService {
       ProtectKernelTunables = lib.mkDefault true;
       ProtectKernelModules = lib.mkDefault true;
       ProtectKernelLogs = lib.mkDefault true;
