@@ -1,6 +1,17 @@
 {
   description = "NixOS configuration";
 
+  nixConfig = {
+    extra-substituters = [
+      "https://devenv.cachix.org"
+      "https://codex-cli.cachix.org"
+    ];
+    extra-trusted-public-keys = [
+      "devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw="
+      "codex-cli.cachix.org-1:1Br3H1hHoRYG22n//cGKJOk3cQXgYobUel6O8DgSing="
+    ];
+  };
+
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     nixpkgs-stable.url = "github:NixOS/nixpkgs/nixos-26.05";
@@ -71,6 +82,19 @@
       };
 
       packages.${system} = import ./pkgs/packages.nix { inherit pkgs; };
+
+      devShells.${system} =
+        let
+          codex = pkgs.mkShell {
+            packages = [
+              inputs.codex-cli-nix.packages.${system}.default
+            ];
+          };
+        in
+        {
+          default = codex;
+          codex = codex;
+        };
 
       overlays.default = final: prev: import ./pkgs/packages.nix { pkgs = final; };
 

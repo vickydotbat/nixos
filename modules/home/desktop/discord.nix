@@ -1,6 +1,5 @@
 {
   config,
-  inputs,
   lib,
   pkgs,
   ...
@@ -10,7 +9,19 @@ let
   cfg = config.theorem.home.desktop.discord;
 in
 {
-  options.theorem.home.desktop.discord.enable = lib.mkEnableOption "Discord";
+  options.theorem.home.desktop.discord = {
+    enable = lib.mkEnableOption "Discord";
+
+    autostart.enable = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = ''
+        Install a declarative desktop autostart entry for Discord. This is a
+        user workflow choice and is mainly useful on impermanent systems where
+        the mutable autostart directory is not preserved.
+      '';
+    };
+  };
 
   config = lib.mkIf cfg.enable {
     programs.discord.enable = true;
@@ -21,8 +32,7 @@ in
         ".config/discord"
       ];
     };
-
-    xdg.configFile."autostart/discord.desktop".text = ''
+    xdg.configFile."autostart/discord.desktop".text = lib.mkIf cfg.autostart.enable ''
       [Desktop Entry]
       Type=Application
       Name=Discord

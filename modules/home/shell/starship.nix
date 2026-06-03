@@ -1,22 +1,29 @@
 {
   config,
-  inputs,
   lib,
-  pkgs,
   ...
 }:
-
+# FIXME: Check for opinionated settings. Set good defaults and derived configuration and then fold the rest into vicky's user.
 let
   cfg = config.theorem.home.shell.starship;
 in
 {
-  options.theorem.home.shell.starship.enable = lib.mkEnableOption "Starship prompt";
+  options.theorem.home.shell.starship = {
+    enable = lib.mkEnableOption "Starship prompt";
+
+    bashIntegration.enable = lib.mkOption {
+      type = lib.types.bool;
+      default = config.theorem.home.shell.shell.enable or true;
+      defaultText = lib.literalExpression "theorem.home.shell.shell.enable";
+      description = "Enable Starship integration for the repository's Bash shell theorem.";
+    };
+  };
 
   config = lib.mkIf cfg.enable {
 
     programs.starship = {
       enable = true;
-      enableBashIntegration = true;
+      enableBashIntegration = cfg.bashIntegration.enable;
       settings = {
         add_newline = false;
         command_timeout = 1000;

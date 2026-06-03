@@ -1,23 +1,40 @@
 {
   config,
-  inputs,
   lib,
   pkgs,
   ...
 }:
-
 let
   cfg = config.theorem.home.desktop.gimp;
 in
 {
-  options.theorem.home.desktop.gimp.enable = lib.mkEnableOption "GIMP";
+  options.theorem.home.desktop.gimp = {
+    enable = lib.mkEnableOption "GIMP";
+
+    package = lib.mkOption {
+      type = lib.types.package;
+      default = pkgs.gimp3;
+      defaultText = lib.literalExpression "pkgs.gimp3";
+      description = ''
+        GIMP package installed for this user. Plugin-bearing custom builds are
+        user workflow and should be selected in user modules.
+      '';
+    };
+
+    persistConfig = lib.mkOption {
+      type = lib.types.bool;
+      default = config.theorem.home.base.persistence.enable;
+      defaultText = lib.literalExpression "theorem.home.base.persistence.enable";
+      description = "Persist GIMP user configuration when Home persistence is active.";
+    };
+  };
 
   config = lib.mkIf cfg.enable {
     home.packages = [
-      pkgs.gimp3-custom
+      cfg.package
     ];
 
-    home.persistence."/nix/persist" = lib.mkIf config.theorem.home.base.persistence.enable {
+    home.persistence."/nix/persist" = lib.mkIf cfg.persistConfig {
       directories = [
         ".config/GIMP"
       ];

@@ -66,9 +66,8 @@ in
     '';
 
     systemd.tmpfiles.rules = [
-      # TODO: Builtins. prefix can apparently be removed? Double-check correct syntax.
-      "d ${builtins.dirOf (builtins.dirOf cfg.ageKeyFile)} 0750 ${cfg.ageKeyOwner} ${cfg.ageKeyGroup} - -"
-      "d ${builtins.dirOf cfg.ageKeyFile} 0750 ${cfg.ageKeyOwner} ${cfg.ageKeyGroup} - -"
+      "d ${dirOf (dirOf cfg.ageKeyFile)} 0750 ${cfg.ageKeyOwner} ${cfg.ageKeyGroup} - -"
+      "d ${dirOf cfg.ageKeyFile} 0750 ${cfg.ageKeyOwner} ${cfg.ageKeyGroup} - -"
       "z ${cfg.ageKeyFile} ${cfg.ageKeyMode} ${cfg.ageKeyOwner} ${cfg.ageKeyGroup} - -"
     ];
   };

@@ -4,6 +4,7 @@
   pkgs,
   ...
 }:
+# TODO: Document this!
 let
   cfg = config.theorem.nixos.base.persistence;
 
@@ -13,10 +14,7 @@ let
   ];
 
   nixMountOptions =
-    if cfg.storage.fsType == "btrfs" then
-      btrfsOptions cfg.nix.subvolume
-    else
-      cfg.storage.mountOptions;
+    if cfg.storage.fsType == "btrfs" then btrfsOptions cfg.nix.subvolume else cfg.storage.mountOptions;
 
   rootMount =
     if cfg.root.mode == "tmpfs" then

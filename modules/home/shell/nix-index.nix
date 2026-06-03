@@ -5,12 +5,29 @@
   pkgs,
   ...
 }:
-
 let
   cfg = config.theorem.home.shell.nix-index;
 in
 {
-  options.theorem.home.shell.nix-index.enable = lib.mkEnableOption "nix-index";
+  options.theorem.home.shell.nix-index = {
+    enable = lib.mkEnableOption "nix-index";
+
+    commandNotFound.enable = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = ''
+        Install a Bash command-not-found handler backed by nix-index. This is a
+        convenience hook, not required for the database itself, so users should
+        opt into the shell behavior explicitly.
+      '';
+    };
+
+    comma.enable = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = "Enable comma integration from nix-index-database.";
+    };
+  };
 
   imports = [
     inputs.nix-index-database.homeModules.nix-index
@@ -65,12 +82,14 @@ in
       in
       {
         enable = true;
+      }
+      // lib.optionalAttrs cfg.commandNotFound.enable {
         package = pkgs.symlinkJoin {
           name = "nix-index";
           paths = [ commandNotFound ];
         };
       };
-    programs.nix-index-database.comma.enable = true;
+    programs.nix-index-database.comma.enable = cfg.comma.enable;
 
     home.persistence."/nix/persist" = lib.mkIf config.theorem.home.base.persistence.enable {
       directories = [

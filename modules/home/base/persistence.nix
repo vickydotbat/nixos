@@ -18,19 +18,31 @@ let
   backingDownloads = "${downloadsParent}/Downloads";
 in
 {
-  options.theorem.home.base.persistence.enable = lib.mkOption {
-    type = lib.types.bool;
-    default = systemPersistenceEnabled;
-    defaultText = lib.literalExpression ''
-      if osConfig == null
-      then false
-      else osConfig.theorem.nixos.base.persistence.enable or false
-    '';
-    description = ''
-      Enable Home Manager persistence. Defaults to the system persistence
-      theorem so user bind mounts are only declared when the persistence
-      substrate exists.
-    '';
+  options.theorem.home.base.persistence = {
+    enable = lib.mkOption {
+      type = lib.types.bool;
+      default = systemPersistenceEnabled;
+      defaultText = lib.literalExpression ''
+        if osConfig == null
+        then false
+        else osConfig.theorem.nixos.base.persistence.enable or false
+      '';
+      description = ''
+        Enable Home Manager persistence. Defaults to the system persistence
+        theorem so user bind mounts are only declared when the persistence
+        substrate exists.
+      '';
+    };
+
+    volatileDownloads.enable = lib.mkOption {
+      type = lib.types.bool;
+      default = cfg.enable;
+      defaultText = lib.literalExpression "theorem.home.base.persistence.enable";
+      description = ''
+        Place `~/Downloads` on boot-scoped `/tmp` storage. Disable this on hosts
+        where `/tmp` is memory-backed or where downloads must survive reboot.
+      '';
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -66,7 +78,7 @@ in
       ];
     };
 
-    systemd.user.services.volatile-downloads = {
+    systemd.user.services.volatile-downloads = lib.mkIf cfg.volatileDownloads.enable {
       Unit = {
         Description = "Prepare boot-scoped Downloads directory";
       };

@@ -37,3 +37,27 @@ the validation rite that proves it still holds.
 - Treat `run0` as a separate security profile until the per-user authorization
   model is real. A placeholder username in an authorization rule is not a
   mechanism; it is a warning light.
+
+## Home Module Boundary
+
+- Keep reusable Home Manager modules focused on mechanisms and broadly useful
+  defaults. User modules should carry themes, editor posture, shell habits,
+  autostart choices, plugin-bearing packages, and language stacks that are only
+  true for one operator.
+- Continue the option-boundary pass before adding another user: Plasma layout,
+  Ghostty key ownership, shell aliases, Codex CLI policy, browser defaults, and
+  KeePassXC posture still need the same calibration that editors, GIMP,
+  Spicetify, ripgrep, nix-index, Discord autostart, and Home SSH now have.
+- Move service-specific group membership out of static user registry entries
+  where the service module can own it. A future Docker, Podman, or repository
+  access module should add only the groups it creates or requires, with a clear
+  failure mode when the backing service is disabled.
+- Validation: evaluate a second user with the shared Home modules enabled and no
+  Vicky profile imports. The result should install plain mechanisms, not Vicky's
+  editor theme, VS Code workflow, GIMP plugin build, Spotify extensions, Discord
+  autostart, command-not-found hook, or repository-specific ripgrep posture.
+
+
+## In-File documentation
+
+- TODO: Document every module and its settings inside its individual .nix file. If its configuration is relevant on a wider scale, also document it in a global or directory-based README.md. Ensure directory README.md explain broad-stroke understanding of "what is this directory for?" and the root repo README.md explains how to navigate. Organize this section for long-term todo standard or fold it into readmes.

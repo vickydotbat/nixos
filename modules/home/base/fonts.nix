@@ -9,35 +9,30 @@
 let
   cfg = config.theorem.home.base.fonts;
   graphicsEnabled = (osConfig.theorem.nixos.desktop.graphics.enable or false);
-  desktopAppEnabled =
-    let
-      home = config.theorem.home;
-    in
-    lib.any (enabled: enabled) [
-      (home.desktop.blender.enable or false)
-      (home.desktop.discord.enable or false)
-      (home.desktop.gimp.enable or false)
-      (home.desktop.keepassxc.enable or false)
-      (home.desktop.obsidian.enable or false)
-      (home.desktop.plasma.enable or false)
-      (home.desktop.spicetify.enable or false)
-      (home.editor.vscode.enable or false)
-      (home.web.firefox.enable or false)
-      (home.web.ungoogled-chromium.enable or false)
-    ];
 in
 {
-  options.theorem.home.base.fonts.enable = lib.mkOption {
-    type = lib.types.bool;
-    default = graphicsEnabled && desktopAppEnabled;
-    defaultText = lib.literalExpression ''
-      osConfig.theorem.nixos.desktop.graphics.enable && any desktop/app theorem is enabled
-    '';
-    description = ''
-      Enable user font packages. Defaults on for graphics-enabled systems with
-      desktop applications, because GUI repair starts with text rendering that
-      can actually carry its load.
-    '';
+  options.theorem.home.base.fonts = {
+    enable = lib.mkOption {
+      type = lib.types.bool;
+      default = graphicsEnabled;
+      defaultText = lib.literalExpression ''
+        osConfig.theorem.nixos.desktop.graphics.enable
+      '';
+      description = ''
+        Enable user font packages. Defaults on for graphics-enabled systems,
+        because GUI repair starts with text rendering that can carry its load.
+      '';
+    };
+
+    fontconfig.enable = lib.mkOption {
+      type = lib.types.bool;
+      default = cfg.enable;
+      defaultText = lib.literalExpression "theorem.home.base.fonts.enable";
+      description = ''
+        Enable fontconfig and persist its cache when Home Manager persistence is
+        active.
+      '';
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -68,11 +63,11 @@ in
       vista-fonts
     ];
 
-    fonts.fontconfig = {
+    fonts.fontconfig = lib.mkIf cfg.fontconfig.enable {
       enable = true;
     };
 
-    home.persistence."/nix/persist" = lib.mkIf config.theorem.home.base.persistence.enable {
+    home.persistence."/nix/persist" = lib.mkIf (cfg.fontconfig.enable && config.theorem.home.base.persistence.enable) {
       directories = [
         ".cache/fontconfig"
       ];

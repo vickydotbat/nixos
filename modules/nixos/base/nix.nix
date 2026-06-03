@@ -1,17 +1,31 @@
-{ config, lib, ... }:
-# TODO: These are global defaults. Use lib.mkDefault where necessary but this should not be put on a toggle.
+{
+  config,
+  lib,
+  repository,
+  ...
+}:
 let
   cfg = config.theorem.nixos.base.nix;
 in
 {
-  options.theorem.nixos.base.nix.enable = lib.mkEnableOption "base Nix daemon configuration";
-  options.theorem.nixos.base.nix.unfreePackageNames = lib.mkOption {
-    type = lib.types.listOf lib.types.str;
-    default = [ ];
-    description = ''
-      Exact package names allowed through the unfree predicate.
-      Modules and hosts should add only packages they actually enable.
-    '';
+  options.theorem.nixos.base.nix = {
+    enable = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = ''
+        Enable the base Nix daemon configuration. This defaults on because the
+        flake machinery is the repair surface for every host in this repository.
+      '';
+    };
+
+    unfreePackageNames = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [ ];
+      description = ''
+        Exact package names allowed through the unfree predicate.
+        Modules and hosts should add only packages they actually enable.
+      '';
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -27,21 +41,12 @@ in
           "nix-command"
           "flakes"
         ];
-
-        # Allow DevEnv to merge binary caches with the system Nix store
-        extra-substituters = [
-          "https://devenv.cachix.org"
-        ];
-        extra-trusted-public-keys = [
-          "devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw="
-        ];
       };
-
     };
 
     programs.nh = lib.mkDefault {
       enable = true;
-      flake = "/nix/nixos"; # FIXME: Create a default global repo-wide variable.
+      flake = repository.path;
       clean = {
         enable = true;
         extraArgs = "--keep 5 --keep-since 7d";

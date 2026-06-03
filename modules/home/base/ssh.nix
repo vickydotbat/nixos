@@ -5,8 +5,8 @@
   pkgs,
   ...
 }:
-# TODO: SSH defaults for system-wide need evaluation, but this module should only allow itself to be enabled when systemwide SSH is also enabled. It should however be disabled by default. Likewise it needs per-user configuration. Some users might not use this.
 let
+  cfg = config.theorem.home.base.ssh;
   sshEnabled = (osConfig.theorem.nixos.base.ssh.enable or false);
   username = config.home.username;
 
@@ -16,8 +16,36 @@ let
   sshPublicKeySecret = "/run/secrets/ssh-${username}-id_ed25519.pub";
 in
 {
-  # Derived from active SSH state.
-  config = lib.mkIf sshEnabled {
+  options.theorem.home.base.ssh = {
+    enable = lib.mkEnableOption "per-user SSH configuration";
+
+    privateKeySecret = lib.mkOption {
+      type = lib.types.str;
+      default = sshPrivateKeySecret;
+      defaultText = lib.literalExpression ''"/run/secrets/ssh-$${config.home.username}-id_ed25519"'';
+      description = "Readable secret path for this user's private SSH key.";
+    };
+
+    publicKeySecret = lib.mkOption {
+      type = lib.types.str;
+      default = sshPublicKeySecret;
+      defaultText = lib.literalExpression ''"/run/secrets/ssh-$${config.home.username}-id_ed25519.pub"'';
+      description = "Readable secret path for this user's public SSH key.";
+    };
+  };
+
+  config = lib.mkIf cfg.enable {
+    assertions = [
+      {
+        assertion = sshEnabled;
+        message = ''
+          theorem.home.base.ssh.enable requires theorem.nixos.base.ssh.enable.
+          The user SSH rite should not spawn key material unless the host has
+          deliberately enabled the system SSH mechanism.
+        '';
+      }
+    ];
+
     programs.ssh = {
       enable = true;
       enableDefaultConfig = lib.mkDefault false; # Respect per-user mandates in users/.
@@ -30,8 +58,8 @@ in
 
     home.activation.sshKeys = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
       ssh_dir=${lib.escapeShellArg sshDir}
-      private_key_secret=${lib.escapeShellArg sshPrivateKeySecret}
-      public_key_secret=${lib.escapeShellArg sshPublicKeySecret}
+      private_key_secret=${lib.escapeShellArg cfg.privateKeySecret}
+      public_key_secret=${lib.escapeShellArg cfg.publicKeySecret}
 
       $DRY_RUN_CMD ${pkgs.coreutils}/bin/install -d -m 0700 "$ssh_dir"
 

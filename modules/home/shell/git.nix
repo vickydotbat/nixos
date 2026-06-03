@@ -1,8 +1,7 @@
 {
   config,
-  inputs,
   lib,
-  pkgs,
+  repository,
   ...
 }:
 
@@ -15,7 +14,7 @@ in
   config = lib.mkIf cfg.enable {
     programs.git = {
       enable = true;
-      lfs.enable = true;
+      lfs.enable = lib.mkForce true; # NOTE: This should be global for every git installation, and I don't know why it isn't. When LFS isn't installed git can do some serious damage to repos that use it.
 
       settings = {
         init.defaultBranch = "main";
@@ -73,7 +72,7 @@ in
         branch.sort = "-committerdate"; # sorts branches by most recent
         tag.sort = "version:refname"; # treat numbers as version numbers when sorting tags
 
-        safe.directory = "/nix/nixos"; # FIXME: Use global default variable
+        safe.directory = repository.path;
 
         core = {
           # speed up git in big repos, see `git help status`

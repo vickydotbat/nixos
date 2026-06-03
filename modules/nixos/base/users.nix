@@ -1,4 +1,9 @@
-{ config, lib, ... }:
+{
+  config,
+  lib,
+  repository,
+  ...
+}:
 let
   cfg = config.theorem.nixos.base.users;
   accountType = lib.types.submodule (
@@ -63,7 +68,14 @@ let
 in
 {
   options.theorem.nixos.base.users = {
-    enable = lib.mkEnableOption "base user accounts";
+    enable = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = ''
+        Enable declarative user account management. Defaults on so a host does
+        not drift back to mutable account state by accident.
+      '';
+    };
 
     rootPasswordHashFile = lib.mkOption {
       type = lib.types.nullOr lib.types.path;
@@ -84,10 +96,10 @@ in
   config = lib.mkIf cfg.enable {
     users.mutableUsers = false;
 
-    users.groups.nixcfg = { };
+    users.groups.${repository.group} = { };
 
     systemd.tmpfiles.rules = [
-      "d /nix/nixos 2775 root nixcfg - -" # FIXME: Use global default variable
+      "d ${repository.path} 2775 root ${repository.group} - -"
     ];
 
     users.users =

@@ -1,21 +1,44 @@
 {
   config,
-  inputs,
   lib,
   pkgs,
   ...
 }:
-
 let
   cfg = config.theorem.home.shell.zellij;
 in
 {
-  options.theorem.home.shell.zellij.enable = lib.mkEnableOption "Zellij terminal multiplexer";
+  options.theorem.home.shell.zellij = {
+    enable = lib.mkEnableOption "Zellij terminal multiplexer";
+
+    bashIntegration.enable = lib.mkOption {
+      type = lib.types.bool;
+      default = config.theorem.home.shell.shell.enable or true;
+      defaultText = lib.literalExpression "theorem.home.shell.shell.enable";
+      description = "Enable Zellij integration for the repository's Bash shell theorem.";
+    };
+
+    scrollbackEditor = lib.mkOption {
+      type = lib.types.str;
+      default = "${pkgs.helix}/bin/hx";
+      description = "Editor command used by Zellij for scrollback inspection.";
+    };
+
+    ghosttyKeybindings.enable = lib.mkOption {
+      type = lib.types.bool;
+      default = config.theorem.home.shell.ghostty.enable or false;
+      defaultText = lib.literalExpression "theorem.home.shell.ghostty.enable";
+      description = ''
+        Install Ghostty-style Zellij keybindings. Disable this when another
+        terminal should keep ownership of those chords.
+      '';
+    };
+  };
 
   config = lib.mkIf cfg.enable {
     programs.zellij = {
       enable = true;
-      enableBashIntegration = true;
+      enableBashIntegration = cfg.bashIntegration.enable;
       attachExistingSession = true;
       exitShellOnExit = false;
 
@@ -38,7 +61,7 @@ in
 
         # Scrollback.
         scroll_buffer_size = 50000;
-        scrollback_editor = "${pkgs.helix}/bin/hx";
+        scrollback_editor = cfg.scrollbackEditor;
 
         # Sessions.
         session_serialization = true;
@@ -46,7 +69,7 @@ in
         scrollback_lines_to_serialize = 10000;
       };
 
-      extraConfig = ''
+      extraConfig = lib.mkIf cfg.ghosttyKeybindings.enable ''
         keybinds {
             normal {
                 // Ghostty-like chords, owned by Zellij once Ghostty passes them through.

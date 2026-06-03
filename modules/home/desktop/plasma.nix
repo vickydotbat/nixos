@@ -1,11 +1,9 @@
 {
   config,
-  inputs,
   lib,
-  pkgs,
   ...
 }:
-
+# FIXME: Opinionated. This is user configuration.
 let
   cfg = config.theorem.home.desktop.plasma;
 in

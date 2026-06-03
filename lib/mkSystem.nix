@@ -6,6 +6,10 @@
   userRegistry,
   hostPath,
   selectedUsers,
+  repository ? {
+    path = "/nix/nixos";
+    group = "nixcfg";
+  },
 }:
 
 let
@@ -21,6 +25,7 @@ inputs.nixpkgs.lib.nixosSystem {
       stable
       userRegistry
       selectedUsers
+      repository
       ;
   };
 
@@ -47,6 +52,7 @@ inputs.nixpkgs.lib.nixosSystem {
           stable
           userRegistry
           selectedUsers
+          repository
           ;
       };
 
