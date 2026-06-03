@@ -12,6 +12,14 @@ in
   options.theorem.nixos.gaming.steam.enable = lib.mkEnableOption "Steam gaming profile";
 
   config = lib.mkIf cfg.enable {
+    nixpkgs.config.allowUnfreePredicate =
+      pkg:
+      builtins.elem (lib.getName pkg) [
+        "steam"
+        "steam-unwrapped"
+        "steam-run"
+      ];
+
     programs.steam = {
       enable = true;
       remotePlay.openFirewall = true;

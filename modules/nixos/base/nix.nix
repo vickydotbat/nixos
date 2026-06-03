@@ -7,8 +7,7 @@ in
   options.theorem.nixos.base.nix.enable = lib.mkEnableOption "base Nix daemon configuration";
 
   config = lib.mkIf cfg.enable {
-    nixpkgs.config.allowUnfree = true;
-
+    nixpkgs.config.allowUnfree = false; # Use predicates
     nix = {
       settings = {
         auto-optimise-store = true;
@@ -35,5 +34,8 @@ in
         extraArgs = "--keep 5 --keep-since 7d";
       };
     };
+
+    # Reduces the suffering of the average user.
+    programs.nix-ld.enable = lib.mkDefault true;
   };
 }
