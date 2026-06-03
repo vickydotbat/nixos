@@ -44,6 +44,17 @@ Home Manager already exposes it directly, set that native option in the user's
 profile. Theorem options are for coordinated mechanisms, not renamed copies of
 package settings.
 
+For users with Home Manager enabled, keep identity separate from profile
+selection. Vicky's Home module entry point is `users/vicky/home.nix`; it imports
+`identity.nix` for `home.username`, `home.homeDirectory`, `home.stateVersion`,
+and Home Manager's own enablement, then imports `profiles.nix` for selected
+`theorem.home.*` mechanisms and deliberate personal overrides.
+
+Do not change `home.stateVersion` as an ordinary upgrade habit. It preserves
+Home Manager compatibility for the account's existing state. Raising it is a
+migration, not housekeeping; name the changed behavior and keep rollback visible
+before turning that key.
+
 ## Shared Configuration Access
 
 `admin` and `vicky` both belong to the `nixcfg` group. The group is declared by

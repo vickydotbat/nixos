@@ -108,6 +108,11 @@ the validation rite that proves it still holds.
   the `networkmanager` group to selected users that already belong to `nixcfg`,
   keeping network control with repository stewards rather than with every local
   account or a single personal profile.
+- Podman is now calibrated for the sharp case: rootless use needs no static
+  user group, but enabling the Docker-compatible Podman socket grants the
+  upstream-required `podman` group only to selected repository stewards. Keep
+  `guest` outside that socket unless a host names the workflow and accepts the
+  engine-control surface.
 - Validation: evaluate a second user with the shared Home modules enabled and no
   Vicky profile imports. The result should install plain mechanisms, not Vicky's
   editor theme, VS Code workflow, GIMP plugin build, Spotify extensions, Discord
@@ -122,6 +127,9 @@ the validation rite that proves it still holds.
   the broad-stroke purpose of the directory, and the root repository `README.md`
   explains how to navigate. Fold this into a long-term documentation standard
   or into the relevant readmes when the pattern settles.
+- Progress: `modules/nixos/README.md` and `modules/home/README.md` now name the
+  boundary between reusable system mechanisms, reusable Home mechanisms, host
+  facts, and user-specific working-surface choices.
 
 ## YubiKey Support
 

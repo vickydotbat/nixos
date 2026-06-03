@@ -1,6 +1,22 @@
-{ config, lib, ... }:
+{
+  config,
+  lib,
+  repository,
+  selectedUsers,
+  ...
+}:
 let
   cfg = config.theorem.nixos.virtualisation.podman;
+  repositoryGroup = repository.group or "nixcfg";
+
+  isRepositoryUser =
+    _name: user:
+    (user.group or null) == repositoryGroup || lib.elem repositoryGroup (user.extraGroups or [ ]);
+
+  # The Docker-compatible Podman socket is an engine-control surface. Upstream
+  # gates it with the `podman` group, so grant that key only to repository
+  # stewards unless a host deliberately widens access elsewhere.
+  podmanSocketUsers = lib.attrNames (lib.filterAttrs isRepositoryUser selectedUsers);
 in
 {
   options.theorem.nixos.virtualisation.podman = {
@@ -31,8 +47,9 @@ in
       default = false;
       description = ''
         Expose the Docker-compatible Podman socket. This broadens what local
-        tools can ask the container engine to do; enable it only for a named
-        workflow that needs socket access.
+        tools can ask the container engine to do. When enabled, selected
+        repository stewards receive the `podman` group required to connect;
+        enable it only for a named workflow that needs socket access.
       '';
     };
   };
@@ -48,5 +65,11 @@ in
         defaultNetwork.settings.dns_enabled = cfg.composeDns.enable;
       };
     };
+
+    users.users = lib.mkIf cfg.dockerSocket.enable (
+      lib.genAttrs podmanSocketUsers (_: {
+        extraGroups = lib.mkAfter [ "podman" ];
+      })
+    );
   };
 }
