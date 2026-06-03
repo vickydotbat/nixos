@@ -31,10 +31,11 @@ the validation rite that proves it still holds.
   and Polkit may follow Plasma. Optional applications, firewall openings, backup
   jobs, and hardware conveniences should remain explicit choices.
 - Turn remaining host-shaped defaults into options before adding the next host:
-  boot loader family, networking backend, and GPU vendor support still deserve
-  sane defaults with host override points. SSH exposure, Bluetooth posture, and
-  Podman compatibility features now have explicit module options; keep future
-  host-shaped defaults on that same repair path.
+  additional GPU vendor profiles still deserve sane defaults with host override
+  points. Keep explicit theorem options for grouped mechanisms such as boot
+  loader family, Bluetooth service hardening, and Podman compatibility features;
+  use native NixOS options directly for single upstream settings such as SSH
+  firewall exposure, boot generation limits, and graphics library toggles.
 - Treat `run0` as a separate security profile until the per-user authorization
   model is real. A placeholder username in an authorization rule is not a
   mechanism; it is a warning light.
@@ -61,4 +62,9 @@ the validation rite that proves it still holds.
 
 ## In-File documentation
 
-- TODO: Document every module and its settings inside its individual .nix file. If its configuration is relevant on a wider scale, also document it in a global or directory-based README.md. Ensure directory README.md explain broad-stroke understanding of "what is this directory for?" and the root repo README.md explains how to navigate. Organize this section for long-term todo standard or fold it into readmes.
+- Document every module and its settings inside its individual `.nix` file. If
+  its configuration is relevant on a wider scale, also document it in a global
+  or directory-based `README.md`. Ensure directory `README.md` files explain
+  the broad-stroke purpose of the directory, and the root repository `README.md`
+  explains how to navigate. Fold this into a long-term documentation standard
+  or into the relevant readmes when the pattern settles.

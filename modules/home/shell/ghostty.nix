@@ -3,12 +3,23 @@
   lib,
   ...
 }:
-# FIXME: Opinionated. This is user configuration. Aim for solid defaults and then move the opinionated bits into user config for Vicky.
 let
   cfg = config.theorem.home.shell.ghostty;
 in
 {
-  options.theorem.home.shell.ghostty.enable = lib.mkEnableOption "Ghostty terminal";
+  options.theorem.home.shell.ghostty = {
+    enable = lib.mkEnableOption "Ghostty terminal";
+
+    zellijPassthrough.enable = lib.mkOption {
+      type = lib.types.bool;
+      default = config.theorem.home.shell.zellij.enable or false;
+      defaultText = lib.literalExpression "theorem.home.shell.zellij.enable";
+      description = ''
+        Unbind Ghostty shortcuts that Zellij should own when the user's Home
+        profile enables Zellij as the terminal workspace mechanism.
+      '';
+    };
+  };
 
   config = lib.mkIf cfg.enable {
     programs.ghostty = {
@@ -17,30 +28,21 @@ in
       installBatSyntax = true;
 
       settings = {
-        font-size = 11;
-        window-padding-x = 8;
-        window-padding-y = 8;
-        copy-on-select = "clipboard";
         shell-integration = "detect";
 
-        # FIXME: Some of this banks on whether we're using Zellij or some similar multiplexer. Cross-check both Zellij and Ghostty configuration and make deeper configuration, and especially derived configurations, where needed.
-
-        # Keep a fallback for plain shells. In Zellij sessions, the multiplexer
-        # owns pane scrollback and these overlapping shortcuts are passed through.
+        # Keep a repairable fallback for plain shells. When Zellij owns the
+        # workspace, its own scrollback settings carry the heavier state.
         scrollback-limit = 100000;
 
         # Keep terminal behavior simple.
         confirm-close-surface = false;
 
-        # Keep clipboard usable from terminal apps.
-        clipboard-read = "allow";
-        clipboard-write = "allow";
-
         # Good when terminal programs set titles.
         window-title-font-family = "inherit";
-
-        # Zellij owns terminal tabs, panes, pane focus, and scrollback navigation.
-
+      }
+      // lib.optionalAttrs cfg.zellijPassthrough.enable {
+        # Zellij owns terminal tabs, panes, pane focus, and scrollback
+        # navigation. Ghostty must pass these chords through for that theorem.
         keybind = [
           "shift+page_up=unbind"
           "shift+page_down=unbind"

@@ -1,6 +1,6 @@
 {
   imports = [
-    ./hardware-configuration.nix
+    ./hardware.nix
     ./profiles.nix
     ./secrets.nix
     ./storage.nix

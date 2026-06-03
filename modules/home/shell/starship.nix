@@ -3,7 +3,6 @@
   lib,
   ...
 }:
-# FIXME: Check for opinionated settings. Set good defaults and derived configuration and then fold the rest into vicky's user.
 let
   cfg = config.theorem.home.shell.starship;
 in

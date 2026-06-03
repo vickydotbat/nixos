@@ -3,27 +3,7 @@ let
   cfg = config.theorem.nixos.base.ssh;
 in
 {
-  options.theorem.nixos.base.ssh = {
-    enable = lib.mkEnableOption "base OpenSSH configuration";
-
-    openFirewall = lib.mkOption {
-      type = lib.types.bool;
-      default = true;
-      description = ''
-        Open the firewall for OpenSSH. Keep this explicit on hosts where SSH is
-        only needed over a private overlay or during a narrow maintenance rite.
-      '';
-    };
-
-    startAgent = lib.mkOption {
-      type = lib.types.bool;
-      default = true;
-      description = ''
-        Start the system SSH agent program. Disable this when user or desktop
-        configuration owns agent lifetime instead.
-      '';
-    };
-  };
+  options.theorem.nixos.base.ssh.enable = lib.mkEnableOption "base OpenSSH configuration";
 
   config = lib.mkIf cfg.enable {
     services.openssh = {
@@ -37,9 +17,9 @@ in
         UseDns = false;
       };
 
-      openFirewall = cfg.openFirewall;
+      openFirewall = lib.mkDefault true;
     };
 
-    programs.ssh.startAgent = cfg.startAgent;
+    programs.ssh.startAgent = lib.mkDefault true;
   };
 }

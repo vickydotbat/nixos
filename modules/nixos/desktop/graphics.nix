@@ -4,7 +4,6 @@
   pkgs,
   ...
 }:
-# TODO: This assumes too much, but enabling it if things that need graphics is a good start. This should also support specific setups like NVIDIA. My other system is a laptop with intel processor and nvidia and will need that versatility.
 let
   cfg = config.theorem.nixos.desktop.graphics;
   desktopNeedsGraphics =
@@ -27,7 +26,7 @@ in
   config = lib.mkIf cfg.enable {
     hardware.graphics = {
       enable = true;
-      enable32Bit = true;
+      enable32Bit = lib.mkDefault true;
     };
 
     environment.systemPackages = with pkgs; [

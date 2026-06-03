@@ -20,7 +20,10 @@ in
 {
   theorem.nixos = {
     base = {
-      boot.enable = true;
+      boot = {
+        enable = true;
+        loader = "systemd-boot";
+      };
       locale.enable = true;
       networking.enable = true;
       nix.enable = true;
@@ -38,7 +41,9 @@ in
       ];
       packages.enable = true;
       persistence.enable = true;
-      ssh.enable = true;
+      ssh = {
+        enable = true;
+      };
       users = {
         enable = true;
         accounts = lib.mapAttrs mkAccount selectedUsers;
@@ -46,14 +51,22 @@ in
     };
 
     desktop = {
-      bluetooth.enable = true;
+      audio = {
+        enable = true;
+      };
+      bluetooth = {
+        enable = true;
+        hardenService = true;
+      };
       plasma.enable = true;
       appimage.enable = true;
+      graphics.enable = true;
       flatpak.enable = false;
       jailwolf.enable = true;
     };
 
     gaming = {
+      core.enable = true;
       steam.enable = true;
     };
 
@@ -66,6 +79,8 @@ in
     };
 
     security = {
+      firejail.enable = true;
+      polkit.enable = true;
       sudo.enable = true;
     };
   };

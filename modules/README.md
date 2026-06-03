@@ -45,6 +45,23 @@ module a thin import of `users/<user>/` or another user-owned tree. The
 user tree is for selection and calibration; the module tree is the forge where
 the shared mechanism belongs.
 
+System modules follow the same law. `modules/nixos/` should expose boot,
+networking, desktop, security, persistence, and service mechanisms with named
+options when those options describe a real grouped posture. `hosts/<host>/`
+should use native NixOS options directly for one-to-one settings such as
+firewall exposure, boot generation limits, or graphics library toggles. A final
+system should build because the host and user profiles selected a shape, not
+because a reusable module quietly guessed which machine or operator it was
+serving.
+
+User-facing Home modules may include repair-minded defaults, but personal
+habits belong in `users/<user>/profiles.nix`: terminal font scale, clipboard
+trust, shell prompt posture, editor workflow, desktop layout, autostart choices,
+language stacks, and application preferences. If a value is already a direct
+Home Manager option, set that native option instead of wrapping it in a theorem
+option. Add theorem options only when they coordinate several settings or name a
+maintenance boundary.
+
 When a mechanism is only useful as another mechanism's substrate, prefer a
 derived default over another profile switch. Examples: fonts and XDG support
 following graphical applications, Home persistence following system

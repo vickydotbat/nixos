@@ -3,7 +3,10 @@
   lib,
   ...
 }:
-# FIXME: Opinionated. This is user configuration.
+# This is a curated Plasma user profile, not a neutral desktop substrate. It is
+# safe here only because users must opt into `theorem.home.desktop.plasma` from
+# their own profile; future users should split personal layout, shortcut, and
+# application preference groups into options before inheriting this whole shape.
 let
   cfg = config.theorem.home.desktop.plasma;
 in

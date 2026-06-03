@@ -21,6 +21,15 @@ The reusable mechanisms live elsewhere. A host should declare which theorems it 
   survive impermanence.
 - `solanine/secrets.nix` binds encrypted secret names to their runtime destinations.
 
+## Profile Doctrine
+
+The host profile is where machine-shaped opinions become explicit: boot loader
+family, Bluetooth radio posture, container compatibility layers, desktop
+selection, gaming substrate, and the security elevation mechanism. Reusable
+modules should provide theorem options for grouped mechanisms. For single
+upstream settings, use native NixOS options directly instead of forging another
+wrapper.
+
 ## Failure Modes
 
 - Do not put reusable desktop, package, or service doctrine here unless it is genuinely host-specific.

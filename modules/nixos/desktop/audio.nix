@@ -14,12 +14,7 @@ in
     '';
     description = "Enable the desktop audio stack when desktop or gaming theorems need sound.";
   };
-  /*
-    TODO: Add profiles for wireplumber/pipewire settings.
-    At minimum:
-    - "High quality" = good clock defaults for high fidelity
-    - Default, for average quality.
-  */
+
   config = lib.mkIf cfg.enable {
     services.pipewire = {
       enable = true;

@@ -17,6 +17,17 @@ Home Manager modules consume the chosen user's home profile.
 - `vicky/` is the current daily-driver user, including her Home Manager profile
   and SSH client settings.
 
+## Home Profile Doctrine
+
+The user profile is where personal Home Manager choices belong: terminal font
+scale, clipboard trust, multiplexer key ownership, desktop layout, editor
+workflow, language stacks, application autostart, and theme or prompt posture.
+Reusable modules under `modules/home/` should expose those as options or carry
+small repair-minded defaults. If a setting is only true for one operator and
+Home Manager already exposes it directly, set that native option in the user's
+profile. Theorem options are for coordinated mechanisms, not renamed copies of
+package settings.
+
 ## Shared Configuration Access
 
 `admin` and `vicky` both belong to the `nixcfg` group. The group is declared by

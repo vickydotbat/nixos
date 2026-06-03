@@ -7,15 +7,6 @@ in
   options.theorem.nixos.desktop.bluetooth = {
     enable = lib.mkEnableOption "desktop Bluetooth support";
 
-    powerOnBoot = lib.mkOption {
-      type = lib.types.bool;
-      default = false;
-      description = ''
-        Power on Bluetooth automatically during boot. The default keeps radios
-        quiet until the operator asks for them.
-      '';
-    };
-
     hardenService = lib.mkOption {
       type = lib.types.bool;
       default = true;
@@ -30,7 +21,7 @@ in
   config = lib.mkIf cfg.enable {
     hardware.bluetooth = {
       enable = true;
-      powerOnBoot = cfg.powerOnBoot;
+      powerOnBoot = lib.mkDefault false;
     };
 
     systemd.services.bluetooth.serviceConfig = lib.mkIf cfg.hardenService {

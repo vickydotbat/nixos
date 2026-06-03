@@ -4,7 +4,6 @@
   pkgs,
   ...
 }:
-# TODO: Always enable on hardened systems.
 let
   cfg = config.theorem.nixos.security.firejail;
 in
@@ -14,7 +13,11 @@ in
       type = lib.types.bool;
       default = config.theorem.nixos.desktop.jailwolf.enable;
       defaultText = lib.literalExpression "theorem.nixos.desktop.jailwolf.enable";
-      description = "Enable Firejail sandboxing when a Firejail-backed desktop theorem needs it.";
+      description = ''
+        Enable Firejail sandboxing when a Firejail-backed desktop theorem needs
+        it. A future hardened system profile may also select this explicitly;
+        optional sandboxed applications should still remain profile choices.
+      '';
     };
 
     installCli = lib.mkOption {

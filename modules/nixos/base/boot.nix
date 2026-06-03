@@ -3,19 +3,32 @@
   lib,
   ...
 }:
-#TODO: We always use boot. Break this up so it is always enabled by default, but allow different versions: Grub, possibly Lanzaboot options, etc.
 let
   cfg = config.theorem.nixos.base.boot;
 in
 {
-  options.theorem.nixos.base.boot.enable = lib.mkEnableOption "base boot configuration";
+  options.theorem.nixos.base.boot = {
+    enable = lib.mkEnableOption "base boot configuration";
+
+    loader = lib.mkOption {
+      type = lib.types.enum [
+        "systemd-boot"
+      ];
+      default = "systemd-boot";
+      description = ''
+        Boot loader family for this host. Only `systemd-boot` is forged here
+        today; add GRUB or Lanzaboote as separate, named mechanisms when a host
+        actually needs them.
+      '';
+    };
+  };
 
   config = lib.mkIf cfg.enable {
-    boot.loader.systemd-boot = {
+    boot.loader.systemd-boot = lib.mkIf (cfg.loader == "systemd-boot") {
       enable = true;
-      configurationLimit = 10;
+      configurationLimit = lib.mkDefault 10;
     };
 
-    boot.loader.efi.canTouchEfiVariables = true;
+    boot.loader.efi.canTouchEfiVariables = lib.mkDefault true;
   };
 }

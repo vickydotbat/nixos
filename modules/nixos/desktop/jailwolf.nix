@@ -4,7 +4,6 @@
   pkgs,
   ...
 }:
-# TODO: Derive Jailwolf from whether the firejail addon is enabled, but allow it to enabled manually. Make it expect graphics in order to be enabled. Always enable it when firejail is enabled.
 let
   cfg = config.theorem.nixos.desktop.jailwolf;
 
@@ -66,8 +65,11 @@ let
   };
 in
 {
-  options.theorem.nixos.desktop.jailwolf.enable =
-    lib.mkEnableOption "Firejailed LibreWolf disposable browser";
+  options.theorem.nixos.desktop.jailwolf.enable = lib.mkEnableOption ''
+    Firejailed LibreWolf disposable browser. This stays an explicit desktop
+    application choice; the Firejail substrate may follow it, but Firejail alone
+    should not summon a browser onto a host.
+  '';
 
   config = lib.mkIf cfg.enable {
     programs.firejail.wrappedBinaries = {
