@@ -5,7 +5,7 @@
   pkgs,
   ...
 }:
-
+# TODO: SSH defaults for system-wide need evaluation, but this module should only allow itself to be enabled when systemwide SSH is also enabled. It should however be disabled by default. Likewise it needs per-user configuration. Some users might not use this.
 let
   sshEnabled = (osConfig.theorem.nixos.base.ssh.enable or false);
   username = config.home.username;

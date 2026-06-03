@@ -3,7 +3,7 @@
   lib,
   ...
 }:
-
+# TODO: Consider good plasma defaults. Also add other desktop options like GNOME. Allow a switch to enable/disable X11 versions. etc.
 let
   cfg = config.theorem.nixos.desktop.plasma;
 in

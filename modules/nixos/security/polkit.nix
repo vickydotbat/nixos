@@ -1,5 +1,5 @@
 { config, lib, ... }:
-
+# TODO: Rethink this, understand what polkit is good for and where it needs to be enabled.
 let
   cfg = config.theorem.nixos.security.polkit;
 in

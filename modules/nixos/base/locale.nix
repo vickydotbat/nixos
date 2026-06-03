@@ -1,5 +1,5 @@
 { config, lib, ... }:
-
+# TODO: Locale ALWAYS needs to be enabled. Just make sure it's configurable per-host.
 let
   cfg = config.theorem.nixos.base.locale;
 in

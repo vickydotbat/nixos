@@ -1,13 +1,25 @@
 { config, lib, ... }:
-
+# TODO: These are global defaults. Use lib.mkDefault where necessary but this should not be put on a toggle.
 let
   cfg = config.theorem.nixos.base.nix;
 in
 {
   options.theorem.nixos.base.nix.enable = lib.mkEnableOption "base Nix daemon configuration";
+  options.theorem.nixos.base.nix.unfreePackageNames = lib.mkOption {
+    type = lib.types.listOf lib.types.str;
+    default = [ ];
+    description = ''
+      Exact package names allowed through the unfree predicate.
+      Modules and hosts should add only packages they actually enable.
+    '';
+  };
 
   config = lib.mkIf cfg.enable {
-    nixpkgs.config.allowUnfree = false; # Use predicates
+    nixpkgs.config = {
+      allowUnfree = false;
+      allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) cfg.unfreePackageNames;
+    };
+
     nix = {
       settings = {
         auto-optimise-store = true;

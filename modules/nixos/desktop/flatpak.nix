@@ -1,5 +1,5 @@
 { config, lib, ... }:
-
+# TODO: Flatpak needs hardening.
 let
   cfg = config.theorem.nixos.desktop.flatpak;
 in

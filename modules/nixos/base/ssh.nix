@@ -1,5 +1,5 @@
 { config, lib, ... }:
-
+# TODO: SSH needs hardening. SSH should also be disabled by default. Also, how is it populating systemwide SSH keys? If this is disabled, those keys should cease to exist on the system. Make sure any systemwide ssh key evaluation is done here, where able.
 let
   cfg = config.theorem.nixos.base.ssh;
 in

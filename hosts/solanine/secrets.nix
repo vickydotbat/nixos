@@ -1,5 +1,5 @@
 { lib, ... }:
-
+# TODO: Opinionated. This must be evaluated on per-user basis. Not explicitly. This file should simply declare names or what needs to be generated. See other modules for more notes. Again: SSH should derive from SSH module where possible. Don't populate SSH keys if SSH is disabled. Etc.
 let
   hostSecretsFile = ../../secrets/solanine.yaml;
   userSshSecretsFile = ../../secrets/ssh-vicky.yaml;

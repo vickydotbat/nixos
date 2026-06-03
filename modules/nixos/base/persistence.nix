@@ -3,7 +3,7 @@
   lib,
   ...
 }:
-
+# TODO: There is no distinction between the btrfs-with-snapshot technique and the current TMPFS technique. Also, many other modules derived from persistance assume, in a way that is not reproducible, that we always use the TMPFS technique. TMPFS has different requirements, such as needing to persist /tmp so that it doesn't go to ram (meanwhile BTRFS would be the reverse: wanting /tmp ON ram). Analysis and refactor needed.
 let
   cfg = config.theorem.nixos.base.persistence;
 in

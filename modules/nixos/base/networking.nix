@@ -1,5 +1,5 @@
 { config, lib, ... }:
-
+# TODO: Networkmanager is an opinionated default but most systems need internet. Rethink this for host-to-host configuration and allow different options.
 let
   cfg = config.theorem.nixos.base.networking;
 in

@@ -3,7 +3,7 @@
   lib,
   ...
 }:
-
+#TODO: We always use boot. Break this up so it is always enabled by default, but allow different versions: Grub, possibly Lanzaboot options, etc.
 let
   cfg = config.theorem.nixos.base.boot;
 in

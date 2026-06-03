@@ -1,5 +1,5 @@
 { config, lib, ... }:
-
+# TODO: Let a list of users be controlled exclusively by hosts. This module should always generate an "admin" user in the "Wheel" group and then automatically populate passwords from SOPS for all users. I would consider having most user-specific settings be in a /users directory somewhere in the repository to set up THAT user. Meanwhile, this file just configures the Admin user.
 let
   cfg = config.theorem.nixos.base.users;
 in

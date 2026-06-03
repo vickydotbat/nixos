@@ -4,7 +4,7 @@
   pkgs,
   ...
 }:
-
+# TODO: Always enable on hardened systems.
 let
   cfg = config.theorem.nixos.security.firejail;
 in

@@ -100,7 +100,7 @@ symlinkJoin {
       $out/bin/gimp-console-3 \
       $out/bin/gimp-console-3.0
 
-    makeWrapper ${gimp}/bin/gimp-3.0 $out/bin/gimp-3.0 \
+    makeWrapper ${gimp}/bin/gimp $out/bin/gimp-3.0 \
       --set GIMP3_PLUGINDIR "$out/lib/gimp/3.0" \
       --set GIMP3_DATADIR "$out/share/gimp/3.0" \
       --set PATH ${pluginRuntimePath} \
@@ -108,7 +108,7 @@ symlinkJoin {
     ln -s gimp-3.0 $out/bin/gimp
     ln -s gimp-3.0 $out/bin/gimp-3
 
-    makeWrapper ${gimp}/bin/gimp-console-3.0 $out/bin/gimp-console-3.0 \
+    makeWrapper ${gimp}/bin/gimp-console $out/bin/gimp-console-3.0 \
       --set GIMP3_PLUGINDIR "$out/lib/gimp/3.0" \
       --set GIMP3_DATADIR "$out/share/gimp/3.0" \
       --set PATH ${pluginRuntimePath} \

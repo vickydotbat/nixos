@@ -1,3 +1,5 @@
+# TODO: This can possibly be made part of the persistance module. Again, watch for derived configurations: SSH should only persist when SSH is enabled, per-user configuration should be handled automatically, etc.
+
 {
   config,
   lib,

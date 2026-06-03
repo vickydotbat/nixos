@@ -5,9 +5,11 @@
   pkgs,
   ...
 }:
-
+# TODO: Ensure /tmp linking works correctly. This ensures compatibility between both root on tmpfs and root on ephemeral btrfs models.
 let
   cfg = config.theorem.home.base.persistence;
+
+  # TODO: See this? This is suggested by ChatGPT for all systempersistance checks to ensure evaluation always works. If valid, apply everywhere.
   systemPersistenceEnabled =
     if osConfig == null then false else osConfig.theorem.nixos.base.persistence.enable or false;
 

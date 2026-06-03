@@ -4,7 +4,7 @@
   pkgs,
   ...
 }:
-
+# TODO: These are global defaults, most of them (maybe except the disk tools and wine). Reconsider this being a toggle and instead just set up good global defaults.
 let
   cfg = config.theorem.nixos.base.packages;
 in
@@ -13,18 +13,10 @@ in
 
   config = lib.mkIf cfg.enable {
     environment.systemPackages = with pkgs; [
-      nano
       git
-      zip
+      nano
       unzip
-      unrar
-      p7zip
-      e2fsprogs
-      btrfs-progs
-      nvme-cli
-      smartmontools
-
-      wineWow64Packages.staging
+      zip
     ];
   };
 }

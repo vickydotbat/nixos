@@ -4,7 +4,7 @@
   pkgs,
   ...
 }:
-
+# TODO: Derive Jailwolf from whether the firejail addon is enabled, but allow it to enabled manually. Make it expect graphics in order to be enabled. Always enable it when firejail is enabled.
 let
   cfg = config.theorem.nixos.desktop.jailwolf;
 
