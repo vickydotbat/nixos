@@ -283,31 +283,45 @@ in
       bat.enable = true;
       codex = {
         enable = true;
-        initialConfig = {
-          enable = true;
-          settings = {
-            model = "gpt-5.5";
-            model_reasoning_effort = "high";
-            model_reasoning_summary = "concise";
-            model_verbosity = "medium";
+        superpowers.enable = true;
+        settings = {
+          model = "gpt-5.5";
+          model_reasoning_effort = "high";
+          model_reasoning_summary = "concise";
+          model_verbosity = "medium";
 
-            approval_policy = "never";
-            sandbox_mode = "workspace-write";
+          approval_policy = "never";
+          sandbox_mode = "workspace-write";
 
-            web_search = "cached";
-            file_opener = "vscode";
-            hide_agent_reasoning = true;
+          web_search = "cached";
+          file_opener = "vscode";
+          hide_agent_reasoning = true;
 
-            history.persistence = "none";
+          history.persistence = "none";
 
-            sandbox_workspace_write = {
-              network_access = false;
-              exclude_slash_tmp = true;
-              exclude_tmpdir_env_var = true;
-            };
-
-            shell_environment_policy."inherit" = "core";
+          sandbox_workspace_write = {
+            network_access = false;
+            exclude_slash_tmp = true;
+            exclude_tmpdir_env_var = true;
           };
+
+          shell_environment_policy."inherit" = "core";
+        };
+
+        context = ''
+          Prefer small, reviewable changes.
+          Do not run destructive commands unless explicitly asked.
+          For NixOS work, prefer `nix flake check`, targeted `nix eval`, and `nixos-rebuild dry-build` before switching.
+        '';
+
+        rules = {
+          default = ''
+            prefix_rule(pattern = ["nix", "flake", "check"], decision = "allow")
+            prefix_rule(pattern = ["nix", "eval"], decision = "allow")
+            prefix_rule(pattern = ["nix", "fmt"], decision = "allow")
+            prefix_rule(pattern = ["git", "status"], decision = "allow")
+            prefix_rule(pattern = ["git", "diff"], decision = "allow")
+          '';
         };
       };
       ghostty.enable = true;

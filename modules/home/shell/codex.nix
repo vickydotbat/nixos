@@ -12,6 +12,10 @@ let
   system = pkgs.stdenv.hostPlatform.system;
   toml = pkgs.formats.toml { };
   initialConfigFile = toml.generate "codex-config.toml" cfg.initialConfig.settings;
+  superpowersSkills =
+    lib.mapAttrs
+      (name: _type: lib.mkDefault (cfg.superpowers.source + "/${name}"))
+      (builtins.readDir cfg.superpowers.source);
 in
 {
   options.theorem.home.shell.codex = {
@@ -33,6 +37,80 @@ in
       default = persistenceEnabled;
       defaultText = lib.literalExpression "theorem.home.base.persistence.enable";
       description = "Persist Codex state when Home persistence is active.";
+    };
+
+    trustNixosConfiguration = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = ''
+        Trust `/nix/nixos` as a Codex project. Disable this on hosts where the
+        repository is mounted for inspection only, or where trust should be
+        granted by hand after checking the local worktree.
+      '';
+    };
+
+    settings = lib.mkOption {
+      type = toml.type;
+      default = { };
+      description = ''
+        Additional Codex settings written to `~/.codex/config.toml`. The module
+        provides conservative defaults with `mkDefault`; user profiles should
+        set model choice, approval posture, and other personal doctrine here.
+      '';
+    };
+
+    context = lib.mkOption {
+      type = lib.types.either lib.types.lines lib.types.path;
+      default = "";
+      description = ''
+        Global Codex context written to `~/.codex/AGENTS.md`. Keep this short:
+        repository doctrine belongs in project `AGENTS.md`, while this is the
+        operator's portable field note.
+      '';
+    };
+
+    rules = lib.mkOption {
+      type = lib.types.attrsOf (lib.types.either lib.types.lines lib.types.path);
+      default = { };
+      description = ''
+        Codex rule files managed under `~/.codex/rules`. User profile values
+        override the default allow-list when the same rule name is declared.
+      '';
+    };
+
+    defaultRules.enable = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = ''
+        Install a small default Codex command allow-list for low-risk inspection
+        and Nix validation commands. Disable when every recurring approval
+        should be trained interactively instead.
+      '';
+    };
+
+    superpowers = {
+      enable = lib.mkEnableOption "Superpowers Codex skills";
+
+      source = lib.mkOption {
+        type = lib.types.path;
+        default = inputs.superpowers + "/skills";
+        defaultText = lib.literalExpression ''inputs.superpowers + "/skills"'';
+        description = ''
+          Directory containing Superpowers skill folders. Defaults to the
+          pinned `superpowers` flake input so updates pass through `flake.lock`
+          instead of an unmanaged `git pull`.
+        '';
+      };
+    };
+
+    skills = lib.mkOption {
+      type = lib.types.attrsOf (lib.types.either lib.types.lines lib.types.path);
+      default = { };
+      description = ''
+        Additional Codex skills. These are merged with Superpowers when enabled;
+        profile-defined skills win if a name collides, so local repair doctrine
+        can overrule the imported kit.
+      '';
     };
 
     initialConfig = {
@@ -59,9 +137,60 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    home.packages = [
-      cfg.package
-    ];
+    programs.codex = {
+      enable = true;
+      package = cfg.package;
+
+      settings = lib.mkMerge [
+        {
+          approval_policy = lib.mkDefault "on-request";
+          sandbox_mode = lib.mkDefault "workspace-write";
+          web_search = lib.mkDefault "cached";
+          hide_agent_reasoning = lib.mkDefault true;
+
+          history.persistence = lib.mkDefault "none";
+
+          sandbox_workspace_write = {
+            network_access = lib.mkDefault false;
+            exclude_slash_tmp = lib.mkDefault true;
+            exclude_tmpdir_env_var = lib.mkDefault true;
+          };
+
+          shell_environment_policy."inherit" = lib.mkDefault "core";
+        }
+        (lib.mkIf cfg.trustNixosConfiguration {
+          projects."/nix/nixos".trust_level = lib.mkDefault "trusted";
+        })
+        cfg.settings
+      ];
+
+      context = lib.mkMerge [
+        (lib.mkDefault ''
+          Prefer small, reviewable changes.
+          Do not run destructive commands unless explicitly asked.
+          For NixOS work, prefer `nix flake check`, targeted `nix eval`, and `nixos-rebuild dry-build` before switching.
+        '')
+        cfg.context
+      ];
+
+      rules = lib.mkMerge [
+        (lib.mkIf cfg.defaultRules.enable {
+          default = lib.mkDefault ''
+            prefix_rule(pattern = ["nix", "flake", "check"], decision = "allow")
+            prefix_rule(pattern = ["nix", "eval"], decision = "allow")
+            prefix_rule(pattern = ["nix", "fmt"], decision = "allow")
+            prefix_rule(pattern = ["git", "status"], decision = "allow")
+            prefix_rule(pattern = ["git", "diff"], decision = "allow")
+          '';
+        })
+        cfg.rules
+      ];
+
+      skills = lib.mkMerge [
+        (lib.mkIf cfg.superpowers.enable superpowersSkills)
+        cfg.skills
+      ];
+    };
 
     home.persistence."/nix/persist" = lib.mkIf cfg.persistState {
       directories = [
