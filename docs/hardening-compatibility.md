@@ -37,7 +37,7 @@ and the host signal that proves it is safe.
 | `dbus-broker` | Available as opt-in | Desktop portals and user services need session testing. | Boot Plasma, test portals, Flatpak if enabled, and inspect user service health. |
 | Volatile-only journald | Disabled | Post-reboot incident diagnosis becomes weaker. | Decide per host whether privacy or forensic continuity matters more. |
 | Fail2Ban | Disabled | Trusted LAN mistakes can ban the operator if ignore lists are wrong. | Enable only for exposed SSH and declare trusted address ranges. |
-| Chrony NTS | Disabled | Server choice and time sync behavior need validation. | Select NTS-capable servers and verify with `chronyc -N authdata`. |
+| Chrony NTS | Enabled by the hardening profile | NTS-KE uses TLS on port 4460, and provider or firewall problems can leave the host unsynchronized. | Verify selected servers with `chronyc -N authdata`; override `theorem.nixos.security.hardening.timeSync.chronyNts.servers` when locality or trust requires a different source. |
 | USBGuard | Disabled | Bad rules can block keyboards, mice, docks, and recovery devices. | Create a no-USBGuard boot specialization before enabling. |
 | AIDE checks | Tool-only optional profile | Database churn is noisy on desktops and useless without persistence/update rites. | Design database paths, update command, and persistence before scheduling checks. |
 | ClamAV scans | Tool-only optional profile | Daemons and broad scans can consume resources and create noisy logs. | Choose daemon or scheduled `clamscan`, not both by accident. |

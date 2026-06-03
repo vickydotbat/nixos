@@ -254,7 +254,7 @@ decoration.
 
 ## Time, Boot, Kernel, And Sysctl
 
-- [ ] Replace or supplement `timesyncd` with Chrony using Network Time Security.
+- [x] Replace or supplement `timesyncd` with Chrony using Network Time Security.
   - Why: NTS authenticates time synchronization and reduces tampering risk.
   - How: enable `services.chrony.enable = true` and
     `services.chrony.enableNTS = true`; choose a small, maintained server set;
@@ -262,6 +262,13 @@ decoration.
   - Achieves: authenticated network time for hosts that depend on correct clocks.
   - Default posture: likely safe, but verify service interactions first.
   - Validation: `chronyc -N authdata` shows NTS authentication.
+  - Completed: the hardening profile now enables Chrony with NTS by default,
+    selects `time.cloudflare.com`, `sth1.nts.netnod.se`, and
+    `sth2.nts.netnod.se` as the initial maintained server set, and uses
+    `mkForce false` for `services.timesyncd.enable` while Chrony NTS owns the
+    clock. Hosts can disable `theorem.nixos.security.hardening.timeSync.chronyNts`
+    or override its `servers` list when locality, firewall policy, or provider
+    trust requires another time source.
 
 - [ ] Add Secure Boot/lanzaboote as a separate project.
   - Why: Secure Boot helps ensure only trusted kernels and bootloaders execute
@@ -721,7 +728,7 @@ decoration.
 1. Safe defaults still open: package hygiene review and service-disable defaults
    derived from existing module enables.
 2. Derived defaults: SUID wrapper minimization, sysctl safe tier,
-   Flatpak/portal posture, Fail2Ban, Chrony NTS, and selected service hardening.
+   Flatpak/portal posture, Fail2Ban, and selected service hardening.
 3. Host-sensitive mechanisms: USBGuard, impermanence, hardened allocator,
    hardened kernel, boot parameters, module blacklists, Secure Boot, AIDE, and
    ClamAV.

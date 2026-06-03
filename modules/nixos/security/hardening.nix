@@ -50,8 +50,7 @@ in
       allowUnprivilegedUserNamespaces = lib.mkOption {
         type = lib.types.bool;
         default =
-          config.theorem.nixos.desktop.flatpak.enable
-          || config.theorem.nixos.virtualisation.podman.enable;
+          config.theorem.nixos.desktop.flatpak.enable || config.theorem.nixos.virtualisation.podman.enable;
         defaultText = lib.literalExpression ''
           theorem.nixos.desktop.flatpak.enable
           || theorem.nixos.virtualisation.podman.enable
@@ -108,6 +107,33 @@ in
       '';
     };
 
+    timeSync.chronyNts = {
+      enable = lib.mkOption {
+        type = lib.types.bool;
+        default = true;
+        description = ''
+          Replace systemd-timesyncd with Chrony using Network Time Security.
+          This protects clock synchronization from unauthenticated network time
+          while keeping the sharper service replacement inside the opted-in
+          hardening profile.
+        '';
+      };
+
+      servers = lib.mkOption {
+        type = lib.types.listOf lib.types.str;
+        default = [
+          "time.cloudflare.com"
+          "sth1.nts.netnod.se"
+          "sth2.nts.netnod.se"
+        ];
+        description = ''
+          NTS-capable time servers used by Chrony when the hardening profile
+          owns time synchronization. Override this per host if locality,
+          firewall policy, or provider trust requires a different time source.
+        '';
+      };
+    };
+
     dbusBroker.enable = lib.mkOption {
       type = lib.types.bool;
       default = false;
@@ -119,45 +145,59 @@ in
     };
   };
 
-  config = lib.mkIf cfg.enable (lib.mkMerge [
-    (lib.mkIf cfg.kernel.enable {
-      security = {
-        protectKernelImage = lib.mkDefault cfg.kernel.protectKernelImage;
-        forcePageTableIsolation = lib.mkDefault cfg.kernel.forcePageTableIsolation;
-        lockKernelModules = lib.mkDefault cfg.kernel.lockKernelModules;
-        unprivilegedUsernsClone = lib.mkDefault cfg.kernel.allowUnprivilegedUserNamespaces;
-      };
-    })
+  config = lib.mkIf cfg.enable (
+    lib.mkMerge [
+      (lib.mkIf cfg.kernel.enable {
+        security = {
+          protectKernelImage = lib.mkDefault cfg.kernel.protectKernelImage;
+          forcePageTableIsolation = lib.mkDefault cfg.kernel.forcePageTableIsolation;
+          lockKernelModules = lib.mkDefault cfg.kernel.lockKernelModules;
+          unprivilegedUsernsClone = lib.mkDefault cfg.kernel.allowUnprivilegedUserNamespaces;
+        };
+      })
 
-    (lib.mkIf cfg.coredumps.disable {
-      systemd.coredump.enable = lib.mkDefault false;
+      (lib.mkIf cfg.coredumps.disable {
+        systemd.coredump.enable = lib.mkDefault false;
 
-      security.pam.loginLimits = [
-        {
-          domain = "*";
-          type = "-";
-          item = "core";
-          value = 0;
-        }
-      ];
-    })
+        security.pam.loginLimits = [
+          {
+            domain = "*";
+            type = "-";
+            item = "core";
+            value = 0;
+          }
+        ];
+      })
 
-    (lib.mkIf cfg.journald.boundLocalLogs {
-      services.journald = {
-        upload.enable = lib.mkDefault false;
-        extraConfig = lib.mkAfter ''
-          SystemMaxUse=${cfg.journald.systemMaxUse}
-          RuntimeMaxUse=${cfg.journald.runtimeMaxUse}
-        '';
-      };
-    })
+      (lib.mkIf cfg.journald.boundLocalLogs {
+        services.journald = {
+          upload.enable = lib.mkDefault false;
+          extraConfig = lib.mkAfter ''
+            SystemMaxUse=${cfg.journald.systemMaxUse}
+            RuntimeMaxUse=${cfg.journald.runtimeMaxUse}
+          '';
+        };
+      })
 
-    (lib.mkIf cfg.logrotate.enable {
-      services.logrotate.enable = lib.mkDefault true;
-    })
+      (lib.mkIf cfg.logrotate.enable {
+        services.logrotate.enable = lib.mkDefault true;
+      })
 
-    (lib.mkIf cfg.dbusBroker.enable {
-      services.dbus.implementation = lib.mkDefault "broker";
-    })
-  ]);
+      (lib.mkIf cfg.timeSync.chronyNts.enable {
+        services = {
+          chrony = {
+            enable = lib.mkDefault true;
+            enableNTS = lib.mkDefault true;
+            servers = lib.mkDefault cfg.timeSync.chronyNts.servers;
+          };
+
+          timesyncd.enable = lib.mkForce false;
+        };
+      })
+
+      (lib.mkIf cfg.dbusBroker.enable {
+        services.dbus.implementation = lib.mkDefault "broker";
+      })
+    ]
+  );
 }
