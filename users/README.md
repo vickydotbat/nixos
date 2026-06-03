@@ -17,6 +17,22 @@ Home Manager modules consume the chosen user's home profile.
 - `vicky/` is the current daily-driver user, including her Home Manager profile
   and SSH client settings.
 
+## Enabling the Guest Account
+
+The guest account exists in the user registry, but no host receives it until the
+host selects it. For `solanine`, add `guest` to `selectedUsers` in `flake.nix`:
+
+```nix
+selectedUsers = {
+  inherit (userRegistry) admin guest vicky;
+};
+```
+
+Then run the usual NixOS test activation before switching. The account has no
+password secret, no SSH profile, no Home Manager profile, and no supplementary
+groups by default. Those absences are part of the boundary; widen them only when
+the host names the workflow and accepts the failure mode.
+
 ## Home Profile Doctrine
 
 The user profile is where personal Home Manager choices belong: terminal font

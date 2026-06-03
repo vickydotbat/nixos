@@ -170,7 +170,9 @@
         self = inputs.self;
         hostPath = ./hosts/solanine;
         selectedUsers = {
-          inherit (userRegistry) admin vicky;
+          # Add `guest` here when this host should expose the low-access guest
+          # account: `inherit (userRegistry) admin guest vicky;`.
+          inherit (userRegistry) admin vicky guest;
         };
       };
     };

@@ -1,8 +1,12 @@
+let
+  thisUser = "guest";
+in
 {
-  username = "guest";
+  username = "${thisUser}";
   description = "Low-access guest account";
   uid = 29999;
-  homeDirectory = "/home/guest";
+  homeDirectory = "/home/${thisUser}";
+  avatar = ./avatar.png;
   extraGroups = [ ];
   passwordHashSecret = null;
 
