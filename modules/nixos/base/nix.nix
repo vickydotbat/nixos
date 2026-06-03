@@ -35,12 +35,19 @@ in
     };
 
     nix = {
+      extraOptions = [ "gc-keep-outputs = true" ]; # Prevent immediate garbage collection
       settings = {
         auto-optimise-store = true;
         experimental-features = [
           "nix-command"
           "flakes"
         ];
+
+        # Always require signatures
+        require-sigs = lib.mkForce true;
+
+        # Use substitutes for builders
+        builders-use-substitutes = true;
 
         # Use prebuilt binaries
         substituters = [ "https://cache.nixos.org" ];

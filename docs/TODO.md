@@ -71,3 +71,43 @@ the validation rite that proves it still holds.
   the broad-stroke purpose of the directory, and the root repository `README.md`
   explains how to navigate. Fold this into a long-term documentation standard
   or into the relevant readmes when the pattern settles.
+
+## YubiKey Support
+
+- Research a YubiKey support module before binding any account or screen unlock
+  path to a hardware key. The first mechanism should enable the local substrate:
+  USB device access, `pcscd` or FIDO/U2F support as needed, browser and SSH
+  compatibility, and diagnostics that prove the key is visible.
+- Do not make YubiKeys mandatory MFA until loss and recovery are designed. The
+  failure mode is severe: a misplaced token should not lock the operator out of
+  the machine, secrets, or rebuild path.
+- Decide which use cases belong in separate options: SSH resident keys, browser
+  WebAuthn, LUKS or PAM unlock, KeePassXC challenge-response, and graphical
+  screen unlock. Each one has a different recovery rite and should not be
+  summoned by a single broad switch.
+- Validation: test at least two physical keys, unplug one during login and
+  unlock attempts, confirm recovery credentials still work, and document the
+  command that proves the hardware path is available.
+
+## Plasma Default Posture
+
+- Decide whether new graphical hosts should select Plasma by default until a
+  different desktop profile is explicitly enabled. Plasma is well supported in
+  this flake today and gives new hosts a repairable fallback interface, but the
+  default should remain a declared profile choice rather than a hidden import.
+- Keep Wayland as the default display path. X11 should stay disabled or
+  narrowly available unless a host names the application that still requires it.
+  The failure mode is an older display server becoming an ambient attack surface
+  because it was convenient during installation.
+- Let window-manager profiles such as Hyprland, Sway, or Niri coexist with
+  Plasma where their display-manager requirements allow it. Desktop environments
+  that require their own login stack, such as GNOME with GDM, should disable or
+  replace Plasma through explicit module logic.
+- Split personal Plasma preferences from reusable defaults. The current Home
+  Manager Plasma settings are close to Vicky's working surface; the reusable
+  module should carry only broadly useful defaults, with themes, layout habits,
+  and operator-specific shortcuts kept in user profiles.
+- Validation: evaluate a new graphical host with no user-specific desktop
+  imports, boot it in a VM if practical, confirm Wayland login works, confirm
+  Plasma remains available after adding a compatible window-manager profile, and
+  verify GNOME-style profiles make the replacement explicit.

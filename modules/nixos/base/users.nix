@@ -59,7 +59,8 @@ let
       };
     }
   );
-  # FIXME: Does this check if the system uses impermanence at all? It may only need to update it once otherwise, except when the avatar changes.
+  # AccountsService state is mutable host state even without impermanence. Keep
+  # the activation rite idempotent so avatar changes are repaired on rebuild.
   accountsWithAvatars = lib.filterAttrs (
     _: account: account.enable && account.avatar != null
   ) cfg.accounts;

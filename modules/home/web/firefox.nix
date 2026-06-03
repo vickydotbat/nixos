@@ -1,11 +1,9 @@
 {
   config,
-  inputs,
   lib,
   pkgs,
   ...
 }:
-
 let
   cfg = config.theorem.home.web.firefox;
 
@@ -91,6 +89,10 @@ in
             Privacy & Telemetry
             -------------------
           */
+
+          # Ensure Site Isolation is enabled
+          "fission.autostart" = true;
+          "gfx.webrender.all" = true;
 
           # Privacy-ish, without going full breakage mode
           "privacy.donottrackheader.enabled" = true;

@@ -49,14 +49,15 @@ in
     home.persistence."/nix/persist" = {
       directories = [
         ".local/share/systemd/timers"
-        ".local/share/nix" # TODO: Needed? And if so, for what?
+        # User-scoped Nix state for profile and registry metadata when the home
+        # directory is rebuilt from an ephemeral root.
+        ".local/share/nix"
         ".cache/nix" # Nix cache -- must keep when using tmpfs
 
         # XDG Directories
         "Documents"
         "Pictures"
         "Videos"
-        # "Downloads" # TODO: Make persistence dependant on whether volatile-downloads is enabled. If disabled, this will persist. If enabled, it will not.
         "Projects"
         "Music"
         "Templates"
@@ -69,6 +70,9 @@ in
         "Games"
         "Applications"
 
+      ]
+      ++ lib.optionals (!cfg.volatileDownloads.enable) [
+        "Downloads"
       ];
 
       files = [

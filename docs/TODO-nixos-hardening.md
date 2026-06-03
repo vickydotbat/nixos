@@ -158,6 +158,55 @@ decoration.
     desktop profile.
   - Validation: confirm portal backend and screen-sharing behavior per desktop.
 
+- [ ] Decide whether the disposable browser should use LibreWolf, Mullvad
+  Browser, or both.
+  - Why: fingerprint resistance is hard to bolt onto a normal browser. Mullvad
+    Browser is designed around the Tor Browser privacy model without the Tor
+    network, while LibreWolf is already packaged and wrapped in this repository
+    as the current disposable browser.
+  - How: compare `pkgs.librewolf` and `pkgs.mullvad-browser` under the same
+    Firejail constraints; check package maintenance, launch behavior,
+    persistence expectations, profile management, and breakage under existing
+    hardening.
+  - Achieves: a named browser role instead of a half-private browser with
+    folklore preferences.
+  - Default posture: conditional. Keep the current LibreWolf wrapper until the
+    Mullvad path is tested and rollback is trivial.
+  - Validation: launch the wrapper, inspect profile directories after exit,
+    verify no persistent browser state is written outside intended paths, and
+    confirm package availability in the pinned nixpkgs input.
+
+- [ ] Fold browser policy hardening into reusable browser modules.
+  - Why: telemetry, studies, sponsored suggestions, Pocket, weak TLS policy, and
+    unsafe plugin handling are browser attack surface and privacy surface, but
+    browser preferences drift quickly.
+  - How: move stable Firefox-family policy into module settings or enterprise
+    policies after checking the currently supported preference and policy names.
+    Keep settings that break normal browsing behind explicit options.
+  - Achieves: browser hardening that can be evaluated and reviewed rather than
+    pasted into comments.
+  - Default posture: safe for telemetry and update-policy controls; conditional
+    for fingerprinting, plugin MIME restrictions, session behavior, and form
+    fill because these can break expected workflows.
+  - Validation: evaluate the Firefox and Jailwolf modules, launch each browser,
+    inspect `about:policies` or generated profile preferences, and test login,
+    downloads, PDF handling, and at least one WebAuthn flow.
+
+- [ ] Add secure browser search defaults without deleting fallback engines.
+  - Why: default search engines leak routine intent. Removing every mainstream
+    fallback can also make repair harder when privacy engines fail.
+  - How: set a privacy-preserving default such as Startpage or a chosen SearXNG
+    instance, add NixOS/Home Manager/package search shortcuts, and keep
+    mainstream engines available but non-default unless a stricter profile opts
+    out.
+  - Achieves: better defaults for daily use without turning search configuration
+    into a fragile purity test.
+  - Default posture: safe when configured per browser profile; instance choice
+    must remain explicit if a SearXNG endpoint is operator-owned.
+  - Validation: verify the generated browser profile contains the expected
+    default engine, run searches through the configured shortcuts, and confirm
+    fallback engines are present but not selected.
+
 - [ ] Add a Sway-only hardening task for disabling Xwayland where practical.
   - Why: disabling Xwayland removes an older compatibility surface when the user
     does not need X11 applications.
