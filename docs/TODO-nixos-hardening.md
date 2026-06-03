@@ -233,14 +233,19 @@ decoration.
   - Why: replacing `sudo` removes a common SUID elevation binary, but privilege
     rules can lock out administration if the user model is wrong.
   - How: continue `modules/nixos/security/run0.nix`; require declared admin
-    users or groups; keep `security.polkit.enable = true`; decide whether
-    `security.run0.enableSudoAlias` is default or compatibility-only.
+    users or groups; keep `security.polkit.enable = true`; keep the sudo alias
+    as a compatibility option until host repair notes no longer depend on it.
   - Achieves: privilege escalation through systemd-run/Polkit rather than the
     traditional `sudo` SUID binary.
   - Default posture: conditional until every host has a tested admin account and
     recovery path.
   - Validation: run `run0 true`, `run0 nixos-rebuild dry-build --flake .#host`,
     and confirm rollback access.
+  - Progress: `modules/nixos/security/run0.nix` now rejects simultaneous
+    selection with the sudo theorem, requires at least one declared Polkit cache
+    user or group, and exposes
+    `theorem.nixos.security.run0-sudo.sudoAlias.enable` instead of hard-coding
+    the compatibility alias.
 
 - [ ] Separate daily users from administrator accounts where the host can bear
   it.

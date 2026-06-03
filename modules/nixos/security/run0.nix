@@ -31,19 +31,47 @@ in
         boundary while keeping the rule declarative.
       '';
     };
+
+    sudoAlias.enable = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = ''
+        Install a `sudo` compatibility alias that invokes `run0`. Keep enabled
+        while operator habits and maintenance notes still reach for `sudo`;
+        disable once the host's repair rites name `run0` directly.
+      '';
+    };
   };
 
   config = lib.mkIf cfg.enable {
+    assertions = [
+      {
+        assertion = !config.theorem.nixos.security.sudo.enable;
+        message = ''
+          Select only one elevation profile: `theorem.nixos.security.sudo.enable`
+          and `theorem.nixos.security.run0-sudo.enable` cannot both be true.
+        '';
+      }
+      {
+        assertion = cfg.authenticationCacheUsers != [ ] || cfg.authenticationCacheGroups != [ ];
+        message = ''
+          `theorem.nixos.security.run0-sudo` needs at least one
+          `authenticationCacheUsers` or `authenticationCacheGroups` entry so the
+          Polkit cache rule has a declared administrative boundary.
+        '';
+      }
+    ];
+
     environment.systemPackages = [
       config.systemd.package
     ];
 
     security = {
-      sudo.enable = false;
+      sudo.enable = lib.mkForce false;
 
       polkit.enable = true;
       run0 = {
-        enableSudoAlias = true;
+        enableSudoAlias = cfg.sudoAlias.enable;
       };
 
       # Force using run0 for admin commands.

@@ -39,9 +39,10 @@ the validation rite that proves it still holds.
   loader family, Bluetooth service hardening, and Podman compatibility features;
   use native NixOS options directly for single upstream settings such as SSH
   firewall exposure, boot generation limits, and graphics library toggles.
-- Treat `run0` as a separate security profile until the per-user authorization
-  model is real. A placeholder username in an authorization rule is not a
-  mechanism; it is a warning light.
+- Treat `run0` as a separate security profile until it has been activated and
+  tested on a host. The profile now has a declared Polkit cache boundary and a
+  configurable sudo compatibility alias, but the remaining rite is operational:
+  prove login, elevation, rebuild, and rollback before making it a default.
 
 ## Home Module Boundary
 
