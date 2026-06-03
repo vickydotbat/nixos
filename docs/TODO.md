@@ -22,6 +22,9 @@ the validation rite that proves it still holds.
 
 ## Module Hardening Queue
 
+- Opened the conservative hardening ledger in
+  [`docs/TODO-nixos-hardening.md`](./TODO-nixos-hardening.md). Use it to break
+  hardening into small, tested mechanisms instead of one sharp global switch.
 - Finish Btrfs rollback support before any host selects
   `theorem.nixos.base.persistence.root.mode = "btrfs"`. The option now exists
   to name the substrate, but the rollback-to-blank initrd rite still needs to be

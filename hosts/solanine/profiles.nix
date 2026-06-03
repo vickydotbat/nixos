@@ -80,6 +80,7 @@ in
 
     security = {
       firejail.enable = true;
+      hardening.enable = true;
       polkit.enable = true;
       sudo.enable = true;
     };
