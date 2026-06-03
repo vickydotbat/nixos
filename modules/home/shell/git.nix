@@ -73,7 +73,7 @@ in
         branch.sort = "-committerdate"; # sorts branches by most recent
         tag.sort = "version:refname"; # treat numbers as version numbers when sorting tags
 
-        safe.directory = "/nix/nixos";
+        safe.directory = "/nix/nixos"; # FIXME: Use global default variable
 
         core = {
           # speed up git in big repos, see `git help status`

@@ -87,7 +87,7 @@ in
     users.groups.nixcfg = { };
 
     systemd.tmpfiles.rules = [
-      "d /nix/nixos 2775 root nixcfg - -" # TODO: Global "Flake" variable in the upper reaches of the repository that this uses.
+      "d /nix/nixos 2775 root nixcfg - -" # FIXME: Use global default variable
     ];
 
     users.users =

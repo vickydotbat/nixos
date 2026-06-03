@@ -8,6 +8,7 @@
 
 let
   cfg = config.theorem.home.shell.codex;
+  persistenceEnabled = config.theorem.home.base.persistence.enable;
   system = pkgs.stdenv.hostPlatform.system;
   codexConfig = ''
     model = "gpt-5.5"
@@ -42,20 +43,12 @@ in
       inputs.codex-cli-nix.packages.${system}.default
     ];
 
-    home.persistence."/nix/persist" = {
-      # FIXME: Only persist if persistence is actually active.
+    home.persistence."/nix/persist" = lib.mkIf persistenceEnabled {
       directories = [
         ".codex"
       ];
     };
 
-    # FIXME This should allow declarative edits of the codex configuration. If this isn't the right way to do this, changeme.
-    home.activation.codexConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-            mkdir -p "$HOME/.codex"
-            cat > "$HOME/.codex/config.toml" <<'EOF'
-      ${codexConfig}
-      EOF
-            chmod 600 "$HOME/.codex/config.toml"
-    '';
+    home.file.".codex/config.toml".text = codexConfig;
   };
 }

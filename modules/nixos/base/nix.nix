@@ -41,7 +41,7 @@ in
 
     programs.nh = lib.mkDefault {
       enable = true;
-      flake = "/nix/nixos"; # TODO: Global "Flake" variable in the upper reaches of the repository that this uses.
+      flake = "/nix/nixos"; # FIXME: Create a default global repo-wide variable.
       clean = {
         enable = true;
         extraArgs = "--keep 5 --keep-since 7d";
