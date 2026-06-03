@@ -116,3 +116,13 @@ the validation rite that proves it still holds.
   imports, boot it in a VM if practical, confirm Wayland login works, confirm
   Plasma remains available after adding a compatible window-manager profile, and
   verify GNOME-style profiles make the replacement explicit.
+
+## Hardening philosophy
+
+TODO: Fold the principles from the  below documentation into the current hardening manifest where relevant. Use research and the existing hardening principles in analysis.
+<https://saylesss88.github.io/nix/index.html>
+<https://saylesss88.github.io/nix/hardening_networking.html>
+<https://saylesss88.github.io/nix/browsing_security.html>
+<https://saylesss88.github.io/installation/enc/sops-nix.html>
+<https://saylesss88.github.io/nix/gpg-agent.html>
+<https://saylesss88.github.io/installation/enc/lanzaboote.html>

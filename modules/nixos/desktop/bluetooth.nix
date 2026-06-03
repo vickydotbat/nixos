@@ -11,9 +11,10 @@ in
       type = lib.types.bool;
       default = true;
       description = ''
-        Apply a narrow systemd sandbox to the Bluetooth service. Disable only
-        when a specific adapter or pairing workflow proves which guard blocks
-        it.
+        Apply low-risk systemd hardening to the Bluetooth service. BlueZ is a
+        hardware-facing daemon, so this deliberately avoids broad syscall,
+        kernel-module, and process-visibility restrictions that can break
+        adapters during pairing, suspend/resume, or reconnect.
       '';
     };
   };
@@ -25,19 +26,12 @@ in
     };
 
     systemd.services.bluetooth.serviceConfig = lib.mkIf cfg.hardenService {
+      # Keep this conservative. Bluetooth hardware paths need room for udev,
+      # firmware, D-Bus, and adapter-specific reconnect behavior.
       ProtectKernelTunables = lib.mkDefault true;
-      ProtectKernelModules = lib.mkDefault true;
       ProtectKernelLogs = lib.mkDefault true;
-      ProtectHostname = true;
-      ProtectControlGroups = true;
-      ProtectProc = "invisible";
-      SystemCallFilter = [
-        "~@obsolete"
-        "~@cpu-emulation"
-        "~@swap"
-        "~@reboot"
-        "~@mount"
-      ];
+      ProtectHostname = lib.mkDefault true;
+      ProtectControlGroups = lib.mkDefault true;
       SystemCallArchitectures = "native";
     };
 

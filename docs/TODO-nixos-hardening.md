@@ -284,6 +284,24 @@ decoration.
   - Validation: `find /run/wrappers -perm -4000 -ls` before and after; test
     AppImage, Podman, Flatpak, and mount workflows as applicable.
 
+- [ ] Validate Bluetooth service hardening on real hardware before tightening
+  it further.
+  - Why: BlueZ is a hardware-facing daemon. Aggressive sandboxing can build
+    cleanly while causing pairing, firmware, suspend/resume, or headset
+    reconnect failures during normal use.
+  - How: keep `modules/nixos/desktop/bluetooth.nix` limited to low-risk service
+    guards unless logs prove a stronger restriction is safe for the adapter
+    fleet.
+  - Achieves: fewer ambient daemon permissions without making the audio and
+    input repair path brittle.
+  - Default posture: conservative. Do not add `ProtectKernelModules`,
+    `ProtectProc`, or broad `SystemCallFilter` rules to `bluetooth.service`
+    until the host has passed runtime tests.
+  - Validation: pair a device, reconnect a headset, switch audio profiles,
+    suspend and resume, then inspect `journalctl -u bluetooth -b`,
+    `journalctl -k -b` for `bluetooth|btusb|firmware|hci|usb`, and the boot log
+    for denial, seccomp, or syscall errors.
+
 - [x] Do not disable `unix_chkpwd`.
   - Why: it is a core PAM helper for checking passwords against shadow data.
   - How: add it to the hardening compatibility matrix as forbidden to disable.
