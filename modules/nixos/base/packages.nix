@@ -4,13 +4,10 @@
   pkgs,
   ...
 }:
-/*
-  NOTE: This is for packages that every system should realistically have. We're talking stuff like:
-  - Core utilities every system needs regardless of hardware setup.
-  - Things you'd tear your hair out over if you needed it in a pinch and it wasn't available.
-  - Anything that frequently gets activated on the vast majority of packages too.
-  - Git is a great example, Nano is always a good fallback editor. I threw in vim just in case someone likes vim more.
-*/
+# Small base package set for every maintained host. Keep this list boring:
+# repair tools, archive tools, and fallback editors that should exist even when
+# a richer profile fails. Feature-bearing applications belong in their own
+# modules or host profiles.
 let
   cfg = config.theorem.nixos.base.packages;
 in

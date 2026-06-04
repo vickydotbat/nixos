@@ -4,6 +4,9 @@
   pkgs,
   ...
 }:
+# Base boot substrate for ordinary NixOS hosts in this flake. It owns the
+# default kernel family and bootloader retention, while sharper boot-chain work
+# such as Lanzaboote or alternate loaders should arrive as named mechanisms.
 let
   cfg = config.theorem.nixos.base.boot;
 in

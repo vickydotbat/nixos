@@ -1,4 +1,7 @@
 { config, lib, ... }:
+# Host locale and clock posture. The reusable defaults stay neutral; each host
+# should declare the time zone, generated locales, and regional LC_* settings it
+# can actually support during login and recovery.
 let
   cfg = config.theorem.nixos.base.locale;
 in

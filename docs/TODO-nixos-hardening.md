@@ -271,7 +271,7 @@ decoration.
   - Validation: login as daily user, confirm no `wheel`; authenticate as admin;
     test common desktop operations.
 
-- [ ] Keep `users.mutableUsers = false` wherever declarative user management is
+- [x] Keep `users.mutableUsers = false` wherever declarative user management is
   complete.
   - Why: imperative password or user drift weakens reproducibility and hides
     access changes outside the flake.
@@ -280,6 +280,11 @@ decoration.
   - Achieves: account state that can be reviewed and rebuilt.
   - Default posture: safe only after secrets and recovery accounts are in place.
   - Validation: rebuild, reboot, and login with every intended account.
+  - Completed: `modules/nixos/base/users.nix` sets
+    `users.mutableUsers = false` as part of the base account theorem. Solanine's
+    selected administrator and daily account receive declared SOPS-backed
+    password hashes; guest remains passwordless and low-access until a host
+    names a real guest login rite.
 
 - [ ] Audit and minimize active SUID wrappers.
   - Why: SUID binaries are local privilege escalation pathways when they contain

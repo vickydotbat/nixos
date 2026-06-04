@@ -60,6 +60,11 @@ the validation rite that proves it still holds.
   integration such as service groups, SOPS material, login shell changes, or
   persistent directories, that integration remains a system-flake change with a
   clear reviewer and rollback path.
+- Progress: shared Home base modules that follow NixOS state now tolerate
+  standalone Home evaluation when `osConfig` is absent. XDG directories, fonts,
+  Distrobox, Steam persistence, and Home persistence all default to inert or
+  user-selected behavior outside the system theorem instead of dereferencing a
+  missing NixOS configuration.
 - Validation: create or simulate a non-repository user, evaluate the shared Home
   baseline without Vicky imports, and prove that the user can build or activate
   a personal Home flake from their own directory without write access to
@@ -149,9 +154,13 @@ the validation rite that proves it still holds.
   `lib/mkSystem.nix`, `modules/nixos/base/users.nix`,
   `modules/nixos/base/networking.nix`,
   `modules/nixos/base/nix-trusted-users.nix`,
-  `modules/nixos/base/ssh.nix`, `modules/nixos/virtualisation/podman.nix`,
-  `modules/nixos/security/sudo.nix`, `modules/nixos/security/run0.nix`, and
-  `modules/home/base/persistence.nix`. The next pass should continue module by
+  `modules/nixos/base/ssh.nix`, `modules/nixos/base/boot.nix`,
+  `modules/nixos/base/locale.nix`, `modules/nixos/base/packages.nix`,
+  `modules/nixos/virtualisation/podman.nix`,
+  `modules/nixos/security/sudo.nix`, `modules/nixos/security/run0.nix`,
+  `modules/home/base/persistence.nix`, `modules/home/base/xdg.nix`,
+  `modules/home/base/fonts.nix`, `modules/home/base/virtualization.nix`, and
+  `modules/home/gaming/steam.nix`. The next pass should continue module by
   module, placing the doctrine beside the mechanism instead of burying it in a
   distant checklist.
 
@@ -219,14 +228,15 @@ the validation rite that proves it still holds.
     browser compromise, leaked secrets, broken rebuild paths, and accidental
     operator damage. Use it as the gate before importing any sharp security
     profile.
-  - Audit whether `users.mutableUsers = false` belongs in the base user module
-    or as a host-selected hardening tier. Declarative users reduce account
-    drift, but password rotation, rescue accounts, and guest enablement need a
-    tested maintenance path before this becomes a default.
-  - Fold XDG directory posture into the Home baseline review. Keeping ordinary
-    files in declared directories such as `Documents`, `Downloads`, and
-    project-specific trees makes future persistence, backup, and confinement
-    rules easier to reason about than a flat home directory full of loose state.
+  - Completed: `modules/nixos/base/users.nix` keeps
+    `users.mutableUsers = false` in the base user doctrine. Every login-capable
+    account selected by Solanine receives a SOPS-backed password hash, while
+    `guest` remains deliberately passwordless and outside the Home Manager
+    persistence surface until a host names a guest workflow.
+  - Progress: XDG directory posture is part of the Home baseline review.
+    `modules/home/base/xdg.nix` declares ordinary directories such as
+    `Documents`, `Downloads`, and `Projects`, and now defaults off cleanly for
+    standalone Home flakes with no system graphics profile.
   - Compare these against existing modules before adding new options. If native
     NixOS options already describe the behavior cleanly, document the expected
     host setting instead of wrapping it.
