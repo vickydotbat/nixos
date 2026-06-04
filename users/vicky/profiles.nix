@@ -338,7 +338,7 @@ in
           model_reasoning_summary = "concise";
           model_verbosity = "medium";
 
-          approval_policy = "never";
+          approval_policy = "on-request";
           sandbox_mode = "workspace-write";
 
           web_search = "cached";
@@ -348,9 +348,13 @@ in
           history.persistence = "none";
 
           sandbox_workspace_write = {
-            network_access = false;
-            exclude_slash_tmp = true;
-            exclude_tmpdir_env_var = true;
+            network_access = true;
+            exclude_slash_tmp = false;
+            exclude_tmpdir_env_var = false;
+            writable_roots = [
+              "/nix/nixos"
+              "/nix/var/nix/daemon-socket"
+            ];
           };
 
           shell_environment_policy."inherit" = "core";
