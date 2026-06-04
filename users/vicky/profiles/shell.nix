@@ -15,8 +15,8 @@
         model_reasoning_summary = "concise";
         model_verbosity = "medium";
 
-        approval_policy = "on-request";
-        sandbox_mode = "workspace-write";
+        approval_policy = "never";
+        sandbox_mode = "danger-full-access";
 
         web_search = "cached";
         file_opener = "vscode";
