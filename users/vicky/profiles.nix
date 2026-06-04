@@ -245,6 +245,33 @@ in
             "editor.codeActionsOnSave" = { };
           };
           "cSpell.enabledFileTypes".nix = false;
+          "cSpell.allowCompoundWords" = true;
+          "cSpell.dictionaries" = [
+            "bash"
+            "companies"
+            "cpp"
+            "cpp-compound-words"
+            "cpp-legacy"
+            "cpp-refined"
+            "css"
+            "filetypes"
+            "fonts"
+            "game-development"
+            "gaming-terms"
+            "git"
+            "html"
+            "html-symbol-entities"
+            "makefile"
+            "node"
+            "npm"
+            "powershell"
+            "public-licenses"
+            "python"
+            "python-common"
+            "shellscript"
+            "softwareTerms"
+            "typescript"
+          ];
           "cSpell.words" = [
             "cachix"
             "deadnix"

@@ -17,6 +17,20 @@ in
       type = lib.types.listOf lib.types.str;
       default = [
         "--smart-case"
+        "--hidden"
+        "--glob=!.git"
+
+        # Color behavior
+        "--color=auto"
+
+        # Match colors
+        "--colors=match:fg:red"
+        "--colors=match:style:bold"
+
+        # Path / line / column colors
+        "--colors=path:fg:green"
+        "--colors=line:fg:yellow"
+        "--colors=column:fg:cyan"
       ];
       description = ''
         Default ripgrep arguments. Keep global behavior unsurprising; repository
