@@ -3,7 +3,7 @@
   ...
 }:
 let
-  diskDevice = "/dev/disk/by-id/CHANGE-ME-husband-system-disk";
+  diskDevice = "/dev/disk/by-id/CHANGE-ME-firelink-system-disk";
   btrfsCompression = "zstd:1";
   btrfsMountOptions = [
     "compress=${btrfsCompression}"

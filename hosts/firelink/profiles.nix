@@ -27,7 +27,6 @@ in
         enable = true;
         loader = "systemd-boot";
       };
-      # TODO: Keymap needs to be italian keyboard.
       locale = {
         enable = true;
         timeZone = "Europe/Rome";
@@ -81,4 +80,7 @@ in
     nvme-cli
     smartmontools
   ];
+
+  console.keyMap = "it2";
+  services.xserver.xkb.layout = "it";
 }

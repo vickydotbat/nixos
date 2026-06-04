@@ -4,6 +4,7 @@
 }:
 
 let
+  inherit (pkgs) lib;
   config = inputs.self.nixosConfigurations.firelink.config;
   disk = config.disko.devices.disk.main;
   partitions = disk.content.partitions;
@@ -28,6 +29,9 @@ assert subvolumes."@swap".mountpoint == "/.swapvol";
 assert subvolumes."@swap".swap.swapfile.size == "16G";
 assert swapDevice.device == "/.swapvol/swapfile";
 assert swapDevice.priority == 0;
+assert config.services.xserver.xkb.layout == "it";
+assert config.console.keyMap == "it2";
+assert lib.elem "kvm-intel" config.boot.kernelModules;
 assert config.theorem.nixos.base.persistence.storage.manageFileSystems == false;
 assert config.theorem.nixos.base.persistence.root.mode == "btrfs";
 assert config.boot.initrd.systemd.services.rollback-root.before == [ "sysroot.mount" ];

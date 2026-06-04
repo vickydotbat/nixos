@@ -23,6 +23,16 @@ are part of the mechanism.
   Btrfs subvolumes for `@root`, `@root-blank`, `@nix`, `@persist`, and `@swap`,
   and a 16 GiB encrypted-at-rest Btrfs swapfile under `/.swapvol`. The disk
   device is deliberately `CHANGE-ME` until the target drive is named.
+- `hosts/firelink/` now records the known target facts for the MSI Cyborg 15
+  A13VE laptop: Intel Core i7-13620H, 16 GiB RAM, 1 TB internal disk, Intel UHD
+  integrated graphics, NVIDIA GeForce RTX 4050 Laptop GPU with 6 GiB VRAM,
+  Italian keyboard, x86_64, and UEFI boot. The Intel CPU profile and Italian
+  keyboard are declared; NVIDIA driver policy waits for the first hardware
+  probe so this host does not inherit an untested proprietary graphics theorem.
+- Solanine now carries the local VM testing substrate for this work:
+  `theorem.nixos.virtualisation.libvirt.enable`, libvirtd, virt-manager, SPICE
+  USB redirection, and swtpm. The `libvirtd` group is granted only to selected
+  repository stewards, because it is a VM engine-control surface.
 - The host selects only `admin` as a repair account for now. It still needs a
   host-owned SOPS file, password secret wiring, and the actual managed desktop
   user before activation on real hardware.
@@ -96,6 +106,7 @@ the existing `desktop` and `gaming` modules prove too blunt for this profile.
 | Wine tooling | `pkgs.winetricks`; `pkgs.wineWow64Packages.staging` exists | `wineWowPackages` is deprecated; use `wineWow64Packages`. |
 | Gaming tools | `pkgs.mangohud`, `pkgs.goverlay`, `pkgs.steam-run` exist | Coordinate with `docs/TODO-nixos-gaming.md`. |
 | Flatseal | No top-level `pkgs.flatseal` matched on 2026-06-04 | Research package movement or use Flatpak permission docs before promising it. |
+| Local VM testing | `theorem.nixos.virtualisation.libvirt.enable`; `virtualisation.libvirtd.enable`; `programs.virt-manager.enable`; `virtualisation.libvirtd.qemu.swtpm.enable` | Solanine owns disposable VM creation for disko/firelink testing. OVMF firmware is available through current libvirt/QEMU defaults in pinned nixpkgs. |
 
 ## Project Shape
 
