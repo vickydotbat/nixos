@@ -10,11 +10,15 @@
 let
   cfg = config.theorem.home.base.ssh;
   username = config.home.username;
+  persistenceEnabled = config.theorem.home.base.persistence.enable or false;
 
   # Default mechanism, kept in the reusable module; user profiles may override it.
   sshDir = "${config.home.homeDirectory}/.ssh";
+  persistedSshDir = "/nix/persist/home/${username}/.ssh";
   sshPrivateKeySecret = "/run/secrets/ssh-${username}-id_ed25519";
   sshPublicKeySecret = "/run/secrets/ssh-${username}-id_ed25519.pub";
+  knownHostsFile =
+    if persistenceEnabled then "${persistedSshDir}/known_hosts" else "${sshDir}/known_hosts";
 in
 {
   options.theorem.home.base.ssh = {
@@ -33,12 +37,29 @@ in
       defaultText = lib.literalExpression ''"/run/secrets/ssh-$${config.home.username}-id_ed25519.pub"'';
       description = "Readable secret path for this user's public SSH key.";
     };
+
+    knownHostsFile = lib.mkOption {
+      type = lib.types.str;
+      default = knownHostsFile;
+      defaultText = lib.literalExpression ''
+        if theorem.home.base.persistence.enable
+        then "/nix/persist/home/$${config.home.username}/.ssh/known_hosts"
+        else "$${config.home.homeDirectory}/.ssh/known_hosts"
+      '';
+      description = ''
+        Outbound SSH known-host ledger. Impermanent homes point OpenSSH at the
+        persisted file directly, rather than bind-mounting a single file into
+        `~/.ssh`, so OpenSSH can rotate `known_hosts.old` on the same
+        filesystem when a host key changes.
+      '';
+    };
   };
 
   config = lib.mkIf cfg.enable {
     programs.ssh = {
       enable = true;
       enableDefaultConfig = lib.mkDefault false; # Respect per-user mandates in users/.
+      settings."*".UserKnownHostsFile = lib.mkDefault cfg.knownHostsFile;
     };
 
     # Restore per-user SSH keys from SOPS material into the user's own profile.

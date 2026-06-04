@@ -79,12 +79,7 @@ in
         "Downloads"
       ];
 
-      files = [
-        {
-          file = ".ssh/known_hosts";
-          parentDirectory.mode = "0700";
-        }
-      ];
+      files = [ ];
     };
 
     systemd.user.services.volatile-downloads = lib.mkIf cfg.volatileDownloads.enable {

@@ -76,11 +76,12 @@ let
 
   homeUsers = config.home-manager.users or { };
 
-  homeUsersWithKnownHosts = lib.filterAttrs (
+  homeUsersWithPersistedKnownHosts = lib.filterAttrs (
     _: homeConfig:
-    lib.any (persistence: lib.any (file: file.file == ".ssh/known_hosts") (persistence.files or [ ])) (
-      lib.attrValues (homeConfig.home.persistence or { })
-    )
+    let
+      knownHostsFile = homeConfig.theorem.home.base.ssh.knownHostsFile or "";
+    in
+    homeConfig.theorem.home.base.ssh.enable or false && lib.hasPrefix "/nix/persist/" knownHostsFile
   ) homeUsers;
 
   mkPersistedKnownHosts =
@@ -88,8 +89,8 @@ let
     let
       user = homeConfig.home.username;
       group = config.users.users.${user}.group;
-      persistedKnownHostsDir = "/nix/persist/home/${user}/.ssh";
-      persistedKnownHosts = "${persistedKnownHostsDir}/known_hosts";
+      persistedKnownHosts = homeConfig.theorem.home.base.ssh.knownHostsFile;
+      persistedKnownHostsDir = builtins.dirOf persistedKnownHosts;
     in
     ''
       ${pkgs.coreutils}/bin/install -d -m 0700 -o ${user} -g ${group} ${lib.escapeShellArg persistedKnownHostsDir}
@@ -248,7 +249,9 @@ in
 
     system.activationScripts.persistedKnownHosts = {
       deps = [ "createPersistentStorageDirs" ];
-      text = lib.concatStringsSep "\n" (lib.mapAttrsToList mkPersistedKnownHosts homeUsersWithKnownHosts);
+      text = lib.concatStringsSep "\n" (
+        lib.mapAttrsToList mkPersistedKnownHosts homeUsersWithPersistedKnownHosts
+      );
     };
 
     system.activationScripts.persist-files.deps = [ "persistedKnownHosts" ];
