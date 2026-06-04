@@ -96,10 +96,11 @@ the validation rite that proves it still holds.
   defaults. User modules should carry themes, editor posture, shell habits,
   autostart choices, plugin-bearing packages, and language stacks that are only
   true for one operator.
-- Continue the option-boundary pass before adding another user: Plasma layout,
-  Ghostty key ownership, and shell aliases still need the same calibration that
-  editors, Codex CLI policy, GIMP, Spicetify, ripgrep, nix-index, Discord
-  autostart, Home SSH, Firefox search defaults, and KeePassXC posture now have.
+- Continue the option-boundary pass before adding another user: Plasma layout
+  still needs the same calibration that editors, Codex CLI policy, GIMP,
+  Spicetify, ripgrep, nix-index, Discord autostart, Home SSH, Firefox search
+  defaults, KeePassXC posture, Ghostty/Zellij key ownership, and shell aliases
+  now have.
 - Completed: user SSH identity restoration no longer depends on the system
   OpenSSH service. The Home SSH module restores per-user SOPS-backed keys for
   outbound SSH and Git signing, while the host SOPS binding exposes user SSH
@@ -123,6 +124,10 @@ the validation rite that proves it still holds.
   upstream-required `podman` group only to selected repository stewards. Keep
   `guest` outside that socket unless a host names the workflow and accepts the
   engine-control surface.
+- Completed: shell aliases now pass through `theorem.home.shell.shell.aliases`,
+  `extraAliases`, `nixosAliases`, and `elevationAlias`. Standalone Home flakes
+  no longer inherit host-repair aliases by accident, and the `please` retry
+  alias follows `run0` when the active NixOS elevation theorem selects it.
 - Validation: evaluate a second user with the shared Home modules enabled and no
   Vicky profile imports. The result should install plain mechanisms, not Vicky's
   editor theme, VS Code workflow, GIMP plugin build, Spotify extensions, Discord
@@ -209,11 +214,11 @@ the validation rite that proves it still holds.
   - Convert any remaining implicit security assumptions into named checks:
     firewall posture, user account mutability, root-login avoidance, log review,
     update cadence, and password-manager expectations.
-  - Add an explicit threat-model note before broad hardening work. The baseline
-    should name likely local risks first: physical theft, hostile networks,
+  - Completed: [`docs/threat-model.md`](./threat-model.md) names the baseline
+    local risks before broad hardening work: physical theft, hostile networks,
     browser compromise, leaked secrets, broken rebuild paths, and accidental
-    operator damage. Do not spend repair time defending against every possible
-    attacker when the host still has simpler failure modes unmeasured.
+    operator damage. Use it as the gate before importing any sharp security
+    profile.
   - Audit whether `users.mutableUsers = false` belongs in the base user module
     or as a host-selected hardening tier. Declarative users reduce account
     drift, but password rotation, rescue accounts, and guest enablement need a
@@ -445,9 +450,7 @@ Research sources to revisit and distill when working a specific slice:
   files are not persisted unless that user's Home profile declares
   `home.persistence` entries.
 
-## NEW:
-
-TODO: Fix AMDGPU plasma freezes on Solanine
+## Solanine AMDGPU Plasma Freezes
 
 Solanine still experiences the well-documented "flip_done" freeze despite some
 kernel module workarounds being applied. There is also a real world workaround
@@ -455,7 +458,33 @@ where the user unplugs the monitor cable from the back of the PC, plugs it back
 in, and hits a key a few times to wake the monitor. This is documented as working
 during two such freeze cases.
 
-Read documentation of the issue online before pursuing.
+What has been tried so far:
+- Kernel versions 6.12, Default LTS kernel 6.18, and now the latest unstable.
+
+Documentation checked before pursuing:
+
+- ArchWiki records `amdgpu.dcdebugmask=0x10` or `amdgpu.dcdebugmask=0x12` as
+  workarounds for frozen or unresponsive AMDGPU displays with `flip_done timed
+  out`.
+- An AMD GFX patch thread from February 2026 tracks an upstream race that can
+  produce intermittent `flip_done` timeouts on KDE Plasma Wayland since kernel
+  6.12, so local parameters should remain reversible trials until the fixed
+  kernel path is known.
+
+Progress: Solanine now tests the next host-scoped workaround in
+`hosts/solanine/hardware.nix`: `amdgpu.dcdebugmask=0x12` replaces the
+insufficient `0x10`, and `amdgpu.runpm=0` keeps the desktop GPU out of runtime
+power-down while diagnosing the "no outputs" freeze. This is not proven until
+the host boots the generation and survives normal Plasma uptime. If idle power
+or thermals become the sharper failure mode, remove `amdgpu.runpm=0` first.
+
+Validation: boot Solanine, confirm `/proc/cmdline` contains
+`amdgpu.dcdebugmask=0x12` and `amdgpu.runpm=0`, use the normal Plasma Wayland
+session through the workflows that previously froze, and review
+`journalctl -b -k | rg 'flip_done|commit wait|amdgpu_dm'`. If the freeze
+returns, capture `sudo dmesg` and
+`journalctl --user-unit plasma-kwin_wayland --boot 0` before trying a kernel,
+Mesa, firmware, cable/port, or VRR-focused trial.
 
 Below is some of the journalctl output.
 

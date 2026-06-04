@@ -1,3 +1,4 @@
 .cache/
 .local-nix-store/
 result/
+.codex-cache/
