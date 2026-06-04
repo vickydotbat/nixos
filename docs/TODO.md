@@ -107,10 +107,12 @@ as understandable as possible for newer maintainers.
   autostart choices, plugin-bearing packages, and language stacks that are only
   true for one operator.
 - Continue the option-boundary pass before adding another user: Plasma layout
-  still needs the same calibration that editors, Codex CLI policy, GIMP,
-  Spicetify, ripgrep, nix-index, Discord autostart, Home SSH, Firefox search
-  defaults, KeePassXC posture, Ghostty/Zellij key ownership, and shell aliases
-  now have.
+  still needs calibration before it can be treated as a plain reusable default.
+- Completed: Vicky's large Home profile is now split under
+  `users/vicky/profiles/`. The import coordinator stays at
+  `users/vicky/profiles.nix`, while focused user-owned files carry desktop,
+  editor, shell, web, and gaming posture without moving those personal choices
+  into reusable Home modules.
 - Completed: user SSH identity restoration no longer depends on the system
   OpenSSH service. The Home SSH module restores per-user SOPS-backed keys for
   outbound SSH and Git signing, while the host SOPS binding exposes user SSH

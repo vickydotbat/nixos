@@ -71,7 +71,10 @@ For users with Home Manager enabled, keep identity separate from profile
 selection. Vicky's Home module entry point is `users/vicky/home.nix`; it imports
 `identity.nix` for `home.username`, `home.homeDirectory`, `home.stateVersion`,
 and Home Manager's own enablement, then imports `profiles.nix` for selected
-`theorem.home.*` mechanisms and deliberate personal overrides.
+`theorem.home.*` mechanisms and deliberate personal overrides. `profiles.nix`
+is an import coordinator; focused files under `users/vicky/profiles/` carry
+Vicky's personal desktop, editor, shell, web, and gaming posture so each
+working-surface repair can be reviewed without opening the whole workshop.
 
 Do not change `home.stateVersion` as an ordinary upgrade habit. It preserves
 Home Manager compatibility for the account's existing state. Raising it is a

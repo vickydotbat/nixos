@@ -33,10 +33,10 @@ Expected: evaluation succeeds and lists selected Home Manager users, currently i
 Run:
 
 ```bash
-nix eval --json .#nixosConfigurations.solanine.config.home-manager.users.vicky.theorem.home
+nix eval --json .#nixosConfigurations.solanine.config.home-manager.users.vicky.theorem.home --apply 'home: { categories = builtins.attrNames home; base = builtins.attrNames home.base; desktop = builtins.attrNames home.desktop; editor = builtins.attrNames home.editor; gaming = builtins.attrNames home.gaming; shell = builtins.attrNames home.shell; web = builtins.attrNames home.web; }'
 ```
 
-Expected: evaluation succeeds and prints JSON for the selected `theorem.home.*` options.
+Expected: evaluation succeeds and prints serializable category keys for the selected `theorem.home.*` options.
 
 - [ ] **Step 3: Capture authority-sensitive system values**
 
@@ -154,10 +154,10 @@ Expected: command exits 0 and only formatting changes are applied.
 Run:
 
 ```bash
-nix eval --json .#nixosConfigurations.solanine.config.home-manager.users.vicky.theorem.home
+nix eval --json .#nixosConfigurations.solanine.config.home-manager.users.vicky.theorem.home --apply 'home: { categories = builtins.attrNames home; base = builtins.attrNames home.base; desktop = builtins.attrNames home.desktop; editor = builtins.attrNames home.editor; gaming = builtins.attrNames home.gaming; shell = builtins.attrNames home.shell; web = builtins.attrNames home.web; }'
 ```
 
-Expected: evaluation succeeds. If comparing manually against Task 1 output, no intentional option changes should appear.
+Expected: evaluation succeeds and the category keys match the Task 1 baseline.
 
 ### Task 3: Document The Repaired User Profile Boundary
 
@@ -256,7 +256,7 @@ Run:
 ```bash
 nix eval .#nixosConfigurations.solanine.config.system.name
 nix eval .#nixosConfigurations.solanine.config.home-manager.users --apply builtins.attrNames
-nix eval --json .#nixosConfigurations.solanine.config.home-manager.users.vicky.theorem.home
+nix eval --json .#nixosConfigurations.solanine.config.home-manager.users.vicky.theorem.home --apply 'home: { categories = builtins.attrNames home; base = builtins.attrNames home.base; desktop = builtins.attrNames home.desktop; editor = builtins.attrNames home.editor; gaming = builtins.attrNames home.gaming; shell = builtins.attrNames home.shell; web = builtins.attrNames home.web; }'
 ```
 
 Expected: each command exits 0.
