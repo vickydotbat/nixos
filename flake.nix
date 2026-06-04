@@ -183,6 +183,10 @@
           inherit inputs pkgs;
         };
 
+        solanine-libvirt-boundary = import ./checks/solanine-libvirt-boundary.nix {
+          inherit inputs pkgs;
+        };
+
         btrfs-rollback-boundary = import ./checks/btrfs-rollback-boundary.nix {
           inherit inputs pkgs;
         };

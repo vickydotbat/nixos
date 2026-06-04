@@ -89,6 +89,10 @@ in
     };
 
     virtualisation = {
+      libvirt = {
+        enable = true;
+        spiceUSBRedirection.enable = true;
+      };
       podman = {
         enable = true;
         dockerCompat.enable = true;

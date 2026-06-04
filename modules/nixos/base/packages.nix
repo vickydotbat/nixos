@@ -22,6 +22,11 @@ in
   };
 
   config = lib.mkIf cfg.enable {
+    # Repair shells may cross user boundaries through sudo/run0. Keep common
+    # terminal descriptions available system-wide so root-side tools do not
+    # fail when a modern terminal exports its precise TERM name.
+    environment.enableAllTerminfo = true;
+
     environment.systemPackages = with pkgs; [
       git
       nano
