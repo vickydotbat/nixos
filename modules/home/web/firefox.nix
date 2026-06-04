@@ -2,6 +2,7 @@
   config,
   lib,
   options,
+  osConfig ? null,
   pkgs,
   ...
 }:
@@ -17,6 +18,12 @@ let
   # Default browser target, shared by the desktop entry and MIME mappings.
   firefox = [ desktopFile ];
   profilePath = "${config.home.homeDirectory}/.mozilla/firefox/${profileName}";
+  systemPlasmaBrowserIntegrationEnabled =
+    if osConfig == null then
+      false
+    else
+      (osConfig.theorem.nixos.desktop.plasma.enable or false)
+      && (osConfig.theorem.nixos.desktop.plasma.browserIntegration.enable or false);
 in
 {
   options.theorem.home.web.firefox = {
@@ -45,6 +52,17 @@ in
       default = "firefox-devedition";
       description = "Icon name used by the generated Firefox desktop entry.";
     };
+
+    plasmaIntegration.enable = lib.mkOption {
+      type = lib.types.bool;
+      default = systemPlasmaBrowserIntegrationEnabled;
+      defaultText = lib.literalExpression "system Plasma browser-integration connector state";
+      description = ''
+        Install the Firefox Plasma Integration extension when the native Plasma
+        browser-integration connector is present. Standalone Home profiles may
+        set this explicitly when another system provides that connector.
+      '';
+    };
   };
 
   config = lib.mkMerge [
@@ -66,7 +84,7 @@ in
               ublock-origin
               consent-o-matic
             ]
-            ++ lib.optionals (config.theorem.home.desktop.plasma.enable or false) [
+            ++ lib.optionals cfg.plasmaIntegration.enable [
               plasma-integration
             ];
 

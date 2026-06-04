@@ -1,11 +1,13 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }:
 # Plasma is the reusable graphical desktop profile for hosts that select it.
 # Personal panel layout and shortcuts live in Home modules; this system module
-# owns the login stack, desktop service, and firmware-refresh failure mode.
+# owns the login stack, desktop service, browser-integration connector, and
+# firmware-refresh failure mode.
 let
   cfg = config.theorem.nixos.desktop.plasma;
 in
@@ -24,9 +26,30 @@ in
         metadata is part of a maintenance rite.
       '';
     };
+
+    browserIntegration.enable = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = ''
+        Install Plasma's native browser-integration connector. Firefox and
+        other browser profiles should only enable their matching extension when
+        this connector is present, because the extension alone gives a partial
+        mechanism that can misreport browser state or silently do nothing.
+      '';
+    };
   };
 
   config = lib.mkIf cfg.enable {
+    environment = {
+      systemPackages = lib.mkIf cfg.browserIntegration.enable [
+        pkgs.kdePackages.plasma-browser-integration
+      ];
+
+      plasma6.excludePackages = lib.mkIf (!cfg.browserIntegration.enable) [
+        pkgs.kdePackages.plasma-browser-integration
+      ];
+    };
+
     services = {
       displayManager = {
         sddm.enable = lib.mkForce false; # Not supported for 26.05

@@ -236,6 +236,13 @@ as understandable as possible for newer maintainers.
   Manager Plasma settings are close to Vicky's working surface; the reusable
   module should carry only broadly useful defaults, with themes, layout habits,
   and operator-specific shortcuts kept in user profiles.
+- Browser integration is now a named Plasma substrate:
+  `theorem.nixos.desktop.plasma.browserIntegration.enable` defaults on, exposes
+  the native connector, and the Firefox Plasma Integration extension follows
+  that connector instead of the mere presence of a Plasma Home profile. Keep
+  future browser helpers tied to the system connector or to an explicit
+  standalone Home override, and keep user default-browser choices in the user's
+  Plasma or MIME profile.
 - Validation: evaluate a new graphical host with no user-specific desktop
   imports, boot it in a VM if practical, confirm Wayland login works, confirm
   Plasma remains available after adding a compatible window-manager profile, and

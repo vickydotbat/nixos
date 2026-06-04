@@ -222,7 +222,10 @@ in
       "kded5rc".Module-device_automounter.autoload = false;
 
       "kdeglobals" = {
-        General.UseSystemBell = true;
+        General = {
+          BrowserApplication = "firefox-devedition.desktop";
+          UseSystemBell = true;
+        };
 
         KDE = {
           AutomaticLookAndFeel = true;
