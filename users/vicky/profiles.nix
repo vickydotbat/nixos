@@ -208,13 +208,26 @@ in
           "git.allowForcePush" = true;
           "git.confirmForcePush" = false;
           "git.openRepositoryInParentFolders" = "never";
-          "gitlens.telemetry.enabled" = false;
 
           "git.closeDiffOnOperation" = true;
           "diffEditor.experimental.showMoves" = true;
           "diffEditor.ignoreTrimWhitespace" = false;
           "diffEditor.diffAlgorithm" = "advanced";
           "diffEditor.maxComputationTime" = 0;
+
+          # Git Blame: keep it mostly out of the way
+          "gitblame.statusBarMessageFormat" = "\${author.name}, \${time.ago}";
+          "gitblame.statusBarMessageNoCommit" = "Uncommitted";
+          "gitblame.parallelBlames" = 1;
+          "gitblame.extendedHoverInformation" = "off";
+
+          # Git Graph: useful defaults
+          "git-graph.repository.fetchAndPrune" = true;
+          "git-graph.repository.commits.fetchAvatars" = false;
+          "git-graph.repository.commits.showSignatureStatus" = false;
+          "git-graph.repository.commits.showRemoteBranches" = true;
+          "git-graph.repository.commits.showTags" = true;
+          "git-graph.repository.commits.showLocalBranches" = true;
 
           "nix.enableLanguageServer" = true;
           "nix.serverPath" = "nixd";
