@@ -6,7 +6,7 @@ the validation rite that proves it still holds.
 
 NOTE: When completing a task, fold its relevant documentation into the correct
 place. Use `README.md` and `docs/` as readable sources for what purpose every
-change serves. Documentation maintainenance is critical for keeping the repo
+change serves. Documentation maintenance is critical for keeping the repo
 as understandable as possible for newer maintainers.
 
 ## Bootstrap And Spawning
@@ -64,11 +64,15 @@ as understandable as possible for newer maintainers.
   integration such as service groups, SOPS material, login shell changes, or
   persistent directories, that integration remains a system-flake change with a
   clear reviewer and rollback path.
-- Progress: shared Home base modules that follow NixOS state now tolerate
+- Current state: shared Home base modules that follow NixOS state tolerate
   standalone Home evaluation when `osConfig` is absent. XDG directories, fonts,
   Distrobox, Steam persistence, and Home persistence all default to inert or
   user-selected behavior outside the system theorem instead of dereferencing a
   missing NixOS configuration.
+- Boundary record: `users/README.md` now names the two-lane Home doctrine, and
+  `lib/mkSystem.nix` remains the system-managed Home import gate. Do not add
+  discovery of user-owned Home flakes here; design an exported baseline that
+  personal repositories can import under their own authority.
 - Validation: create or simulate a non-repository user, evaluate the shared Home
   baseline without Vicky imports, and prove that the user can build or activate
   a personal Home flake from their own directory without write access to
@@ -109,24 +113,16 @@ as understandable as possible for newer maintainers.
 - Continue the option-boundary pass before adding another user by checking each
   reusable Home module for personal posture before it becomes another user's
   inheritance.
-- Completed: Vicky's large Home profile is now split under
-  `users/vicky/profiles/`. The import coordinator stays at
-  `users/vicky/profiles.nix`, while focused user-owned files carry desktop,
-  editor, shell, web, gaming, and Plasma posture without moving those personal
-  choices into reusable Home modules.
-- Completed: `modules/home/desktop/plasma.nix` is now a neutral Plasma Manager
-  substrate. Vicky's curated layout, shortcuts, MIME defaults, KDE Connect,
-  and wallet persistence live in `users/vicky/profiles/plasma.nix`.
-- Completed: user SSH identity restoration no longer depends on the system
-  OpenSSH service. The Home SSH module restores per-user SOPS-backed keys for
-  outbound SSH and Git signing, while the host SOPS binding exposes user SSH
-  secrets independently of `theorem.nixos.base.ssh.enable`. The NixOS SSH module
-  continues to own `sshd`, host keys, firewall exposure, and inbound access.
-- Completed: Git now consumes the Home SSH identity through
-  `theorem.home.shell.git.sshSigning`, which defaults to enabled when
-  `theorem.home.base.ssh.enable` is selected. User Git files keep personal name
-  and email only, while shared commit-signing mechanics stay in the reusable Git
-  module. Keep agent ownership singular, and avoid making Git imply `sshd`.
+- Repaired boundary map: `users/README.md` records that
+  `users/vicky/profiles.nix` is only an import coordinator, while focused files
+  under `users/vicky/profiles/` own Vicky's desktop, Plasma, editor, shell, web,
+  and gaming posture. `modules/home/README.md` records the shared Home boundary;
+  use those documents before opening another user-profile split.
+- Repaired identity map: `modules/home/base/ssh.nix` owns outbound user SSH
+  identity restoration, `modules/home/shell/git.nix` owns SSH commit-signing
+  mechanics, and `modules/nixos/base/ssh.nix` owns inbound `sshd`, host keys,
+  firewall exposure, and remote-login posture. Keep those identities separate
+  when adding future agent, GPG, or hardware-token work.
 - Move service-specific group membership out of static user registry entries
   where the service module can own it. A future Docker, Podman, or repository
   access module should add only the groups it creates or requires, with a clear
@@ -140,15 +136,6 @@ as understandable as possible for newer maintainers.
   upstream-required `podman` group only to selected repository stewards. Keep
   `guest` outside that socket unless a host names the workflow and accepts the
   engine-control surface.
-- Completed: shell aliases now pass through `theorem.home.shell.shell.aliases`,
-  `extraAliases`, `nixosAliases`, and `elevationAlias`. Standalone Home flakes
-  no longer inherit host-repair aliases by accident, and the `please` retry
-  alias follows `run0` when the active NixOS elevation theorem selects it.
-- Completed: `modules/home/shell/shell.nix` now defaults the shell baseline on,
-  gates NixOS `nh` aliases on `osConfig.programs.nh.enable`, derives the alias
-  flake target from `programs.nh.flake` or `repository.path`, provides `nr` for
-  `nh os build`, and implements `please` as a Bash function that replays the
-  previous command through the selected elevation command.
 - Future shell UX research belongs in the ledger, not as an in-code TODO:
   ble.sh previously broke multiple shell integrations, but lightweight command
   suggestions or highlighting may be worth revisiting behind a separate option
@@ -165,38 +152,17 @@ as understandable as possible for newer maintainers.
   editor theme, VS Code workflow, GIMP plugin build, Spotify extensions, Discord
   autostart, command-not-found hook, or repository-specific ripgrep posture.
 
-
 ## In-File documentation
 
-- Document every module and its settings inside its individual `.nix` file. If
-  its configuration is relevant on a wider scale, also document it in a global
-  or directory-based `README.md`. Ensure directory `README.md` files explain
-  the broad-stroke purpose of the directory, and the root repository `README.md`
-  explains how to navigate. Fold this into a long-term documentation standard
-  or into the relevant readmes when the pattern settles.
-- Progress: `modules/nixos/README.md` and `modules/home/README.md` now name the
-  boundary between reusable system mechanisms, reusable Home mechanisms, host
-  facts, and user-specific working-surface choices.
-- Progress: central stewardship modules now carry top-of-file purpose blocks:
-  `lib/mkSystem.nix`, `modules/nixos/base/users.nix`,
-  `modules/nixos/base/networking.nix`,
-  `modules/nixos/base/nix-trusted-users.nix`,
-  `modules/nixos/base/ssh.nix`, `modules/nixos/base/boot.nix`,
-  `modules/nixos/base/locale.nix`, `modules/nixos/base/packages.nix`,
-  `modules/nixos/virtualisation/podman.nix`,
-  `modules/nixos/security/sudo.nix`, `modules/nixos/security/run0.nix`,
-  `modules/home/base/persistence.nix`, `modules/home/base/xdg.nix`,
-  `modules/home/base/fonts.nix`, `modules/home/base/virtualization.nix`, and
-  `modules/home/gaming/steam.nix`. `modules/home/shell/shell.nix` and
-  `modules/home/web/ungoogled-chromium.nix` also now carry their local doctrine
-  and no longer use inline TODO/FIXME notes for known follow-up work. The next
-  pass should continue module by module, placing the doctrine beside the
-  mechanism instead of burying it in a distant checklist.
-- Completed: every `.nix` module under `modules/` now has a top-of-file purpose
-  block or an equivalent boundary note near the module entry. This does not end
-  documentation stewardship: option descriptions, directory READMEs, and host
-  notes still need to stay current when mechanisms change, but the broad module
-  map is now carried beside the mechanisms themselves.
+- Keep module purpose blocks, option descriptions, directory READMEs, and host
+  notes current when mechanisms change. The broad map now lives in
+  `modules/nixos/README.md`, `modules/home/README.md`, and top-of-file module
+  purpose blocks; do not re-open a generic documentation TODO unless a specific
+  mechanism has drifted from its local explanation.
+- Validation: when changing a mechanism, read the adjacent purpose block and
+  the relevant directory README after the patch. The text should still name what
+  the mechanism protects, what can break, and which command or boot test proves
+  it.
 
 ## YubiKey Support
 
@@ -257,20 +223,11 @@ as understandable as possible for newer maintainers.
   - Convert any remaining implicit security assumptions into named checks:
     firewall posture, user account mutability, root-login avoidance, log review,
     update cadence, and password-manager expectations.
-  - Completed: [`docs/threat-model.md`](./threat-model.md) names the baseline
-    local risks before broad hardening work: physical theft, hostile networks,
-    browser compromise, leaked secrets, broken rebuild paths, and accidental
-    operator damage. Use it as the gate before importing any sharp security
-    profile.
-  - Completed: `modules/nixos/base/users.nix` keeps
-    `users.mutableUsers = false` in the base user doctrine. Every login-capable
-    account selected by Solanine receives a SOPS-backed password hash, while
-    `guest` remains deliberately passwordless and outside the Home Manager
-    persistence surface until a host names a guest workflow.
-  - Progress: XDG directory posture is part of the Home baseline review.
-    `modules/home/base/xdg.nix` declares ordinary directories such as
-    `Documents`, `Downloads`, and `Projects`, and now defaults off cleanly for
-    standalone Home flakes with no system graphics profile.
+  - Use [`docs/threat-model.md`](./threat-model.md) as the gate before importing
+    any sharp security profile. Local risks, mutable-user doctrine, and XDG
+    baseline posture now have permanent homes in `docs/threat-model.md`,
+    `modules/nixos/base/users.nix`, and `modules/home/base/xdg.nix`; update
+    those mechanisms directly when the doctrine changes.
   - Compare these against existing modules before adding new options. If native
     NixOS options already describe the behavior cleanly, document the expected
     host setting instead of wrapping it.
@@ -303,12 +260,10 @@ as understandable as possible for newer maintainers.
     as an unexamined desktop default. NetworkManager can randomize scan and
     connection MACs, but home routers, allow-lists, and location-specific
     networks may interpret the host as a new device.
-    Progress: the hardening theorem now exposes
-    `theorem.nixos.security.hardening.networkManagerMacRandomization.enable`
-    as an opt-in NetworkManager posture. It keeps Wi-Fi scan randomization
-    visible, defaults Wi-Fi connections to `stable-ssid`, preserves wired
-    Ethernet identity by default, and leaves current hosts unchanged until a
-    travel or untrusted-network profile selects the rite.
+    The opt-in mechanism lives at
+    `theorem.nixos.security.hardening.networkManagerMacRandomization.enable`;
+    extend it only with travel or untrusted-network validation, not as base
+    networking drift.
   - Do not collapse privacy tools into the base networking module. A workstation,
     a travel laptop, and a server have different network rites.
   - Validation: `ss -lnp` for local DNS listeners, `dig @127.0.0.1 example.com
@@ -320,10 +275,6 @@ as understandable as possible for newer maintainers.
     choices comparable rather than fashionable. Browser sandbox strength,
     screen-sharing behavior, password-manager integration, downloads, and
     profile persistence all interact.
-  - Progress: `modules/home/web/ungoogled-chromium.nix` now names Chromium as a
-    fallback and web-development browser, and intentionally avoids
-    `home.persistence` hooks so impermanent hosts discard its profile unless a
-    user chooses state elsewhere.
   - Name the browser goal before changing prefs: security, privacy, anonymity,
     or convenience. Standardized fingerprints such as Tor or Mullvad Browser
     serve anonymity but can break sites and invite CAPTCHAs; randomized
@@ -508,13 +459,10 @@ Research sources to revisit and distill when working a specific slice:
 
 ## Additional Users
 
-- Completed: `admin` now keeps its minimal Home Manager repair profile while
-  explicitly disabling `theorem.home.base.persistence.enable`; `guest` still has
-  `home.enable = false`, so it receives no Home Manager persistence surface.
-  `users/README.md` documents the boundary: the system may prepare an empty
-  `/nix/persist/home/<user>` repair cradle for selected Home Manager users, but
-  files are not persisted unless that user's Home profile declares
-  `home.persistence` entries.
+- Before promoting `guest` or another local account into a real working user,
+  name the workflow, decide whether Home Manager is enabled, and declare only
+  the persistence paths that should survive rollback. `users/README.md` carries
+  the current account-boundary doctrine for `admin`, `guest`, and `vicky`.
 
 ## Solanine AMDGPU Plasma Freezes
 
@@ -522,11 +470,3 @@ The detailed repair ledger now lives in
 [`docs/solanine-amdgpu-freezes.md`](./solanine-amdgpu-freezes.md). Keep future
 evidence, tried parameters, rollback notes, and capture commands there so the
 mechanism has one memory.
-
-## Repository Philosophy
-
-- Completed: the repository philosophy has been promoted into
-  [`docs/philosophy.md`](./philosophy.md). Treat that file as the beating heart
-  of the theorem: TODO ledgers, plans, modules, host profiles, user profiles,
-  and agent behavior must serve it. If the repository shape disagrees with that
-  doctrine, repair the shape instead of burying the mismatch here.

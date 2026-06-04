@@ -1,6 +1,38 @@
-# Boundary Repair Refactor Implementation Plan
+# Boundary Repair Refactor Completion Record
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+Status: archived after repair. This file is kept as the historical plan that
+guided the boundary pass; it is not the live checklist for future work.
+
+The profile split and documentation repair described here have been carried
+into the repository shape: `users/vicky/profiles.nix` is an import coordinator,
+focused files under `users/vicky/profiles/` own Vicky's working-surface
+posture, and `users/README.md` records the user-profile boundary. Live follow-up
+work belongs in `docs/TODO.md`, where each item should name the mechanism, the
+failure mode, and the validation rite.
+
+Remaining live edges from this pass:
+
+- Evaluate a second, non-Vicky Home profile against the shared Home modules.
+- Design the exported shared Home baseline for user-owned Home flakes.
+- Keep any system import of user-writable Home code behind an explicit reviewed
+  trust gate.
+- Continue auditing large reusable modules only when a concrete boundary
+  violation is found.
+
+Archived validation from the stock-taking pass:
+
+```bash
+nix eval .#nixosConfigurations.solanine.config.system.name
+nix eval .#nixosConfigurations.solanine.config.home-manager.users --apply builtins.attrNames
+```
+
+Observed results were `"solanine"` and `[ "admin" "vicky" ]` in a dirty
+worktree.
+
+---
+
+The original plan follows for archaeology only. Do not execute it as if the
+unchecked boxes still describe repository state.
 
 **Goal:** Repair repository boundaries by splitting oversized user-owned profile state, auditing reusable module ownership, and updating documentation without adding new features.
 
