@@ -73,7 +73,7 @@ selection. Vicky's Home module entry point is `users/vicky/home.nix`; it imports
 and Home Manager's own enablement, then imports `profiles.nix` for selected
 `theorem.home.*` mechanisms and deliberate personal overrides. `profiles.nix`
 is an import coordinator; focused files under `users/vicky/profiles/` carry
-Vicky's personal desktop, editor, shell, web, and gaming posture so each
+Vicky's personal desktop, Plasma, editor, shell, web, and gaming posture so each
 working-surface repair can be reviewed without opening the whole workshop.
 
 Do not change `home.stateVersion` as an ordinary upgrade habit. It preserves

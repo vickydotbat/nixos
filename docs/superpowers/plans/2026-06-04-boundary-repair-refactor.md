@@ -209,7 +209,7 @@ Expected: no reusable module imports Vicky's user profile or hard-codes her priv
 Run:
 
 ```bash
-rg -L "options\\.theorem\\.|config = lib\\.mkIf|lib\\.mkIf cfg\\.enable|mkIf cfg\\.enable" modules/home/**/*.nix modules/nixos/**/*.nix
+rg --files-without-match "options\\.theorem\\.|config = lib\\.mkIf|lib\\.mkIf cfg\\.enable|mkIf cfg\\.enable" modules/home/**/*.nix modules/nixos/**/*.nix
 ```
 
 Expected: review any listed files manually. A file may be acceptable if it is a companion substrate with a documented derived default or if the search missed its gate.

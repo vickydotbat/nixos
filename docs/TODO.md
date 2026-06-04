@@ -106,13 +106,17 @@ as understandable as possible for newer maintainers.
   defaults. User modules should carry themes, editor posture, shell habits,
   autostart choices, plugin-bearing packages, and language stacks that are only
   true for one operator.
-- Continue the option-boundary pass before adding another user: Plasma layout
-  still needs calibration before it can be treated as a plain reusable default.
+- Continue the option-boundary pass before adding another user by checking each
+  reusable Home module for personal posture before it becomes another user's
+  inheritance.
 - Completed: Vicky's large Home profile is now split under
   `users/vicky/profiles/`. The import coordinator stays at
   `users/vicky/profiles.nix`, while focused user-owned files carry desktop,
-  editor, shell, web, and gaming posture without moving those personal choices
-  into reusable Home modules.
+  editor, shell, web, gaming, and Plasma posture without moving those personal
+  choices into reusable Home modules.
+- Completed: `modules/home/desktop/plasma.nix` is now a neutral Plasma Manager
+  substrate. Vicky's curated layout, shortcuts, MIME defaults, KDE Connect,
+  and wallet persistence live in `users/vicky/profiles/plasma.nix`.
 - Completed: user SSH identity restoration no longer depends on the system
   OpenSSH service. The Home SSH module restores per-user SOPS-backed keys for
   outbound SSH and Git signing, while the host SOPS binding exposes user SSH
