@@ -1,7 +1,6 @@
 {
   config,
   lib,
-  repository,
   ...
 }:
 # Experimental run0 elevation profile. This module replaces the traditional
@@ -10,37 +9,10 @@
 # selected. Test login, rebuild, and rollback before making it a host default.
 let
   cfg = config.theorem.nixos.security.run0-sudo;
-  repositoryGroup = repository.group or "nixcfg";
-  quotedUsers = lib.concatMapStringsSep ", " (user: ''"${user}"'') cfg.authenticationCacheUsers;
-  quotedGroups = lib.concatMapStringsSep ", " (group: ''"${group}"'') cfg.authenticationCacheGroups;
 in
 {
   options.theorem.nixos.security.run0-sudo = {
     enable = lib.mkEnableOption "Run0 instead of sudo";
-
-    authenticationCacheUsers = lib.mkOption {
-      type = lib.types.listOf lib.types.str;
-      default = [ ];
-      description = ''
-        User names allowed to keep Polkit authentication for one NixOS
-        administrative operation. Keep this narrow; every named account becomes
-        part of the host's elevation path.
-      '';
-    };
-
-    authenticationCacheGroups = lib.mkOption {
-      type = lib.types.listOf lib.types.str;
-      default = [ repositoryGroup ];
-      defaultText = lib.literalExpression "[ repository.group ]";
-      description = ''
-        Group names allowed to keep Polkit authentication for one NixOS
-        administrative operation. By default this follows the repository
-        steward group, normally `nixcfg`, so rebuild authority stays bound to
-        the accounts trusted to repair this flake. Override this per host if
-        elevation should follow a different administrative boundary such as
-        `wheel`.
-      '';
-    };
 
     sudoAlias.enable = lib.mkOption {
       type = lib.types.bool;
@@ -56,17 +28,6 @@ in
   config = lib.mkIf cfg.enable {
     theorem.nixos.security.sudo.enable = lib.mkForce false;
 
-    assertions = [
-      {
-        assertion = cfg.authenticationCacheUsers != [ ] || cfg.authenticationCacheGroups != [ ];
-        message = ''
-          `theorem.nixos.security.run0-sudo` needs at least one
-          `authenticationCacheUsers` or `authenticationCacheGroups` entry so the
-          Polkit cache rule has a declared administrative boundary.
-        '';
-      }
-    ];
-
     environment.systemPackages = [
       config.systemd.package
     ];
@@ -79,6 +40,11 @@ in
       polkit.enable = true;
       run0 = {
         enableSudoAlias = cfg.sudoAlias.enable;
+        # Keep run0 password-gated. The working frictionless path is
+        # `wheelNeedsPassword = false`, which grants passwordless Polkit
+        # approval for systemd unit management rather than a narrow NixOS
+        # rebuild cache.
+        wheelNeedsPassword = lib.mkDefault true;
       };
 
       # Force using run0 for admin commands.
@@ -97,23 +63,6 @@ in
         # Optional: if you disable mount, disable umount as well
         # umount.enable = lib.mkForce false;
       };
-
-      # Reduce friction of password entries.
-      polkit.extraConfig = ''
-        polkit.addRule(function(action, subject) {
-          var users = [${quotedUsers}];
-          var groups = [${quotedGroups}];
-          var permittedUser = users.indexOf(subject.user) >= 0;
-          var permittedGroup = groups.some(function(group) {
-            return subject.isInGroup(group);
-          });
-
-          if ((permittedUser || permittedGroup) && action.id.indexOf("org.nixos") == 0) {
-            polkit.log("Caching admin authentication for single NixOS operation");
-            return polkit.Result.AUTH_ADMIN_KEEP;
-          }
-        });
-      '';
 
     };
   };

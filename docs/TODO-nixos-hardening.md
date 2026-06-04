@@ -239,8 +239,9 @@ decoration.
   - Why: replacing `sudo` removes a common SUID elevation binary, but privilege
     rules can lock out administration if the user model is wrong.
   - How: continue `modules/nixos/security/run0.nix`; require declared admin
-    users or groups; keep `security.polkit.enable = true`; keep the sudo alias
-    as a compatibility option until host repair notes no longer depend on it.
+    users or groups through the normal NixOS administrative model; keep
+    `security.polkit.enable = true`; keep the sudo alias as a compatibility
+    option until host repair notes no longer depend on it.
   - Achieves: privilege escalation through systemd-run/Polkit rather than the
     traditional `sudo` SUID binary.
   - Default posture: conditional until every host has a tested admin account and
@@ -248,15 +249,18 @@ decoration.
   - Validation: run `run0 true`, `run0 nixos-rebuild dry-build --flake .#host`,
     and confirm rollback access.
   - Progress: `modules/nixos/security/run0.nix` now force-disables the sudo
-    theorem when the run0 profile is selected, requires at least one declared
-    Polkit cache user or group, defaults that cache boundary to the repository
-    steward group such as `nixcfg`, and exposes
+    theorem when the run0 profile is selected, exposes
     `theorem.nixos.security.run0-sudo.sudoAlias.enable` instead of hard-coding
-    the compatibility alias. `hosts/solanine/profiles.nix` now also builds a
-    `run0-sudo` specialisation that inherits the normal host profile and enables
-    the run0 profile there. This gives the operator a reversible boot or
-    `switch-to-configuration test` path before the default elevation rite is
-    changed.
+    the compatibility alias, and explicitly leaves
+    `security.run0.wheelNeedsPassword` enabled. The attempted narrow
+    `org.nixos` Polkit cache was removed because rebuild activation authorizes
+    through systemd's `org.freedesktop.systemd1.manage-units` path; the working
+    passwordless knob grants broader systemd unit-management authority and must
+    be chosen deliberately per host. `hosts/solanine/profiles.nix` now also
+    builds a `run0-sudo` specialisation that inherits the normal host profile
+    and enables the run0 profile there. This gives the operator a reversible
+    boot or `switch-to-configuration test` path before the default elevation
+    rite is changed.
 
 - [ ] Separate daily users from administrator accounts where the host can bear
   it.

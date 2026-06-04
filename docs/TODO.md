@@ -24,9 +24,8 @@ as understandable as possible for newer maintainers.
   a clearer stewardship name such as `forge`. The group is not a replacement for
   `wheel`: `wheel` remains the local elevation and administrative role, while
   the repository group owns repair access to `/nix/nixos`, shared Git writes,
-  and any narrow NixOS-operation authorization cache such as the `run0` profile.
-  Do not widen application-control groups to guests or outside accounts just
-  because the name changes.
+  and other repository-local repair surfaces. Do not widen application-control
+  groups to guests or outside accounts just because the name changes.
 - If the repository group is renamed, treat it as a real host migration. Update
   `repository.group`, user `extraGroups`, ownership and setgid state for
   `/nix/nixos`, `core.sharedRepository`, related documentation, and any module
@@ -96,9 +95,10 @@ as understandable as possible for newer maintainers.
   use native NixOS options directly for single upstream settings such as SSH
   firewall exposure, boot generation limits, and graphics library toggles.
 - Treat `run0` as a separate security profile until it has been activated and
-  tested on a host. The profile now has a declared Polkit cache boundary and a
-  configurable sudo compatibility alias, but the remaining rite is operational:
-  prove login, elevation, rebuild, and rollback before making it a default.
+  tested on a host. The profile now has a configurable sudo compatibility alias
+  and intentionally keeps run0 password-gated; the working passwordless knob is
+  broader systemd unit-management authority, not a narrow NixOS rebuild cache.
+  Prove login, elevation, rebuild, and rollback before making it a default.
 
 ## Home Module Boundary
 

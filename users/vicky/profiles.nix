@@ -243,8 +243,30 @@ in
             "editor.insertSpaces" = true;
             "editor.tabSize" = 2;
             "editor.codeActionsOnSave" = { };
-            "cSpell.enabled" = false;
           };
+          "cSpell.enabledFileTypes".nix = false;
+          "cSpell.words" = [
+            "cachix"
+            "deadnix"
+            "disko"
+            "home-manager"
+            "impermanence"
+            "libexec"
+            "mkEnableOption"
+            "mkForce"
+            "mkIf"
+            "mkOption"
+            "nixcfg"
+            "nixd"
+            "nixfmt"
+            "nixos"
+            "nixpkgs"
+            "Polkit"
+            "run0"
+            "sops"
+            "statix"
+            "systemd"
+          ];
 
           "direnv.restart.automatic" = true;
 

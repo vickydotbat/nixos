@@ -19,7 +19,7 @@ and the host signal that proves it is safe.
 | Firejail-backed applications | `theorem.nixos.security.firejail.enable` | Firejail is useful confinement, but it is also SUID. Wrap only named applications with tested profiles. |
 | Bluetooth | `theorem.nixos.desktop.bluetooth.enable` | Service reduction and service sandboxing must preserve paired input devices and recovery access. |
 | Impermanence | `theorem.nixos.base.persistence.enable` and root mode options | Audit databases, logs, malware definitions, and restore paths need persistence decisions before scheduled checks. |
-| Administrative elevation | `theorem.nixos.security.sudo.enable` or `run0-sudo.enable` | SUID wrapper reduction must not remove the only tested administrative path. |
+| Administrative elevation | `theorem.nixos.security.sudo.enable` or `run0-sudo.enable` | SUID wrapper reduction must not remove the only tested administrative path. Passwordless run0 is not a narrow rebuild cache; it grants passwordless Polkit approval for systemd unit management and should be a deliberate host choice. |
 | Encrypted DNS resolver | Not yet implemented | DNS privacy controls can break captive portals, VPN bootstrap, MagicDNS, local discovery, and browser DoH assumptions. |
 | Tailscale mesh networking | Not yet implemented | Trusting `tailscale0`, MagicDNS, exit nodes, and DNS acceptance each changes recovery and name-resolution behavior. |
 | MAC randomization | `theorem.nixos.security.hardening.networkManagerMacRandomization.enable` | Randomized addresses can confuse home routers, allow-lists, device inventory, and per-network firewall expectations. |
