@@ -3,19 +3,11 @@
   lib,
   osConfig ? null,
   pkgs,
+  repository ? {
+    path = "$NIXOS_CONFIG_FLAKE";
+  },
   ...
 }:
-
-/*
-  TODO:
-
-  Ble.sh was used in the past for zsh-like inline suggestions but broke numerous
-  shell integrations. We could consider implementing it again but it would need
-  to be done carefully.
-
-  Alternatively: lightweight completion suggestions and command highlighting
-  would go a long way.
-*/
 
 # Interactive shell substrate. This module owns broadly useful Bash behavior and
 # command-line tools, while exposing aliases as options so user profiles can
@@ -24,8 +16,19 @@
 let
   cfg = config.theorem.home.shell.shell;
   hasOsConfig = osConfig != null;
+  nhEnabled = hasOsConfig && (osConfig.programs.nh.enable or false);
   run0Enabled = hasOsConfig && (osConfig.theorem.nixos.security.run0-sudo.enable or false);
   sudoEnabled = hasOsConfig && (osConfig.theorem.nixos.security.sudo.enable or false);
+  configuredNhFlake =
+    if hasOsConfig then
+      osConfig.programs.nh.flake or null
+    else
+      null;
+  defaultNixosFlake =
+    if configuredNhFlake != null then
+      configuredNhFlake
+    else
+      repository.path;
 
   defaultElevationCommand =
     if run0Enabled then
@@ -52,7 +55,15 @@ let
 in
 {
   options.theorem.home.shell.shell = {
-    enable = lib.mkEnableOption "interactive shell"; # FIXME: Should be enabled by default.
+    enable = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = ''
+        Enable the reusable interactive shell baseline. Defaults on because
+        Bash completion, history, and repair tools are expected for every
+        managed Home profile; austere homes can disable it explicitly.
+      '';
+    };
 
     aliases = lib.mkOption {
       type = lib.types.attrsOf lib.types.str;
@@ -73,18 +84,24 @@ in
     nixosAliases = {
       enable = lib.mkOption {
         type = lib.types.bool;
-        default = hasOsConfig; # FIXME: This should also depend on whether `nh` is enabled. Not just when the system exists.
-        defaultText = lib.literalExpression "osConfig != null";
+        default = nhEnabled;
+        defaultText = lib.literalExpression "osConfig != null && osConfig.programs.nh.enable";
         description = ''
           Install short NixOS repair aliases. Defaults on only when this Home
-          profile is evaluated as part of a NixOS system, so standalone personal
-          Home flakes do not receive aliases that depend on host state.
+          profile is evaluated as part of a NixOS system with `programs.nh`
+          enabled, so standalone personal Home flakes do not receive aliases
+          that depend on host state.
         '';
       };
 
       flake = lib.mkOption {
         type = lib.types.str;
-        default = "$NIXOS_CONFIG_FLAKE"; # FIXME: Use the repo path where able. There is no guarantee this variable will be set.
+        default = defaultNixosFlake;
+        defaultText = lib.literalExpression ''
+          if osConfig.programs.nh.flake != null
+          then osConfig.programs.nh.flake
+          else repository.path
+        '';
         description = "Flake reference used by the short NixOS repair aliases.";
       };
     };
@@ -163,14 +180,24 @@ in
           nb = "nh os boot ${cfg.nixosAliases.flake}";
           nt = "nh os test ${cfg.nixosAliases.flake}";
           nd = "nh os dry ${cfg.nixosAliases.flake}";
-          # TODO: Add convenience aliases for the other "nh" possible commands.
-        }
-        // lib.optionalAttrs cfg.elevationAlias.enable {
-          please = "${cfg.elevationAlias.command} $(fc -ln -1)"; # FIXME: Does this trick work for run0? It works for sudo. It essentially re-runs the last command with sudo, I think.
+          nr = "nh os build ${cfg.nixosAliases.flake}";
         }
         // cfg.extraAliases;
 
       initExtra = ''
+        ${lib.optionalString cfg.elevationAlias.enable ''
+          please() {
+            local previous_command
+            previous_command="$(fc -ln -1)"
+
+            if [[ -z "$previous_command" ]]; then
+              return 1
+            fi
+
+            ${lib.escapeShellArg cfg.elevationAlias.command} bash -lc "$previous_command"
+          }
+        ''}
+
         _bash_history_sync() {
           history -a
           history -n
@@ -323,7 +350,9 @@ in
       ];
 
       files = [
-        ".bash_history" # TODO: Make sure this is persisting correctly.
+        # Impermanence persists this file path directly; `_bash_history_sync`
+        # flushes interactive commands into it at each prompt.
+        ".bash_history"
       ];
     };
   };

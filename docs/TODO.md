@@ -133,6 +133,16 @@ the validation rite that proves it still holds.
   `extraAliases`, `nixosAliases`, and `elevationAlias`. Standalone Home flakes
   no longer inherit host-repair aliases by accident, and the `please` retry
   alias follows `run0` when the active NixOS elevation theorem selects it.
+- Completed: `modules/home/shell/shell.nix` now defaults the shell baseline on,
+  gates NixOS `nh` aliases on `osConfig.programs.nh.enable`, derives the alias
+  flake target from `programs.nh.flake` or `repository.path`, provides `nr` for
+  `nh os build`, and implements `please` as a Bash function that replays the
+  previous command through the selected elevation command.
+- Future shell UX research belongs in the ledger, not as an in-code TODO:
+  ble.sh previously broke multiple shell integrations, but lightweight command
+  suggestions or highlighting may be worth revisiting behind a separate option
+  after Bash, Atuin, Carapace, Direnv, FZF, Zellij, and editor-embedded
+  terminals are tested together.
 - Validation: evaluate a second user with the shared Home modules enabled and no
   Vicky profile imports. The result should install plain mechanisms, not Vicky's
   editor theme, VS Code workflow, GIMP plugin build, Spotify extensions, Discord
@@ -160,9 +170,11 @@ the validation rite that proves it still holds.
   `modules/nixos/security/sudo.nix`, `modules/nixos/security/run0.nix`,
   `modules/home/base/persistence.nix`, `modules/home/base/xdg.nix`,
   `modules/home/base/fonts.nix`, `modules/home/base/virtualization.nix`, and
-  `modules/home/gaming/steam.nix`. The next pass should continue module by
-  module, placing the doctrine beside the mechanism instead of burying it in a
-  distant checklist.
+  `modules/home/gaming/steam.nix`. `modules/home/shell/shell.nix` and
+  `modules/home/web/ungoogled-chromium.nix` also now carry their local doctrine
+  and no longer use inline TODO/FIXME notes for known follow-up work. The next
+  pass should continue module by module, placing the doctrine beside the
+  mechanism instead of burying it in a distant checklist.
 
 ## YubiKey Support
 
@@ -280,6 +292,10 @@ the validation rite that proves it still holds.
     choices comparable rather than fashionable. Browser sandbox strength,
     screen-sharing behavior, password-manager integration, downloads, and
     profile persistence all interact.
+  - Progress: `modules/home/web/ungoogled-chromium.nix` now names Chromium as a
+    fallback and web-development browser, and intentionally avoids
+    `home.persistence` hooks so impermanent hosts discard its profile unless a
+    user chooses state elsewhere.
   - Name the browser goal before changing prefs: security, privacy, anonymity,
     or convenience. Standardized fingerprints such as Tor or Mullvad Browser
     serve anonymity but can break sites and invite CAPTCHAs; randomized
