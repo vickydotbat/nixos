@@ -9,6 +9,7 @@
 # application preference groups into options before inheriting this whole shape.
 let
   cfg = config.theorem.home.desktop.plasma;
+  trashPath = "${config.home.homeDirectory}/.local/share/Trash";
 in
 {
   options.theorem.home.desktop.plasma.enable = lib.mkEnableOption "Plasma user configuration";
@@ -298,9 +299,9 @@ in
 
         "ksmserverrc".General.loginMode = "emptySession";
 
-        "ktrashrc"."/home/vicky/.local/share/Trash" = {
-          # FIXME: Explicit username reference. Must be able to support multiple users.
-          # TODO: What about the trash folder on tmpfs setups? It might inadvertantly fill the ram space. Consider using a volatile /tmp mount similar to the volatile downloads instead.
+        "ktrashrc".${trashPath} = {
+          # Keep Trash short-lived and size-bound so tmpfs-backed homes do not
+          # turn accidental deletes into quiet memory pressure.
           Days = 1;
           LimitReachedAction = 1;
           Percent = 5;

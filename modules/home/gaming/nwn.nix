@@ -16,6 +16,8 @@ let
   nwnDataDir = "${config.home.homeDirectory}/.local/share/Neverwinter Nights";
   nwnDocumentsDir = "${config.home.homeDirectory}/Documents/Neverwinter Nights";
   windowsDocumentsDir = "C:\\users\\${config.home.username}\\Documents\\Neverwinter Nights";
+  nwnBlender = pkgs.blender-402-bin;
+  nwnBlenderConfigVersion = lib.versions.majorMinor nwnBlender.version;
 
   nwnDataAliasesBeforeHome = [
     "CRASHREPORT"
@@ -131,7 +133,7 @@ in
 
   config = lib.mkIf cfg.enable {
     home.packages = [
-      pkgs.blender-402-bin
+      nwnBlender
       pkgs.cleanmodels
       pkgs.neverwinter-nim
       (pkgs.nwnexplorer.override {
@@ -142,11 +144,9 @@ in
     home.persistence."/nix/persist" = lib.mkIf persistenceEnabled {
       directories = [
         ".local/share/Neverwinter Nights"
-        ".config/blender/4.0" # TODO: See other blender module.
+        ".config/blender/${nwnBlenderConfigVersion}"
       ];
     };
-
-    # TODO: Write a desktop launcher for aurora toolset. Possibly fine to make it a package.
 
     home.activation.nwnDocumentsLayout = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       nwn_data_dir=${lib.escapeShellArg nwnDataDir}

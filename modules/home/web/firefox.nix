@@ -9,19 +9,46 @@
 # carry copied browser mechanics.
 let
   cfg = config.theorem.home.web.firefox;
+  desktopFile = "${cfg.desktopEntryName}.desktop";
   profileName = config.home.username;
 
-  # Default mechanism, kept in the reusable module; home/ may override it.
-  firefox = [ "firefox-devedition.desktop" ]; # TODO: Link with the below desktop generator.
+  # Default browser target, shared by the desktop entry and MIME mappings.
+  firefox = [ desktopFile ];
   profilePath = "${config.home.homeDirectory}/.mozilla/firefox/${profileName}";
 in
 {
-  options.theorem.home.web.firefox.enable = lib.mkEnableOption "Firefox";
+  options.theorem.home.web.firefox = {
+    enable = lib.mkEnableOption "Firefox";
+
+    package = lib.mkOption {
+      type = lib.types.package;
+      default = pkgs.firefox-devedition;
+      description = "Firefox package installed and launched by this Home profile.";
+    };
+
+    desktopEntryName = lib.mkOption {
+      type = lib.types.str;
+      default = "firefox-devedition";
+      description = "Desktop entry identifier used for Firefox MIME defaults.";
+    };
+
+    desktopName = lib.mkOption {
+      type = lib.types.str;
+      default = "Firefox Developer Edition";
+      description = "Human-readable name shown by the generated Firefox desktop entry.";
+    };
+
+    icon = lib.mkOption {
+      type = lib.types.str;
+      default = "firefox-devedition";
+      description = "Icon name used by the generated Firefox desktop entry.";
+    };
+  };
 
   config = lib.mkIf cfg.enable {
     programs.firefox = {
       enable = true;
-      package = pkgs.firefox-devedition;
+      package = cfg.package;
       configPath = ".mozilla/firefox";
 
       profiles.${profileName} = {
@@ -264,12 +291,11 @@ in
       ];
     };
 
-    xdg.desktopEntries.firefox-devedition = {
-      # TODO: Link with the top-level desktop variable.
-      name = "Firefox Developer Edition";
+    xdg.desktopEntries.${cfg.desktopEntryName} = {
+      name = cfg.desktopName;
       genericName = "Web Browser";
-      exec = "${pkgs.firefox-devedition}/bin/firefox-devedition --name firefox-devedition --profile ${profilePath} %U";
-      icon = "firefox-devedition";
+      exec = "${lib.getExe cfg.package} --name ${cfg.desktopEntryName} --profile ${profilePath} %U";
+      icon = cfg.icon;
       terminal = false;
       categories = [
         "Network"

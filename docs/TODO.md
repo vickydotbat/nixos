@@ -4,6 +4,11 @@ This is the repair ledger for work that should become configuration, not a pile
 of hopeful comments. Each item should name the mechanism, the failure mode, and
 the validation rite that proves it still holds.
 
+NOTE: When completing a task, fold its relevant documentation into the correct
+place. Use `README.md` and `docs/` as readable sources for what purpose every
+change serves. Documentation maintainenance is critical for keeping the repo
+as understandable as possible for newer maintainers.
+
 ## Bootstrap And Spawning
 
 - Add a first-install bootstrap path built around `disko` plus explicit
@@ -143,6 +148,12 @@ the validation rite that proves it still holds.
   suggestions or highlighting may be worth revisiting behind a separate option
   after Bash, Atuin, Carapace, Direnv, FZF, Zellij, and editor-embedded
   terminals are tested together.
+- Neverwinter Nights still needs an Aurora Toolset launcher decision. Decide
+  whether the launcher belongs in the NWN Home module or in a package wrapper,
+  then name the executable, working directory, Wine or Proton environment, icon,
+  and persistence assumptions explicitly. The failure mode is worse than a
+  missing menu entry: a half-declared launcher can write toolset state into an
+  unmanaged prefix or point at the wrong game install.
 - Validation: evaluate a second user with the shared Home modules enabled and no
   Vicky profile imports. The result should install plain mechanisms, not Vicky's
   editor theme, VS Code workflow, GIMP plugin build, Spotify extensions, Discord
@@ -322,10 +333,22 @@ the validation rite that proves it still holds.
   - Browser compartmentalization should be deliberate: one daily browser, one
     hardened or amnesic browser, and one anonymity browser are different tools.
     Do not let MIME defaults, XDG handlers, sync accounts, or password-manager
-    integration blur those boundaries without a reason.
+    integration blur those boundaries without a reason. (NOTE: Regarding MIME,
+    it is safer to open "random links" in the hardened/amnesiac browser such as
+    firejailed LibreWolf or perhaps Mullvad in the future. However, where
+    concerns API calls, not using the daily browser can pose a convenience curb,
+    preventing sign-ins to every day tools like Codex. Since the amnesiac
+    browsers will never remember those logins, the distinction should be made
+    clean and predictable. Random html file? Open in the amnesiac browser for
+    security. API call to login tool? Goes to the daily driver browser. Etc.)
   - Treat Xwayland, desktop portals, and screenshot/screencast protocols as
     desktop threat-model topics. Plasma and Wayland are useful defaults, but
-    each desktop profile should name what it exposes.
+    each desktop profile should name what it exposes. Research exact Xwayland
+    needs for all present hosts before tightening this path. Steam requires it,
+    and some daily applications may still lack a stable Wayland route. The
+    useful mechanism would derive Xwayland or portal support from explicit
+    application needs, such as Discord screen sharing, instead of leaving those
+    surfaces ambient.
   - Validation: browser sandbox diagnostics, fingerprint sanity checks such as
     Cover Your Tracks or Am I Unique without overfitting to them, portal
     screen-share test, download persistence check, password-manager workflow,
@@ -489,95 +512,7 @@ Research sources to revisit and distill when working a specific slice:
 
 ## Solanine AMDGPU Plasma Freezes
 
-Solanine still experiences the well-documented "flip_done" freeze despite some
-kernel module workarounds being applied. There is also a real world workaround
-where the user unplugs the monitor cable from the back of the PC, plugs it back
-in, and hits a key a few times to wake the monitor. This is documented as working
-during two such freeze cases.
-
 The detailed repair ledger now lives in
 [`docs/solanine-amdgpu-freezes.md`](./solanine-amdgpu-freezes.md). Keep future
 evidence, tried parameters, rollback notes, and capture commands there so the
 mechanism has one memory.
-
-What has been tried so far:
-- Kernel versions 6.12, Default LTS kernel 6.18, and now the latest unstable.
-
-Documentation checked before pursuing:
-
-- ArchWiki records `amdgpu.dcdebugmask=0x10` or `amdgpu.dcdebugmask=0x12` as
-  workarounds for frozen or unresponsive AMDGPU displays with `flip_done timed
-  out`.
-- An AMD GFX patch thread from February 2026 tracks an upstream race that can
-  produce intermittent `flip_done` timeouts on KDE Plasma Wayland since kernel
-  6.12, so local parameters should remain reversible trials until the fixed
-  kernel path is known.
-
-Progress: Solanine now tests the next host-scoped workaround in
-`hosts/solanine/hardware.nix`: `amdgpu.dcdebugmask=0x52` replaces the
-insufficient `0x12`, keeping PSR and stutter disabled while also disabling AMD
-Display Core multi-plane offloading after the June 4, 2026 `10:44` freeze
-showed a plane commit timeout. `amdgpu.runpm=0` keeps the desktop GPU out of
-runtime power-down while diagnosing the "no outputs" freeze. This is not proven
-until the host boots the generation and survives normal Plasma uptime. If idle
-power or thermals become the sharper failure mode, remove `amdgpu.runpm=0`
-first; if the newest display workaround regresses behavior, return `0x52` to
-`0x12`.
-
-Validation: boot Solanine, confirm `/proc/cmdline` contains
-`amdgpu.dcdebugmask=0x52` and `amdgpu.runpm=0`, use the normal Plasma Wayland
-session through the workflows that previously froze, and review
-`journalctl -b -k | rg 'flip_done|commit wait|amdgpu_dm'`. If the freeze
-returns, capture `sudo dmesg` and
-`journalctl --user-unit plasma-kwin_wayland --boot 0` before trying a kernel,
-Mesa, firmware, cable/port, or VRR-focused trial.
-
-Below is some of the journalctl output.
-
-```
-Jun 04 08:55:30 solanine kdeconnectd[3911]: There are no outputs - creating placeholder screen
-Jun 04 08:55:30 solanine kactivitymanagerd[3775]: There are no outputs - creating placeholder screen
-Jun 04 08:55:30 solanine polkit-kde-authentication-agent-1[3779]: There are no outputs - creating placeholder screen
-Jun 04 08:55:30 solanine baloorunner[10023]: There are no outputs - creating placeholder screen
-Jun 04 08:55:30 solanine baloo_file_extractor[13063]: There are no outputs - creating placeholder screen
-Jun 04 08:55:30 solanine plasmashell[3748]: There are no outputs - creating placeholder screen
-Jun 04 08:55:30 solanine org_kde_powerdevil[3780]: There are no outputs - creating placeholder screen
-Jun 04 08:55:30 solanine systemd[3422]: Started dbus-:1.2-org.kde.KSplash@1.service.
-Jun 04 08:55:32 solanine pipewire-pulse[3878]: mod.protocol-pulse: setsockopt(SO_PRIORITY) failed: Bad file descriptor
-Jun 04 08:55:32 solanine pipewire-pulse[3878]: mod.protocol-pulse: client 0x5ba79e7fd760: no peercred: Bad file descriptor
-Jun 04 08:55:32 solanine plasmashell[3748]: qrc:/qt/qml/plasma/applet/org/kde/plasma/notifications/global/Globals.qml:575:17: Unable to assign QString to int
-Jun 04 08:55:32 solanine kded6[3701]: Failed to notify "Created too many similar notifications in quick succession"
-Jun 04 08:55:43 solanine kernel: amdgpu 0000:03:00.0: [drm] *ERROR* flip_done timed out
-Jun 04 08:55:43 solanine kernel: amdgpu 0000:03:00.0: [drm] *ERROR* [CRTC:363:crtc-0] commit wait timed out
-Jun 04 08:55:51 solanine discord[3908]: 08:55:51.727 › The resource https://discord.com/assets/ce3b8055f5114434.woff2 was preloaded using link preload but not used within a few seconds from the window's load >
-Jun 04 08:55:51 solanine discord[3908]: 08:55:51.727 › The resource https://discord.com/assets/cb2006dbced0e246.woff2 was preloaded using link preload but not used within a few seconds from the window's load >
-Jun 04 08:55:51 solanine discord[3908]: 08:55:51.728 › The resource https://discord.com/assets/7a6a566c2e88a35d.woff2 was preloaded using link preload but not used within a few seconds from the window's load >
-Jun 04 08:55:51 solanine discord[3908]: 08:55:51.728 › The resource https://discord.com/assets/e52f0cba712e2fb4.woff2 was preloaded using link preload but not used within a few seconds from the window's load >
-Jun 04 08:55:51 solanine discord[3908]: 08:55:51.728 › The resource https://discord.com/assets/dd24010f3cf7def7.woff2 was preloaded using link preload but not used within a few seconds from the window's load >
-Jun 04 08:55:53 solanine kernel: amdgpu 0000:03:00.0: [drm] *ERROR* flip_done timed out
-Jun 04 08:55:53 solanine kernel: amdgpu 0000:03:00.0: [drm] *ERROR* [PLANE:360:plane-6] commit wait timed out
-Jun 04 08:55:54 solanine kernel: ------------[ cut here ]------------
-Jun 04 08:55:54 solanine kernel: WARNING: drivers/gpu/drm/amd/amdgpu/../display/amdgpu_dm/amdgpu_dm.c:9576 at amdgpu_dm_atomic_commit_tail+0x3635/0x3690 [amdgpu], CPU#2: kworker/2:1H/629
-Jun 04 08:55:54 solanine kernel: Modules linked in: ccm rfcomm snd_seq_dummy snd_hrtimer snd_seq snd_seq_device af_packet cmac algif_hash algif_skcipher af_alg bnep nls_iso8859_1 rtw89_8852be nls_cp437 r8169 >
-Jun 04 08:55:54 solanine kernel:  video hid_generic mt792x_lib mt76_connac_lib tiny_power_button rtc_cmos mt76_usb mt76 gpio_amdpt wmi gpio_generic button mac80211 btusb btrtl btintel btmtk btbcm cfg80211 blu>
-Jun 04 08:55:54 solanine kernel: CPU: 2 UID: 0 PID: 629 Comm: kworker/2:1H Not tainted 7.0.10 #1-NixOS PREEMPT(lazy)
-Jun 04 08:55:54 solanine kernel: Hardware name: ASUS System Product Name/PRIME B650M-A WIFI II, BIOS 3263 06/09/2025
-Jun 04 08:55:54 solanine kernel: Workqueue: events_highpri dm_irq_work_func [amdgpu]
-Jun 04 08:55:54 solanine kernel: RIP: 0010:amdgpu_dm_atomic_commit_tail+0x3635/0x3690 [amdgpu]
-Jun 04 08:55:54 solanine kernel: Code: ff ff 90 0f 0b 49 8d 84 24 40 5b 04 00 c6 85 18 fe ff ff 00 48 89 85 20 fe ff ff e9 56 d0 ff ff 90 0f 0b 90 e9 9f d0 ff ff 90 <0f> 0b 90 e9 fc f7 ff ff 48 c7 85 18 fe ff>
-Jun 04 08:55:54 solanine kernel: RSP: 0018:ffffd39041e67ac8 EFLAGS: 00010086
-Jun 04 08:55:54 solanine kernel: RAX: 0000000000000001 RBX: 0000000000000296 RCX: ffff8e560591f118
-Jun 04 08:55:54 solanine kernel: RDX: 0000000000000001 RSI: 0000000000000286 RDI: ffff8e563c480178
-Jun 04 08:55:54 solanine kernel: RBP: ffffd39041e67d40 R08: ffffd39041e679bc R09: 0000000000000000
-Jun 04 08:55:54 solanine kernel: R10: ffff8e5606d52e00 R11: ffffd39041e67a2c R12: ffff8e560591f118
-Jun 04 08:55:54 solanine kernel: R13: 0000000000000000 R14: ffff8e56118c7600 R15: ffff8e560591f000
-Jun 04 08:55:54 solanine kernel: FS:  0000000000000000(0000) GS:ffff8e5db7bdd000(0000) knlGS:0000000000000000
-Jun 04 08:55:54 solanine kernel: CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-Jun 04 08:55:54 solanine kernel: CR2: 00003be40573e3fc CR3: 00000002ec224000 CR4: 0000000000f50ef0
-Jun 04 08:55:54 solanine kernel: PKRU: 55555554
-Jun 04 08:55:54 solanine kernel: Call Trace:
-Jun 04 08:55:54 solanine kernel:  <TASK>
-Jun 04 08:55:54 solanine kernel:  commit_tail+0xd1/0x160
-Jun 04 08:55:54 solanine kernel:  drm_atomic_helper_commit+0x13c/0x180
-lines 919-962/1000 97%
-```

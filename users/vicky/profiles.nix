@@ -16,7 +16,10 @@ in
     };
 
     desktop = {
-      blender.enable = true;
+      blender = {
+        enable = true;
+        persistedConfigVersions = [ "5.1" ];
+      };
       discord = {
         enable = true;
         autostart.enable = true;
@@ -81,6 +84,7 @@ in
           ms-vscode.cpptools
           ms-vscode.cmake-tools
           pkief.material-icon-theme
+          streetsidesoftware.code-spell-checker
         ];
         extraPackages = with pkgs; [
           nixd
@@ -239,6 +243,7 @@ in
             "editor.insertSpaces" = true;
             "editor.tabSize" = 2;
             "editor.codeActionsOnSave" = { };
+            "cSpell.enabled" = false;
           };
 
           "direnv.restart.automatic" = true;

@@ -19,16 +19,9 @@ let
   nhEnabled = hasOsConfig && (osConfig.programs.nh.enable or false);
   run0Enabled = hasOsConfig && (osConfig.theorem.nixos.security.run0-sudo.enable or false);
   sudoEnabled = hasOsConfig && (osConfig.theorem.nixos.security.sudo.enable or false);
-  configuredNhFlake =
-    if hasOsConfig then
-      osConfig.programs.nh.flake or null
-    else
-      null;
-  defaultNixosFlake =
-    if configuredNhFlake != null then
-      configuredNhFlake
-    else
-      repository.path;
+  configuredNhFlake = if hasOsConfig then osConfig.programs.nh.flake or null else null;
+  defaultNixosFlake = if configuredNhFlake != null then configuredNhFlake else repository.path;
+  defaultNhElevationOption = lib.optionalString run0Enabled "-e run0 ";
 
   defaultElevationCommand =
     if run0Enabled then
@@ -176,11 +169,11 @@ in
       shellAliases =
         cfg.aliases
         // lib.optionalAttrs cfg.nixosAliases.enable {
-          ns = "nh os switch ${cfg.nixosAliases.flake}";
-          nb = "nh os boot ${cfg.nixosAliases.flake}";
-          nt = "nh os test ${cfg.nixosAliases.flake}";
-          nd = "nh os dry ${cfg.nixosAliases.flake}";
-          nr = "nh os build ${cfg.nixosAliases.flake}";
+          ns = "nh os ${defaultNhElevationOption}switch ${cfg.nixosAliases.flake}";
+          nb = "nh os ${defaultNhElevationOption}boot ${cfg.nixosAliases.flake}";
+          nt = "nh os ${defaultNhElevationOption}test ${cfg.nixosAliases.flake}";
+          nd = "nh os ${defaultNhElevationOption}build ${cfg.nixosAliases.flake}";
+          nr = "nh os ${defaultNhElevationOption}build ${cfg.nixosAliases.flake}";
         }
         // cfg.extraAliases;
 

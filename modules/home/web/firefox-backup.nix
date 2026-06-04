@@ -26,8 +26,7 @@ let
   */
 
   user = config.home.username;
-  # profileDir = "/nix/persist/home/${user}/.config/mozilla/firefox/vicky";
-  profileDir = "/nix/persist/home/${user}/.mozilla/firefox/vicky"; # FIXME: Explicit username flagging. Must be able to support multiple users.
+  profileDir = "/nix/persist/home/${user}/.mozilla/firefox/${user}";
   backupDir = "/nix/persist/home/${user}/Backups/firefox-state";
   identityFile = "/run/secrets/firefox-backup-age-identity";
 

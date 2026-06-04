@@ -1,4 +1,7 @@
 .cache/
-.local-nix-store/
-result/
 .codex-cache/
+
+# NixOS Build Results
+.local-nix-store/
+result
+result/

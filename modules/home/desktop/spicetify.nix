@@ -16,7 +16,7 @@ in
 
     enabledExtensions = lib.mkOption {
       type = lib.types.listOf lib.types.anything;
-      default = [ ]; # FIXME: The default extensions should be the ones specified in Vicky's user now. These are a good baseline.
+      default = [ ];
       description = ''
         Spicetify extensions enabled for Spotify. Extension choice is user
         workflow; the reusable module only wires the mechanism.

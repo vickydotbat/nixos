@@ -40,7 +40,12 @@ in
       type = lib.types.bool;
       default = persistenceEnabled;
       defaultText = lib.literalExpression "theorem.home.base.persistence.enable";
-      description = "Persist Codex state when Home persistence is active.";
+      description = ''
+        Persist Codex state when Home persistence is active. Disable this when
+        a host should force a clean agent slate on each boot; keep it enabled
+        when login state, installed skills, or local approval memory are part of
+        the operator's repair kit.
+      '';
     };
 
     trustNixosConfiguration = lib.mkOption {
@@ -198,7 +203,7 @@ in
 
     home.persistence."/nix/persist" = lib.mkIf cfg.persistState {
       directories = [
-        ".codex" # TODO: Confirm whether persisting this is a good idea. Codex might prefer a clean slate on each launch, especially since we generate the settings and context.
+        ".codex"
       ];
     };
 
