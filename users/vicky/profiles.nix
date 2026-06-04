@@ -72,7 +72,8 @@ in
           editorconfig.editorconfig
           tamasfe.even-better-toml
           redhat.vscode-yaml
-          eamodio.gitlens
+          mhutchie.git-graph
+          waderyan.gitblame
           usernamehw.errorlens
           gruntfuggly.todo-tree
           ms-python.python
