@@ -4,6 +4,9 @@
   pkgs,
   ...
 }:
+# Graphics support follows declared graphical roles. Vulkan diagnostics and
+# 32-bit libraries are useful on desktops and Steam hosts, but headless systems
+# should not inherit them by accident.
 let
   cfg = config.theorem.nixos.desktop.graphics;
   desktopNeedsGraphics =

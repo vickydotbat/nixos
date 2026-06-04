@@ -1,5 +1,7 @@
 { config, lib, ... }:
 
+# PipeWire is enabled only when a selected desktop or gaming profile needs sound.
+# Audio is useful substrate, but it should still follow an actual host role.
 let
   cfg = config.theorem.nixos.desktop.audio;
   desktopNeedsAudio =

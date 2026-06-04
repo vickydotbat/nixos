@@ -4,7 +4,9 @@
   pkgs,
   ...
 }:
-
+# Steam is an explicit gaming profile because it brings unfree packages, device
+# support, and optional network listeners. Firewall openings stay named so game
+# convenience does not become an ambient service surface.
 let
   cfg = config.theorem.nixos.gaming.steam;
 in

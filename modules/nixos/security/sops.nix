@@ -4,7 +4,9 @@
   pkgs,
   ...
 }:
-
+# SOPS is the repository's runtime secret substrate. This module wires the age
+# identity, default encrypted file, operator environment, and repair tooling
+# without ever placing plaintext secret material in the Nix store.
 let
   cfg = config.theorem.nixos.security.sops;
 in

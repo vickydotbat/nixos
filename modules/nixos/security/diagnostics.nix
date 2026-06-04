@@ -4,6 +4,9 @@
   pkgs,
   ...
 }:
+# Security diagnostics are tools for inspection, not proof of safety. This
+# profile installs manual audit packages while avoiding daemons, databases, or
+# scheduled scans until their persistence and update rites are designed.
 let
   cfg = config.theorem.nixos.security.diagnostics;
 

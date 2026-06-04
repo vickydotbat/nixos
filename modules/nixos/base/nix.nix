@@ -4,6 +4,9 @@
   repository,
   ...
 }:
+# Base Nix daemon policy for the theorem. It keeps flakes enabled, signatures
+# required, the shared repository trusted, and unfree packages behind exact
+# package-name exceptions instead of a global audit bypass.
 let
   cfg = config.theorem.nixos.base.nix;
 in

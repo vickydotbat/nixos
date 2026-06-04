@@ -4,6 +4,9 @@
   pkgs,
   ...
 }:
+# GIMP is kept as a reusable graphics mechanism with a package override. Plugin
+# heavy builds and artist-specific workflow belong in user modules so the shared
+# desktop layer does not inherit one operator's studio.
 let
   cfg = config.theorem.home.desktop.gimp;
 in

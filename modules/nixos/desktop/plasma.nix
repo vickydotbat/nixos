@@ -3,6 +3,9 @@
   lib,
   ...
 }:
+# Plasma is the reusable graphical desktop profile for hosts that select it.
+# Personal panel layout and shortcuts live in Home modules; this system module
+# owns the login stack, desktop service, and firmware-refresh failure mode.
 let
   cfg = config.theorem.nixos.desktop.plasma;
 in

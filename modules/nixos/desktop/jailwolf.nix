@@ -4,6 +4,9 @@
   pkgs,
   ...
 }:
+# `jailwolf` is a disposable LibreWolf launcher owned by the desktop theorem,
+# not a general browser preference. Firejail follows this explicit app choice
+# and the profile denies ordinary browser, key, and password-manager state.
 let
   cfg = config.theorem.nixos.desktop.jailwolf;
 

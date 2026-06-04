@@ -4,7 +4,9 @@
   repository,
   ...
 }:
-
+# Git is the history and review layer for the system theorem. The shared module
+# owns conservative defaults, repository safe-directory posture, LFS support,
+# and SSH commit signing wired to the Home SSH identity.
 let
   cfg = config.theorem.home.shell.git;
 in
@@ -35,7 +37,9 @@ in
   config = lib.mkIf cfg.enable {
     programs.git = {
       enable = true;
-      lfs.enable = lib.mkForce true; # NOTE: This should be global for every git installation, and I don't know why it isn't. When LFS isn't installed git can do some serious damage to repos that use it.
+      # LFS support is cheap insurance for repositories that already use it;
+      # missing filters can corrupt large-file workflows before repair begins.
+      lfs.enable = lib.mkForce true;
 
       settings = {
         init.defaultBranch = "main";
@@ -64,7 +68,7 @@ in
         diff = {
           algorithm = "histogram";
           colorMoved = "plain"; # color moved lines differently, see https://git-scm.com/docs/git-diff#Documentation/git-diff.txt-code--color-movedltmodegtcode
-          mnmonicPrefix = true; # prefix diff header with short source of file instead of only a/b
+          mnemonicPrefix = true; # prefix diff header with short source of file instead of only a/b
         };
 
         /*

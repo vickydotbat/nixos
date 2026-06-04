@@ -3,6 +3,9 @@
   lib,
   ...
 }:
+# Ghostty provides the terminal surface, while Zellij may own workspace chords
+# when enabled. This module keeps that boundary explicit so terminal key repair
+# has one place to look.
 let
   cfg = config.theorem.home.shell.ghostty;
 in

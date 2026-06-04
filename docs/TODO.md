@@ -175,6 +175,11 @@ the validation rite that proves it still holds.
   and no longer use inline TODO/FIXME notes for known follow-up work. The next
   pass should continue module by module, placing the doctrine beside the
   mechanism instead of burying it in a distant checklist.
+- Completed: every `.nix` module under `modules/` now has a top-of-file purpose
+  block or an equivalent boundary note near the module entry. This does not end
+  documentation stewardship: option descriptions, directory READMEs, and host
+  notes still need to stay current when mechanisms change, but the broad module
+  map is now carried beside the mechanisms themselves.
 
 ## YubiKey Support
 

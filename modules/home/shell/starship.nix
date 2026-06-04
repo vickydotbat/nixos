@@ -3,6 +3,9 @@
   lib,
   ...
 }:
+# Starship owns the prompt signal, not shell behavior. The module keeps a small
+# Bash-integrated prompt that exposes repository and Nix shell state without
+# burying repair commands under ornament.
 let
   cfg = config.theorem.home.shell.starship;
 in

@@ -8,7 +8,9 @@
   },
   ...
 }:
-
+# Codex CLI is operator tooling. This module installs the selected package,
+# writes the reusable baseline config, and persists agent state only when the
+# user's Home persistence theorem says that state should survive reboot.
 let
   cfg = config.theorem.home.shell.codex;
   persistenceEnabled = config.theorem.home.base.persistence.enable;
@@ -196,7 +198,7 @@ in
 
     home.persistence."/nix/persist" = lib.mkIf cfg.persistState {
       directories = [
-        ".codex"
+        ".codex" # TODO: Confirm whether persisting this is a good idea. Codex might prefer a clean slate on each launch, especially since we generate the settings and context.
       ];
     };
 

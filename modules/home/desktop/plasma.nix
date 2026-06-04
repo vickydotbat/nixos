@@ -299,6 +299,8 @@ in
         "ksmserverrc".General.loginMode = "emptySession";
 
         "ktrashrc"."/home/vicky/.local/share/Trash" = {
+          # FIXME: Explicit username reference. Must be able to support multiple users.
+          # TODO: What about the trash folder on tmpfs setups? It might inadvertantly fill the ram space. Consider using a volatile /tmp mount similar to the volatile downloads instead.
           Days = 1;
           LimitReachedAction = 1;
           Percent = 5;
@@ -359,6 +361,7 @@ in
         ".local/share/kwalletd"
         ".local/share/baloo"
         ".config/kdeconnect"
+
       ];
     };
 

@@ -4,6 +4,9 @@
   pkgs,
   ...
 }:
+# Zellij owns terminal workspaces when the user selects it. Its keybindings,
+# scrollback, and serialization are kept here so Ghostty can pass through the
+# same chords instead of competing for them.
 let
   cfg = config.theorem.home.shell.zellij;
 in

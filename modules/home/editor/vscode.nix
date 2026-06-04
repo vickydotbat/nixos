@@ -4,7 +4,9 @@
   pkgs,
   ...
 }:
-
+# Shared VS Code support for repairing and editing this theorem. The reusable
+# layer keeps Nix language support, declarative extension ownership, and quiet
+# telemetry defaults; personal workflows belong in user profiles.
 let
   cfg = config.theorem.home.editor.vscode;
 in

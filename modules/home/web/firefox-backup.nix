@@ -1,11 +1,12 @@
 {
   config,
-  inputs,
   lib,
   pkgs,
   ...
 }:
-
+# Firefox backup is an explicit state-preservation rite for the user's browser
+# profile. It encrypts selected SQLite and session material with age, and keeps
+# backup scheduling separate from the normal browser module.
 let
   cfg = config.theorem.home.web.firefox-backup;
 
@@ -26,7 +27,7 @@ let
 
   user = config.home.username;
   # profileDir = "/nix/persist/home/${user}/.config/mozilla/firefox/vicky";
-  profileDir = "/nix/persist/home/${user}/.mozilla/firefox/vicky";
+  profileDir = "/nix/persist/home/${user}/.mozilla/firefox/vicky"; # FIXME: Explicit username flagging. Must be able to support multiple users.
   backupDir = "/nix/persist/home/${user}/Backups/firefox-state";
   identityFile = "/run/secrets/firefox-backup-age-identity";
 

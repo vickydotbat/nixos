@@ -5,6 +5,9 @@
   pkgs,
   ...
 }:
+# nix-index gives the shell a package lookup database. The command-not-found
+# hook remains optional because a helpful suggestion layer can still be noise in
+# repair shells, scripts, and editor-embedded terminals.
 let
   cfg = config.theorem.home.shell.nix-index;
 in

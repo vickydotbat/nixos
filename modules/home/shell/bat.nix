@@ -4,7 +4,9 @@
   pkgs,
   ...
 }:
-
+# `bat` is a shell readability tool with optional Bash integration. The module
+# installs useful extras and pager defaults while keeping aliases tied to the
+# shell theorem that will actually consume them.
 let
   cfg = config.theorem.home.shell.bat;
 in

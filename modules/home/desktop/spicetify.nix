@@ -2,9 +2,11 @@
   config,
   inputs,
   lib,
-  pkgs,
   ...
 }:
+# Spicetify wires the Spotify customization substrate while leaving extension
+# selection to user profiles. This keeps the shared module mechanical and avoids
+# making one listener's taste part of the base desktop.
 let
   cfg = config.theorem.home.desktop.spicetify;
 in
@@ -14,7 +16,7 @@ in
 
     enabledExtensions = lib.mkOption {
       type = lib.types.listOf lib.types.anything;
-      default = [ ];
+      default = [ ]; # FIXME: The default extensions should be the ones specified in Vicky's user now. These are a good baseline.
       description = ''
         Spicetify extensions enabled for Spotify. Extension choice is user
         workflow; the reusable module only wires the mechanism.

@@ -4,12 +4,15 @@
   pkgs,
   ...
 }:
+# Firefox Developer Edition is the daily browser profile in this theorem. Search
+# defaults, repair shortcuts, and extension state live here so user files do not
+# carry copied browser mechanics.
 let
   cfg = config.theorem.home.web.firefox;
   profileName = config.home.username;
 
   # Default mechanism, kept in the reusable module; home/ may override it.
-  firefox = [ "firefox-devedition.desktop" ];
+  firefox = [ "firefox-devedition.desktop" ]; # TODO: Link with the below desktop generator.
   profilePath = "${config.home.homeDirectory}/.mozilla/firefox/${profileName}";
 in
 {
@@ -262,6 +265,7 @@ in
     };
 
     xdg.desktopEntries.firefox-devedition = {
+      # TODO: Link with the top-level desktop variable.
       name = "Firefox Developer Edition";
       genericName = "Web Browser";
       exec = "${pkgs.firefox-devedition}/bin/firefox-devedition --name firefox-devedition --profile ${profilePath} %U";

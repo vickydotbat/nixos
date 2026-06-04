@@ -3,7 +3,9 @@
   lib,
   ...
 }:
-
+# Obsidian is a user knowledge-work surface. The reusable module installs the
+# application and persists the vault directory only when Home persistence is
+# already part of the user's theorem.
 let
   cfg = config.theorem.home.desktop.obsidian;
 in

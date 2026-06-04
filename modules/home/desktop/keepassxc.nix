@@ -3,7 +3,11 @@
   lib,
   ...
 }:
+# KeePassXC carries password-manager posture for the user's desktop session.
+# Autostart, tray behavior, and native-messaging repair live here because an
+# impermanent host should not need mutable GUI clicks to recover the vault.
 
+#TODO: Be wary of redundant configuration. If nixpkgs/nix syntax can achieve these results, making new options for them might just be unneeded cruft. lib.mkDefault is useful for this.
 let
   cfg = config.theorem.home.desktop.keepassxc;
 in

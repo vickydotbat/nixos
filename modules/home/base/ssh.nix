@@ -4,6 +4,9 @@
   pkgs,
   ...
 }:
+# Restores a user's outbound SSH identity from runtime secret material. This is
+# deliberately separate from the system OpenSSH server: Git signing and client
+# authentication should not require the host to expose `sshd`.
 let
   cfg = config.theorem.home.base.ssh;
   username = config.home.username;

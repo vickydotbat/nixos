@@ -1,4 +1,7 @@
 { config, lib, ... }:
+# Flatpak is an explicit desktop compatibility layer. The system installation
+# can be persisted, but application permissions and state remain with the app or
+# user profile that accepts that sandbox surface.
 let
   cfg = config.theorem.nixos.desktop.flatpak;
 in

@@ -429,7 +429,7 @@ decoration.
     `security.lockKernelModules` off, and derives
     `security.unprivilegedUsernsClone` from Flatpak or Podman enablement.
 
-- [ ] Add conservative sysctl defaults in tiers.
+- [x] Add conservative sysctl defaults in tiers.
   - Why: sysctl settings reduce kernel information leaks, restrict debugging
     interfaces, harden networking, and defend user-space filesystem link traps.
   - How: split `boot.kernel.sysctl` into safe, conditional, and aggressive
@@ -443,6 +443,13 @@ decoration.
     and debugging.
   - Validation: compare `sysctl -a` before/after, run network tests, container
     tests, browser tests, and VPN tests.
+  - Completed: `modules/nixos/security/hardening.nix` now exposes
+    `theorem.nixos.security.hardening.sysctl.safeDefaults.enable`, defaulting on
+    inside the opted-in hardening profile. The first safe tier uses `mkDefault`
+    values for protected filesystem links, kernel pointer and dmesg disclosure,
+    kexec disablement, ASLR, same-UID ptrace restriction, and conservative IPv4
+    and IPv6 redirect/source-route handling. Routing, VPN, container, and deep
+    debugging profiles can still override individual upstream sysctls directly.
 
 - [ ] Reject or quarantine questionable sysctl items before implementation.
   - Why: the guide includes aggressive and environment-sensitive values, and at
@@ -456,6 +463,12 @@ decoration.
   - Achieves: no cargo-cult sysctl failures.
   - Default posture: research and host-derived only.
   - Validation: `sysctl -a | rg '<key>'` on the target generation.
+  - Progress: the first implemented tier deliberately excludes the questionable
+    and high-breakage examples from this item, including `kernel.exec-shield`,
+    blanket ping blocking, IPv6 RA disablement, routing/forwarding changes, and
+    forced user-namespace disablement. Before switching a host, verify the
+    selected keys against that host's running kernel and boot the generation
+    through normal network and debugging workflows.
 
 - [ ] Add kernel boot parameters only after hardware and workload testing.
   - Why: boot parameters can improve memory safety and kernel lockdown, but some
@@ -823,8 +836,9 @@ decoration.
 
 1. Safe defaults still open: package hygiene review and service-disable defaults
    derived from existing module enables.
-2. Derived defaults: SUID wrapper minimization, sysctl safe tier,
-   Flatpak/portal posture, Fail2Ban, and selected service hardening.
+2. Derived defaults: SUID wrapper minimization, Flatpak/portal posture,
+   Fail2Ban, selected service hardening, and runtime proof for the sysctl safe
+   tier.
 3. Host-sensitive mechanisms: USBGuard, impermanence, hardened allocator,
    hardened kernel, boot parameters, module blacklists, Secure Boot, AIDE, and
    ClamAV.

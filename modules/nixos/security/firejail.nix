@@ -4,6 +4,9 @@
   pkgs,
   ...
 }:
+# Firejail is only the sandbox substrate. Application modules decide which
+# binaries are wrapped, because blanket sandboxing makes both breakage and false
+# confidence too easy to miss.
 let
   cfg = config.theorem.nixos.security.firejail;
 in

@@ -4,7 +4,9 @@
   pkgs,
   ...
 }:
-
+# Neverwinter Nights keeps old path expectations alive on a modern Home profile.
+# This module writes the alias files, links tool-specific data directories, and
+# persists game state only when the user has selected Home persistence.
 let
   cfg = config.theorem.home.gaming.nwn;
 
@@ -140,9 +142,11 @@ in
     home.persistence."/nix/persist" = lib.mkIf persistenceEnabled {
       directories = [
         ".local/share/Neverwinter Nights"
-        ".config/blender/4.0"
+        ".config/blender/4.0" # TODO: See other blender module.
       ];
     };
+
+    # TODO: Write a desktop launcher for aurora toolset. Possibly fine to make it a package.
 
     home.activation.nwnDocumentsLayout = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       nwn_data_dir=${lib.escapeShellArg nwnDataDir}

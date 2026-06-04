@@ -1,5 +1,8 @@
 { config, lib, ... }:
 
+# Shared gaming substrate belongs here so each game profile does not grow its
+# own service toggles. Today this is GameMode; future additions should still
+# follow an explicit gaming role.
 let
   cfg = config.theorem.nixos.gaming.core;
 in

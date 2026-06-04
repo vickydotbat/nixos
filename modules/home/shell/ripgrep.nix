@@ -3,7 +3,9 @@
   lib,
   ...
 }:
-
+# ripgrep is the shared search tool. The reusable module keeps default arguments
+# conservative; repository-specific hidden-file habits and noisy excludes belong
+# in the user or project layer.
 let
   cfg = config.theorem.home.shell.ripgrep;
 in

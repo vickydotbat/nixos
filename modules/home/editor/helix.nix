@@ -3,6 +3,9 @@
   lib,
   ...
 }:
+# Helix is the lightweight shared editor surface. The reusable module only owns
+# enablement and generic settings; themes, keybindings, and daily editing habits
+# belong in user profiles.
 let
   cfg = config.theorem.home.editor.helix;
 in

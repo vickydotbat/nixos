@@ -1,5 +1,7 @@
 { config, lib, ... }:
 
+# AppImage support is a compatibility surface, not a desktop default. Enabling
+# it adds binfmt/FUSE convenience for hosts that deliberately run AppImages.
 let
   cfg = config.theorem.nixos.desktop.appimage;
 in

@@ -4,7 +4,9 @@
   pkgs,
   ...
 }:
-
+# Discord is a user application, not a system service. This module owns the Home
+# Manager package, optional autostart, and persisted chat state while keeping the
+# decision to start it automatically explicit.
 let
   cfg = config.theorem.home.desktop.discord;
 in
