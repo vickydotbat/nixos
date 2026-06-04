@@ -5,9 +5,13 @@
   ...
 }:
 
+# XDG user-directory and desktop integration baseline. It follows the system
+# graphics profile when Home Manager is evaluated inside NixOS, but remains off
+# by default for standalone Home flakes where no system graphics theorem exists.
 let
   cfg = config.theorem.home.base.xdg;
-  graphicsEnabled = (osConfig.theorem.nixos.desktop.graphics.enable or false);
+  graphicsEnabled =
+    if osConfig == null then false else osConfig.theorem.nixos.desktop.graphics.enable or false;
 in
 {
   options.theorem.home.base.xdg.enable = lib.mkOption {

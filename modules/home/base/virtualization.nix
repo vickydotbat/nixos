@@ -4,11 +4,15 @@
   lib,
   ...
 }:
+# Home-side Distrobox integration. It activates only when the surrounding NixOS
+# system provides Podman containers, so a standalone Home flake can import this
+# module without accidentally depending on unavailable system services.
 let
   cfg = config.theorem.home.base.distrobox;
 
   podmanEnabled =
-    (osConfig.virtualisation.containers.enable or false)
+    osConfig != null
+    && (osConfig.virtualisation.containers.enable or false)
     && (osConfig.virtualisation.podman.enable or false);
 
   persistenceEnabled = (config.theorem.home.base.persistence.enable or false);

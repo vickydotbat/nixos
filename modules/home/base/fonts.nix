@@ -6,9 +6,13 @@
   ...
 }:
 
+# User font baseline for graphical homes. It follows the NixOS graphics profile
+# when one exists, and stays disabled for standalone Home flakes unless the user
+# selects it directly.
 let
   cfg = config.theorem.home.base.fonts;
-  graphicsEnabled = (osConfig.theorem.nixos.desktop.graphics.enable or false);
+  graphicsEnabled =
+    if osConfig == null then false else osConfig.theorem.nixos.desktop.graphics.enable or false;
 in
 {
   options.theorem.home.base.fonts = {
