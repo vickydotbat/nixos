@@ -1,4 +1,7 @@
 { config, lib, ... }:
+# Conservative hardening gathers low-risk protections behind one theorem
+# switch. The profile should reduce ambient exposure while preserving a clear
+# host escape hatch for debugging, desktop portals, containers, and recovery.
 let
   cfg = config.theorem.nixos.security.hardening;
 in
@@ -62,6 +65,18 @@ in
           the host.
         '';
       };
+    };
+
+    sysctl.safeDefaults.enable = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = ''
+        Apply conservative runtime kernel sysctl defaults. These settings reduce
+        kernel address disclosure, ptrace reach, kexec reuse, filesystem link
+        traps, and common redirect/source-route network surprises. Routing,
+        VPN, container, and deep debugging profiles should override individual
+        upstream sysctls directly when their repair path requires it.
+      '';
     };
 
     coredumps.disable = lib.mkOption {
@@ -206,6 +221,37 @@ in
           forcePageTableIsolation = lib.mkDefault cfg.kernel.forcePageTableIsolation;
           lockKernelModules = lib.mkDefault cfg.kernel.lockKernelModules;
           unprivilegedUsernsClone = lib.mkDefault cfg.kernel.allowUnprivilegedUserNamespaces;
+        };
+      })
+
+      (lib.mkIf cfg.sysctl.safeDefaults.enable {
+        boot.kernel.sysctl = {
+          "fs.protected_fifos" = lib.mkDefault 2;
+          "fs.protected_hardlinks" = lib.mkDefault 1;
+          "fs.protected_regular" = lib.mkDefault 2;
+          "fs.protected_symlinks" = lib.mkDefault 1;
+
+          "kernel.dmesg_restrict" = lib.mkDefault 1;
+          "kernel.kexec_load_disabled" = lib.mkDefault 1;
+          "kernel.kptr_restrict" = lib.mkDefault 2;
+          "kernel.randomize_va_space" = lib.mkDefault 2;
+          "kernel.yama.ptrace_scope" = lib.mkDefault 1;
+
+          "net.ipv4.conf.all.accept_redirects" = lib.mkDefault 0;
+          "net.ipv4.conf.all.accept_source_route" = lib.mkDefault 0;
+          "net.ipv4.conf.all.log_martians" = lib.mkDefault 1;
+          "net.ipv4.conf.all.secure_redirects" = lib.mkDefault 0;
+          "net.ipv4.conf.all.send_redirects" = lib.mkDefault 0;
+          "net.ipv4.conf.default.accept_redirects" = lib.mkDefault 0;
+          "net.ipv4.conf.default.accept_source_route" = lib.mkDefault 0;
+          "net.ipv4.conf.default.log_martians" = lib.mkDefault 1;
+          "net.ipv4.conf.default.secure_redirects" = lib.mkDefault 0;
+          "net.ipv4.conf.default.send_redirects" = lib.mkDefault 0;
+
+          "net.ipv6.conf.all.accept_redirects" = lib.mkDefault 0;
+          "net.ipv6.conf.all.accept_source_route" = lib.mkDefault 0;
+          "net.ipv6.conf.default.accept_redirects" = lib.mkDefault 0;
+          "net.ipv6.conf.default.accept_source_route" = lib.mkDefault 0;
         };
       })
 
