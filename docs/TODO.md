@@ -78,6 +78,37 @@ as understandable as possible for newer maintainers.
   host, login account, SOPS identity, or Vicky profile. Optional persistence and
   Plasma hooks stay quiet unless their option providers are present; selecting
   those substrates without the provider fails with a clear assertion.
+- External-user posture: this flake should be safe for other users to consume
+  without inheriting Vicky's private working surface. Vicky's Home Manager
+  theorem now belongs in `/home/vicky/Repositories/nix-home`, which should be
+  treated as a user-owned flake consuming this repository's exported Home
+  baseline rather than as configuration hidden inside the shared system flake.
+- Vicky Home migration rite:
+  1. In `/home/vicky/Repositories/nix-home`, declare a Home Manager flake that
+     imports this repository's `homeModules.shared` entry point, first through a
+     local path during repair and later through the public repository URL that
+     external users will see.
+  2. Move Vicky-specific Home imports in small, reviewable slices from
+     `users/vicky/` into the personal Home flake: identity, Git posture,
+     SSH host aliases, desktop preferences, editor settings, shell habits,
+     application selections, and other private workshop calibration.
+  3. Leave system authority in this repository: login account creation, groups,
+     persistence substrate, SOPS integration, service-owned permissions, login
+     shell choices, and any host declaration that intentionally trusts
+     user-writable Home code.
+  4. If a host still evaluates Vicky's Home through `nixos-rebuild` during the
+     transition, declare the trust gate explicitly as
+     `/home/vicky/Repositories/nix-home`; do not add auto-discovery of home
+     flakes or imports from arbitrary user-writable paths.
+  5. Validate both sides before activation: keep this repository's
+     `checks/home-shared-boundary.nix` passing, run `nix flake check` here, run
+     the corresponding check or activation-package build in
+     `/home/vicky/Repositories/nix-home`, and only then activate Vicky's Home
+     from the user-owned repository.
+  6. Once Vicky's Home activates from the personal repository, remove or narrow
+     any remaining Vicky-only Home imports from this shared flake so external
+     users see reusable modules, defaults, and examples rather than one
+     operator's private workshop.
 - Validation: `checks/home-shared-boundary.nix` simulates a non-repository Home
   profile through `homeModules.shared`, without Vicky profile imports or a NixOS
   `osConfig`. Separately prove that a personal Home flake can build or activate
