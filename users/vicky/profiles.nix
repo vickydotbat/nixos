@@ -2,6 +2,7 @@
   config,
   inputs,
   pkgs,
+  repository,
   ...
 }:
 
@@ -379,7 +380,7 @@ in
             exclude_slash_tmp = false;
             exclude_tmpdir_env_var = false;
             writable_roots = [
-              "/nix/nixos"
+              repository.path
               "/nix/var/nix/daemon-socket"
             ];
           };
@@ -396,21 +397,6 @@ in
           };
         };
 
-        context = ''
-          Prefer small, reviewable changes.
-          Do not run destructive commands unless explicitly asked.
-          For NixOS work, prefer `nix flake check`, targeted `nix eval`, and `nixos-rebuild dry-build` before switching.
-        '';
-
-        rules = {
-          default = ''
-            prefix_rule(pattern = ["nix", "flake", "check"], decision = "allow")
-            prefix_rule(pattern = ["nix", "eval"], decision = "allow")
-            prefix_rule(pattern = ["nix", "fmt"], decision = "allow")
-            prefix_rule(pattern = ["git", "status"], decision = "allow")
-            prefix_rule(pattern = ["git", "diff"], decision = "allow")
-          '';
-        };
       };
       ghostty.enable = true;
       git.enable = true;

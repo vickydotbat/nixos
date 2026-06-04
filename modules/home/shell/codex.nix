@@ -11,6 +11,7 @@
 # Codex CLI is operator tooling. This module installs the selected package,
 # writes the reusable baseline config, and persists agent state only when the
 # user's Home persistence theorem says that state should survive reboot.
+
 let
   cfg = config.theorem.home.shell.codex;
   persistenceEnabled = config.theorem.home.base.persistence.enable;
@@ -243,17 +244,22 @@ in
           Do not run destructive commands unless explicitly asked.
           For NixOS work, prefer `nix flake check`, targeted `nix eval`, and `nixos-rebuild dry-build` before switching.
         '')
-        cfg.context
+        (lib.mkIf (cfg.context != "") cfg.context)
       ];
 
       rules = lib.mkMerge [
         (lib.mkIf cfg.defaultRules.enable {
           default = lib.mkDefault ''
             prefix_rule(pattern = ["nix", "flake", "check"], decision = "allow")
+            prefix_rule(pattern = ["nix", "flake", "metadata"], decision = "allow")
+            prefix_rule(pattern = ["nix", "flake", "show"], decision = "allow")
             prefix_rule(pattern = ["nix", "eval"], decision = "allow")
-            prefix_rule(pattern = ["nix", "fmt"], decision = "allow")
+            prefix_rule(pattern = ["nixfmt", "--check"], decision = "allow")
             prefix_rule(pattern = ["git", "status"], decision = "allow")
             prefix_rule(pattern = ["git", "diff"], decision = "allow")
+            prefix_rule(pattern = ["git", "log"], decision = "allow")
+            prefix_rule(pattern = ["git", "show"], decision = "allow")
+            prefix_rule(pattern = ["rg"], decision = "allow")
           '';
         })
         cfg.rules
