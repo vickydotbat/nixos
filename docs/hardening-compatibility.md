@@ -22,7 +22,7 @@ and the host signal that proves it is safe.
 | Administrative elevation | `theorem.nixos.security.sudo.enable` or `run0-sudo.enable` | SUID wrapper reduction must not remove the only tested administrative path. |
 | Encrypted DNS resolver | Not yet implemented | DNS privacy controls can break captive portals, VPN bootstrap, MagicDNS, local discovery, and browser DoH assumptions. |
 | Tailscale mesh networking | Not yet implemented | Trusting `tailscale0`, MagicDNS, exit nodes, and DNS acceptance each changes recovery and name-resolution behavior. |
-| MAC randomization | Not yet implemented | Randomized addresses can confuse home routers, allow-lists, device inventory, and per-network firewall expectations. |
+| MAC randomization | `theorem.nixos.security.hardening.networkManagerMacRandomization.enable` | Randomized addresses can confuse home routers, allow-lists, device inventory, and per-network firewall expectations. |
 | Secure Boot / Lanzaboote | Not yet implemented | Boot-chain signing can lock out recovery if firmware, keys, dbx, LUKS, and rollback are not tested together. |
 | GPG agent as SSH agent | Not yet implemented | `gpg-agent` with SSH support conflicts with OpenSSH-agent ownership unless the profile deliberately switches models. |
 | NixOS containers | Not yet implemented | `systemd-nspawn` containers separate services, but are not a full security boundary without careful privilege and mount design. |
@@ -47,7 +47,7 @@ and the host signal that proves it is safe.
 | Fail2Ban | Disabled | Trusted LAN mistakes can ban the operator if ignore lists are wrong. | Enable only for exposed SSH and declare trusted address ranges. |
 | dnscrypt-proxy / DoH / DoT | Not yet implemented | Local resolver routing can fail closed, bypass browser DNS, or conflict with VPN/Tailscale DNS. | Test local DNS listener, browser DNS path, captive portal behavior, VPN bootstrap, MagicDNS, and a documented fallback resolver. |
 | nftables DNS egress enforcement | Not yet implemented | Blocking outbound DNS except the resolver process can break troubleshooting, captive portals, and local labs. | Gate behind a profile; verify resolver UID, `dig`, browser behavior, VPN/Tailscale, and emergency disable path. |
-| NetworkManager MAC randomization | Not yet implemented | Networks may treat the host as a new device; allow-lists and router reservations can stop matching. | Test on home, trusted, and untrusted networks; document how to disable per connection. |
+| NetworkManager MAC randomization | Available as opt-in | Networks may treat the host as a new device; allow-lists and router reservations can stop matching. | Test on home, trusted, and untrusted networks; disable the theorem option or override `networking.networkmanager.{wifi,ethernet}.macAddress` per host when identity must remain stable. |
 | Chrony NTS | Enabled by the hardening profile | NTS-KE uses TLS on port 4460, and provider or firewall problems can leave the host unsynchronized. | Verify selected servers with `chronyc -N authdata`; override `theorem.nixos.security.hardening.timeSync.chronyNts.servers` when locality or trust requires a different source. |
 | USBGuard | Disabled | Bad rules can block keyboards, mice, docks, and recovery devices. | Create a no-USBGuard boot specialization before enabling. |
 | AIDE checks | Tool-only optional profile | Database churn is noisy on desktops and useless without persistence/update rites. | Design database paths, update command, and persistence before scheduling checks. |

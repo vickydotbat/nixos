@@ -160,6 +160,60 @@ in
       '';
     };
 
+    networkManagerMacRandomization = {
+      enable = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+        description = ''
+          Apply NetworkManager MAC randomization defaults for hosts that travel
+          through untrusted networks. Leave this disabled for ordinary desktops
+          and servers until router reservations, allow-lists, captive portals,
+          and recovery access have been tested.
+        '';
+      };
+
+      wifiScanRandomization = lib.mkOption {
+        type = lib.types.bool;
+        default = true;
+        description = ''
+          Randomize the Wi-Fi MAC address used while scanning for networks.
+          NetworkManager already defaults this on, but the theorem keeps the
+          intent visible beside the sharper connection identity settings.
+        '';
+      };
+
+      wifiConnectionMacAddress = lib.mkOption {
+        type = lib.types.enum [
+          "permanent"
+          "preserve"
+          "random"
+          "stable"
+          "stable-ssid"
+        ];
+        default = "stable-ssid";
+        description = ''
+          MAC address policy for Wi-Fi connections when the randomization
+          profile is enabled. `stable-ssid` gives each network a stable local
+          identity without carrying the hardware address between networks.
+        '';
+      };
+
+      ethernetConnectionMacAddress = lib.mkOption {
+        type = lib.types.enum [
+          "permanent"
+          "preserve"
+          "random"
+          "stable"
+        ];
+        default = "preserve";
+        description = ''
+          MAC address policy for Ethernet connections when the randomization
+          profile is enabled. The default preserves wired identity because docks,
+          managed switches, and firewall reservations often depend on it.
+        '';
+      };
+    };
+
     unusedServices = {
       enable = lib.mkOption {
         type = lib.types.bool;
@@ -296,6 +350,17 @@ in
 
       (lib.mkIf cfg.dbusBroker.enable {
         services.dbus.implementation = lib.mkDefault "broker";
+      })
+
+      (lib.mkIf cfg.networkManagerMacRandomization.enable {
+        networking.networkmanager = {
+          wifi = {
+            scanRandMacAddress = lib.mkDefault cfg.networkManagerMacRandomization.wifiScanRandomization;
+            macAddress = lib.mkDefault cfg.networkManagerMacRandomization.wifiConnectionMacAddress;
+          };
+
+          ethernet.macAddress = lib.mkDefault cfg.networkManagerMacRandomization.ethernetConnectionMacAddress;
+        };
       })
 
       (lib.mkIf cfg.unusedServices.enable (

@@ -286,6 +286,12 @@ the validation rite that proves it still holds.
     as an unexamined desktop default. NetworkManager can randomize scan and
     connection MACs, but home routers, allow-lists, and location-specific
     networks may interpret the host as a new device.
+    Progress: the hardening theorem now exposes
+    `theorem.nixos.security.hardening.networkManagerMacRandomization.enable`
+    as an opt-in NetworkManager posture. It keeps Wi-Fi scan randomization
+    visible, defaults Wi-Fi connections to `stable-ssid`, preserves wired
+    Ethernet identity by default, and leaves current hosts unchanged until a
+    travel or untrusted-network profile selects the rite.
   - Do not collapse privacy tools into the base networking module. A workstation,
     a travel laptop, and a server have different network rites.
   - Validation: `ss -lnp` for local DNS listeners, `dig @127.0.0.1 example.com
