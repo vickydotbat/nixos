@@ -121,10 +121,13 @@ as understandable as possible for newer maintainers.
 - Opened the conservative hardening ledger in
   [`docs/TODO-nixos-hardening.md`](./TODO-nixos-hardening.md). Use it to break
   hardening into small, tested mechanisms instead of one sharp global switch.
-- Finish Btrfs rollback support before any host selects
-  `theorem.nixos.base.persistence.root.mode = "btrfs"`. The option now exists
-  to name the substrate, but the rollback-to-blank initrd rite still needs to be
-  forged and tested against a disposable disk.
+- Btrfs rollback support now exists for
+  `theorem.nixos.base.persistence.root.mode = "btrfs"`: systemd initrd replaces
+  `root.btrfsSubvolume` from `root.btrfsBlankSubvolume` before `sysroot.mount`,
+  and `checks/btrfs-rollback-boundary.nix` proves the option boundary. Before a
+  real host selects it, test against a disposable disk or VM, create the blank
+  snapshot after installation, write a marker under `/root`, reboot, and prove
+  the marker is gone while `/nix/persist` state remains.
 - Keep derived defaults where the dependency is real: graphics may follow
   graphical desktops or Steam, Home persistence may follow system persistence,
   and Polkit may follow Plasma. Optional applications, firewall openings, backup

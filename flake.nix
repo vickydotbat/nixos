@@ -169,8 +169,18 @@
           shared = shared;
         };
 
-      checks.${system}.home-shared-boundary = import ./checks/home-shared-boundary.nix {
-        inherit inputs pkgs;
+      checks.${system} = {
+        home-shared-boundary = import ./checks/home-shared-boundary.nix {
+          inherit inputs pkgs;
+        };
+
+        btrfs-rollback-boundary = import ./checks/btrfs-rollback-boundary.nix {
+          inherit inputs pkgs;
+        };
+
+        plasma-browser-boundary = import ./checks/plasma-browser-boundary.nix {
+          inherit inputs pkgs;
+        };
       };
 
       devShells.${system} =
@@ -200,7 +210,7 @@
         selectedUsers = {
           # Add `guest` here when this host should expose the low-access guest
           # account: `inherit (userRegistry) admin guest vicky;`.
-          inherit (userRegistry) admin vicky guest;
+          inherit (userRegistry) admin vicky;
         };
       };
     };

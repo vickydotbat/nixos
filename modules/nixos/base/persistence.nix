@@ -7,20 +7,18 @@
 # Impermanence substrate for hosts that keep `/nix` and selected state on
 # durable storage while letting `/` return to a clean shape at boot.
 #
-# The tmpfs root path is ready for daily use. The Btrfs root mode is present so
-# hosts can name the desired substrate, but it still needs a rollback-to-blank
-# initrd rite before it should be selected on real hardware.
+# The tmpfs root path is Solanine's daily rite. Btrfs root mode is available for
+# disk-backed impermanence and rolls the root subvolume back from a declared
+# blank snapshot in systemd initrd before `/` is mounted.
 #
 # Root substrate and persistent storage are separate choices:
 #
 # - `root.mode = "tmpfs"` mounts `/` in memory. It starts clean without an
 #   initrd rollback script, but every large or required state path must be
 #   persisted away from RAM. This is Solanine's current rite.
-# - `root.mode = "btrfs"` mounts a disk-backed root subvolume. It is only
-#   impermanent after an installer creates a blank snapshot and the initrd rolls
-#   the root back to that snapshot before activation. Until that mechanism
-#   exists, this module accepts the option but warns maintainers not to select
-#   it for real hosts.
+# - `root.mode = "btrfs"` mounts a disk-backed root subvolume. The installer
+#   must create `root.btrfsBlankSubvolume` once, while the initrd service
+#   replaces `root.btrfsSubvolume` from that blank snapshot before stage 2.
 # - `storage.fsType` controls the durable `/nix` and persistence substrate.
 #   Btrfs uses named subvolumes and compression; non-Btrfs storage can still
 #   carry `/nix` through `storage.mountOptions`, but it does not provide the
@@ -31,7 +29,7 @@
 # - Btrfs-backed `/nix` with tmpfs `/`, used by Solanine today.
 # - Non-Btrfs disk-backed `/nix` with tmpfs `/`, available through
 #   `storage.fsType` and `storage.mountOptions`.
-# - Btrfs-backed `/`, reserved for future snapshot rollback work.
+# - Btrfs-backed `/`, using rollback-to-blank through systemd initrd.
 #
 # `/nix` must stay disk-backed in every mode. Swap is host-owned because size
 # and placement depend on storage layout. Home persistence is owned by Home
@@ -65,6 +63,53 @@ let
         fsType = "btrfs";
         options = btrfsOptions cfg.root.btrfsSubvolume;
       };
+
+  btrfsRollbackMountPoint = "/mnt-btrfs-root";
+  btrfsRollbackMountOptions = lib.concatStringsSep "," [
+    "subvol=${cfg.root.btrfsTopLevelSubvolume}"
+  ];
+  btrfsRollbackScript = ''
+    set -eu
+
+    mount_point=${lib.escapeShellArg btrfsRollbackMountPoint}
+    device=${lib.escapeShellArg cfg.storage.device}
+    root_subvolume=${lib.escapeShellArg cfg.root.btrfsSubvolume}
+    blank_subvolume=${lib.escapeShellArg cfg.root.btrfsBlankSubvolume}
+
+    ${pkgs.coreutils}/bin/mkdir -p "$mount_point"
+
+    cleanup() {
+      ${pkgs.util-linux}/bin/umount "$mount_point" 2>/dev/null || true
+    }
+    trap cleanup EXIT
+
+    ${pkgs.util-linux}/bin/mount -t btrfs -o ${lib.escapeShellArg btrfsRollbackMountOptions} "$device" "$mount_point"
+
+    if ! ${pkgs.btrfs-progs}/bin/btrfs subvolume show "$mount_point/$blank_subvolume" >/dev/null 2>&1; then
+      echo "Missing Btrfs blank root snapshot: $blank_subvolume" >&2
+      exit 1
+    fi
+
+    if [ -e "$mount_point/$root_subvolume" ]; then
+      if ! ${pkgs.btrfs-progs}/bin/btrfs subvolume show "$mount_point/$root_subvolume" >/dev/null 2>&1; then
+        echo "Refusing to replace non-subvolume root path: $root_subvolume" >&2
+        exit 1
+      fi
+
+      ${pkgs.btrfs-progs}/bin/btrfs subvolume list -o "$mount_point/$root_subvolume" \
+        | ${pkgs.gnused}/bin/sed 's/.* path //' \
+        | ${pkgs.coreutils}/bin/sort -r \
+        | while IFS= read -r nested_subvolume; do
+            if [ -n "$nested_subvolume" ]; then
+              ${pkgs.btrfs-progs}/bin/btrfs subvolume delete "$mount_point/$nested_subvolume"
+            fi
+          done
+
+      ${pkgs.btrfs-progs}/bin/btrfs subvolume delete "$mount_point/$root_subvolume"
+    fi
+
+    ${pkgs.btrfs-progs}/bin/btrfs subvolume snapshot "$mount_point/$blank_subvolume" "$mount_point/$root_subvolume"
+  '';
 
   mkHomePersistDir =
     _: homeConfig:
@@ -160,6 +205,25 @@ in
         default = "@root";
         description = "Btrfs subvolume mounted at `/` when root mode is `btrfs`.";
       };
+
+      btrfsBlankSubvolume = lib.mkOption {
+        type = lib.types.str;
+        default = "@root-blank";
+        description = ''
+          Btrfs snapshot used to recreate the impermanent root subvolume during
+          initrd rollback. Create it once after installation, before the host
+          starts accumulating mutable root state.
+        '';
+      };
+
+      btrfsTopLevelSubvolume = lib.mkOption {
+        type = lib.types.str;
+        default = "/";
+        description = ''
+          Btrfs subvolume mounted in initrd so the rollback service can see
+          both `root.btrfsSubvolume` and `root.btrfsBlankSubvolume`.
+        '';
+      };
     };
 
     boot = {
@@ -204,7 +268,29 @@ in
           persistent `/nix`, not `/`.
         '';
       }
+      {
+        assertion = cfg.root.mode != "btrfs" || cfg.root.btrfsSubvolume != cfg.root.btrfsBlankSubvolume;
+        message = ''
+          theorem.nixos.base.persistence.root.btrfsSubvolume and
+          theorem.nixos.base.persistence.root.btrfsBlankSubvolume must be
+          different. Rollback would otherwise destroy the blank repair point.
+        '';
+      }
     ];
+
+    boot.initrd.systemd = lib.mkIf (cfg.root.mode == "btrfs") {
+      enable = true;
+
+      services.rollback-root = {
+        description = "Roll back Btrfs root to blank snapshot";
+        wantedBy = [ "initrd.target" ];
+        requiredBy = [ "sysroot.mount" ];
+        before = [ "sysroot.mount" ];
+        unitConfig.DefaultDependencies = "no";
+        serviceConfig.Type = "oneshot";
+        script = btrfsRollbackScript;
+      };
+    };
 
     fileSystems."/" = rootMount;
 
