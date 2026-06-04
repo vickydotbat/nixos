@@ -45,11 +45,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    codex-cli-nix = {
-      url = "github:sadjow/codex-cli-nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     superpowers = {
       url = "github:obra/superpowers";
       flake = false;
@@ -145,7 +140,7 @@
         let
           codex = pkgs.mkShell {
             packages = [
-              inputs.codex-cli-nix.packages.${system}.default
+              pkgs.codex
             ];
           };
         in

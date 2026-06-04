@@ -14,25 +14,89 @@
 let
   cfg = config.theorem.home.shell.codex;
   persistenceEnabled = config.theorem.home.base.persistence.enable;
-  system = pkgs.stdenv.hostPlatform.system;
   toml = pkgs.formats.toml { };
   initialConfigFile = toml.generate "codex-config.toml" cfg.initialConfig.settings;
   superpowersSkills = lib.mapAttrs (
     name: _type: lib.mkDefault (cfg.superpowers.source + "/${name}")
   ) (builtins.readDir cfg.superpowers.source);
+
+  codexNightlyPackage = pkgs.stdenvNoCC.mkDerivation {
+    pname = "codex-nightly";
+    version = "999.0.0";
+
+    dontUnpack = true;
+
+    installPhase = ''
+      runHook preInstall
+
+      install -d "$out/bin"
+      cat > "$out/bin/codex" <<'EOF'
+      #!${pkgs.runtimeShell}
+      set -euo pipefail
+
+      flake_ref=${lib.escapeShellArg cfg.nightly.flakeRef}
+      nix_command=${lib.escapeShellArg "${pkgs.nix}/bin/nix"}
+      nix_args=(
+        --extra-experimental-features
+        'nix-command flakes'
+      )
+
+      ${lib.optionalString cfg.nightly.refreshOnRun ''
+        if ! "$nix_command" "''${nix_args[@]}" flake metadata --refresh "$flake_ref" >/dev/null; then
+          printf '%s\n' "codex nightly refresh failed; using cached flake if available: $flake_ref" >&2
+        fi
+      ''}
+
+      exec "$nix_command" "''${nix_args[@]}" run "$flake_ref" -- "$@"
+      EOF
+      chmod +x "$out/bin/codex"
+
+      runHook postInstall
+    '';
+
+    meta = {
+      description = "Self-refreshing Codex nightly wrapper";
+      homepage = "https://github.com/sadjow/codex-cli-nix";
+      mainProgram = "codex";
+    };
+  };
 in
 {
   options.theorem.home.shell.codex = {
     enable = lib.mkEnableOption "Codex CLI";
 
+    nightly = {
+      flakeRef = lib.mkOption {
+        type = lib.types.str;
+        default = "github:sadjow/codex-cli-nix";
+        description = ''
+          Flake reference used by the default Codex nightly wrapper. Keep this
+          as a moving reference when Codex should track upstream builds without
+          teaching the system `flake.lock` to carry that churn.
+        '';
+      };
+
+      refreshOnRun = lib.mkOption {
+        type = lib.types.bool;
+        default = true;
+        description = ''
+          Refresh the Codex nightly flake before each `codex` invocation. When
+          the network or Nix daemon is unavailable, the wrapper warns and then
+          tries the cached flake output so the repair bench can still open.
+        '';
+      };
+    };
+
     package = lib.mkOption {
       type = lib.types.package;
-      default = inputs.codex-cli-nix.packages.${system}.default;
-      defaultText = lib.literalExpression "inputs.codex-cli-nix.packages.${pkgs.stdenv.hostPlatform.system}.default";
+      default = codexNightlyPackage;
+      defaultText = lib.literalExpression "theorem.home.shell.codex nightly wrapper";
       description = ''
-        Codex CLI package to install. Defaults to the native binary from the
-        `codex-cli-nix` flake; user modules may choose `codex-node` or another
-        package when the native binary is not the right tool.
+        Codex CLI package to install. Defaults to a self-refreshing wrapper
+        around `nightly.flakeRef`, so nightly updates do not require this
+        repository's `flake.lock` to move. User modules may choose `pkgs.codex`,
+        `codex-node`, or another package when the live nightly is not the right
+        tool.
       '';
     };
 
