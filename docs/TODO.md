@@ -489,6 +489,11 @@ where the user unplugs the monitor cable from the back of the PC, plugs it back
 in, and hits a key a few times to wake the monitor. This is documented as working
 during two such freeze cases.
 
+The detailed repair ledger now lives in
+[`docs/solanine-amdgpu-freezes.md`](./solanine-amdgpu-freezes.md). Keep future
+evidence, tried parameters, rollback notes, and capture commands there so the
+mechanism has one memory.
+
 What has been tried so far:
 - Kernel versions 6.12, Default LTS kernel 6.18, and now the latest unstable.
 
@@ -503,14 +508,18 @@ Documentation checked before pursuing:
   kernel path is known.
 
 Progress: Solanine now tests the next host-scoped workaround in
-`hosts/solanine/hardware.nix`: `amdgpu.dcdebugmask=0x12` replaces the
-insufficient `0x10`, and `amdgpu.runpm=0` keeps the desktop GPU out of runtime
-power-down while diagnosing the "no outputs" freeze. This is not proven until
-the host boots the generation and survives normal Plasma uptime. If idle power
-or thermals become the sharper failure mode, remove `amdgpu.runpm=0` first.
+`hosts/solanine/hardware.nix`: `amdgpu.dcdebugmask=0x52` replaces the
+insufficient `0x12`, keeping PSR and stutter disabled while also disabling AMD
+Display Core multi-plane offloading after the June 4, 2026 `10:44` freeze
+showed a plane commit timeout. `amdgpu.runpm=0` keeps the desktop GPU out of
+runtime power-down while diagnosing the "no outputs" freeze. This is not proven
+until the host boots the generation and survives normal Plasma uptime. If idle
+power or thermals become the sharper failure mode, remove `amdgpu.runpm=0`
+first; if the newest display workaround regresses behavior, return `0x52` to
+`0x12`.
 
 Validation: boot Solanine, confirm `/proc/cmdline` contains
-`amdgpu.dcdebugmask=0x12` and `amdgpu.runpm=0`, use the normal Plasma Wayland
+`amdgpu.dcdebugmask=0x52` and `amdgpu.runpm=0`, use the normal Plasma Wayland
 session through the workflows that previously froze, and review
 `journalctl -b -k | rg 'flip_done|commit wait|amdgpu_dm'`. If the freeze
 returns, capture `sudo dmesg` and

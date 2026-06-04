@@ -8,7 +8,9 @@ These files are not the system configuration itself. They are the repair ledger:
 
 - implementation plans under `superpowers/plans/`
 - agent-facing task notes that should remain executable
-- hardening compatibility notes such as `hardening-compatibility.md`
+- hardening compatibility and quarantine notes such as
+  `hardening-compatibility.md` and `hardening-sysctl-quarantine.md`
+- host incident notes such as `solanine-amdgpu-freezes.md`
 - the local threat model in `threat-model.md`
 - package inventory review notes such as `package-inventory.md`
 - historical context for structural repairs

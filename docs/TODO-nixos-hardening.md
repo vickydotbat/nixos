@@ -455,7 +455,7 @@ decoration.
     container, and deep debugging profiles can still override individual
     upstream sysctls directly.
 
-- [ ] Reject or quarantine questionable sysctl items before implementation.
+- [x] Reject or quarantine questionable sysctl items before implementation.
   - Why: the guide includes aggressive and environment-sensitive values, and at
     least one historical/unsupported-looking key (`kernel.exec-shield`) may not
     be valid on current NixOS kernels.
@@ -473,6 +473,13 @@ decoration.
     forced user-namespace disablement. Before switching a host, verify the
     selected keys against that host's running kernel and boot the generation
     through normal network and debugging workflows.
+  - Completed: `docs/hardening-sysctl-quarantine.md` now names the rejected,
+    quarantined, and host-owned sysctl candidates and keeps the runtime
+    validation commands beside the failure modes. The generated Solanine
+    generation contains the safe-tier assignments in
+    `/etc/static/sysctl.d/60-nixos.conf`; restricted tool sandboxes may expose
+    only their own loopback network namespace, so host-runtime proof still
+    belongs in the operator's post-boot check.
 
 - [ ] Add kernel boot parameters only after hardware and workload testing.
   - Why: boot parameters can improve memory safety and kernel lockdown, but some

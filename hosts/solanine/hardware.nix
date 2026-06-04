@@ -31,9 +31,10 @@
     "amdgpu.sg_display=0"
 
     # Solanine still sees Plasma/Wayland `flip_done timed out` freezes with
-    # `0x10`. `0x12` is the next documented AMDGPU display workaround to test.
-    # Keep this host-scoped until real uptime proves the rite.
-    "amdgpu.dcdebugmask=0x12"
+    # `0x10` and `0x12`. `0x52` keeps PSR and stutter disabled and also disables
+    # AMD Display Core multi-plane offloading after plane commit timeouts were
+    # observed. Keep this host-scoped until real uptime proves the rite.
+    "amdgpu.dcdebugmask=0x52"
 
     # This desktop is not battery-bound. Keep the discrete GPU out of runtime
     # power-down while diagnosing "no outputs" freezes; remove if idle power or
