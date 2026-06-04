@@ -151,6 +151,17 @@ in
     enable = lib.mkEnableOption "system persistence for impermanence";
 
     storage = {
+      manageFileSystems = lib.mkOption {
+        type = lib.types.bool;
+        default = true;
+        description = ''
+          Let this module declare `/`, `/boot`, and `/nix` filesystems. Disable
+          this when a host imports disko or another storage authority that
+          already generates those mounts; persistence and rollback policy still
+          remain active.
+        '';
+      };
+
       fsType = lib.mkOption {
         type = lib.types.str;
         default = "btrfs";
@@ -292,19 +303,21 @@ in
       };
     };
 
-    fileSystems."/" = rootMount;
+    fileSystems = lib.mkIf cfg.storage.manageFileSystems {
+      "/" = rootMount;
 
-    fileSystems."/boot" = {
-      device = cfg.boot.device;
-      fsType = cfg.boot.fsType;
-      options = cfg.boot.mountOptions;
-    };
+      "/boot" = {
+        device = cfg.boot.device;
+        fsType = cfg.boot.fsType;
+        options = cfg.boot.mountOptions;
+      };
 
-    fileSystems."/nix" = {
-      device = cfg.storage.device;
-      fsType = cfg.storage.fsType;
-      options = nixMountOptions;
-      neededForBoot = true;
+      "/nix" = {
+        device = cfg.storage.device;
+        fsType = cfg.storage.fsType;
+        options = nixMountOptions;
+        neededForBoot = true;
+      };
     };
 
     boot.tmp.cleanOnBoot = true;

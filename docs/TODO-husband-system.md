@@ -18,6 +18,14 @@ are part of the mechanism.
 
 ## Current State
 
+- `nixosConfigurations.firelink` is now a buildable managed-desktop test host
+  with a disko layout: 1 GiB EFI, LUKS `cryptroot` over the remaining disk,
+  Btrfs subvolumes for `@root`, `@root-blank`, `@nix`, `@persist`, and `@swap`,
+  and a 16 GiB encrypted-at-rest Btrfs swapfile under `/.swapvol`. The disk
+  device is deliberately `CHANGE-ME` until the target drive is named.
+- The host selects only `admin` as a repair account for now. It still needs a
+  host-owned SOPS file, password secret wiring, and the actual managed desktop
+  user before activation on real hardware.
 - `users/guest/default.nix` is an opt-in low-access account with no password
   secret, no Home Manager profile, no SSH material, and no supplementary groups.
   It is not yet a managed desktop user.

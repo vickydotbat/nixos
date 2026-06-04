@@ -27,6 +27,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    disko = {
+      url = "github:nix-community/disko";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     import-tree.url = "github:vic/import-tree";
 
     nixos-hardware = {
@@ -174,6 +179,10 @@
           inherit inputs pkgs;
         };
 
+        firelink-disko-boundary = import ./checks/firelink-disko-boundary.nix {
+          inherit inputs pkgs;
+        };
+
         btrfs-rollback-boundary = import ./checks/btrfs-rollback-boundary.nix {
           inherit inputs pkgs;
         };
@@ -211,6 +220,20 @@
           # Add `guest` here when this host should expose the low-access guest
           # account: `inherit (userRegistry) admin guest vicky;`.
           inherit (userRegistry) admin vicky;
+        };
+      };
+
+      nixosConfigurations.firelink = mkSystem {
+        inherit
+          inputs
+          system
+          stable
+          userRegistry
+          ;
+        self = inputs.self;
+        hostPath = ./hosts/firelink;
+        selectedUsers = {
+          inherit (userRegistry) admin;
         };
       };
     };
