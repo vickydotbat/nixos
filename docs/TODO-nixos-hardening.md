@@ -247,15 +247,14 @@ decoration.
     recovery path.
   - Validation: run `run0 true`, `run0 nixos-rebuild dry-build --flake .#host`,
     and confirm rollback access.
-  - Progress: `modules/nixos/security/run0.nix` now rejects simultaneous
-    selection with the sudo theorem, requires at least one declared Polkit cache
-    user or group, defaults that cache boundary to the repository steward group
-    such as `nixcfg`, and exposes
+  - Progress: `modules/nixos/security/run0.nix` now force-disables the sudo
+    theorem when the run0 profile is selected, requires at least one declared
+    Polkit cache user or group, defaults that cache boundary to the repository
+    steward group such as `nixcfg`, and exposes
     `theorem.nixos.security.run0-sudo.sudoAlias.enable` instead of hard-coding
     the compatibility alias. `hosts/solanine/profiles.nix` now also builds a
-    `run0-sudo` specialisation that inherits the normal host profile, disables
-    the active sudo theorem only inside that trial generation, and enables the
-    run0 profile there. This gives the operator a reversible boot or
+    `run0-sudo` specialisation that inherits the normal host profile and enables
+    the run0 profile there. This gives the operator a reversible boot or
     `switch-to-configuration test` path before the default elevation rite is
     changed.
 

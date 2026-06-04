@@ -416,3 +416,20 @@ Research sources to revisit and distill when working a specific slice:
 <https://github.com/jj-vcs/jj>
 <https://saylesss88.github.io/Working_with_Nixpkgs_Locally_10.html>
 <https://saylesss88.github.io/Package_Definitions_Explained_6.html>
+
+## Additional Users
+
+- Completed: `admin` now keeps its minimal Home Manager repair profile while
+  explicitly disabling `theorem.home.base.persistence.enable`; `guest` still has
+  `home.enable = false`, so it receives no Home Manager persistence surface.
+  `users/README.md` documents the boundary: the system may prepare an empty
+  `/nix/persist/home/<user>` repair cradle for selected Home Manager users, but
+  files are not persisted unless that user's Home profile declares
+  `home.persistence` entries.
+
+## NEW: Assert line-by-line and module-by-module documentation where intelligent
+
+TODO: Many modules are only loosely documented. Ensure every module has a section
+at the very top documenting the purpose and, if possible, explain the purpose of
+lines that seem less obvious than others right next to, or above the line. This
+is a long-standing chore and should be standard with every implementation.

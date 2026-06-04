@@ -1,3 +1,20 @@
+/*
+  TODO: Move the Codex and nightly/frequently-updating flakes like NUR into
+  the respective modules that use them, so that we don't have to flake update
+  to take advantage of their updates.
+
+  Some good candidates:
+  - codex + superpowers
+  - firefox
+  - potentially others taking advantage of the flake inputs
+
+  Codex especially should probably be contained to its own module or pkgs/ package
+  so that a  nixos-rebuild switch updates that, since there's nightly updates.
+
+  We use firefox developer's edition, which may not be as up to date as firefox
+  nightly, but we could consider using nightly since the Chaotic Nix repo is back?
+*/
+
 {
   description = "NixOS configuration";
 

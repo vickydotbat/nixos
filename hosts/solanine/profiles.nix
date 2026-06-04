@@ -55,6 +55,7 @@ in
         "vscode-extension-MS-python-vscode-pylance"
         "vscode-extension-ms-python-python"
         "vscode-extension-ms-vscode-cpptools"
+        "vscode-extension-mhutchie-git-graph"
       ];
       packages.enable = true;
       persistence.enable = true;
@@ -108,7 +109,6 @@ in
     inheritParentConfig = true;
     configuration = {
       theorem.nixos.security = {
-        sudo.enable = lib.mkForce false;
         run0-sudo.enable = true;
       };
     };

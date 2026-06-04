@@ -13,8 +13,10 @@ Home Manager modules consume the chosen user's home profile.
   a host has a known administrative handhold even when daily-driver users are
   being recalibrated. Its Home Manager profile is intentionally minimal: SSH key
   restoration plus Git stewardship for committing repairs in `/nix/nixos`.
+  Home persistence is disabled for this account; it is a recovery grip, not a
+  second daily home.
 - `guest/` is an opt-in low-access account. It should not receive SSH private
-  key material or administrative groups.
+  key material, administrative groups, or a Home Manager persistence profile.
 - `vicky/` is the current daily-driver user, including her Home Manager profile
   and SSH client settings.
 
@@ -33,6 +35,22 @@ Then run the usual NixOS test activation before switching. The account has no
 password secret, no SSH profile, no Home Manager profile, and no supplementary
 groups by default. Those absences are part of the boundary; widen them only when
 the host names the workflow and accepts the failure mode.
+
+## Home Persistence Boundary
+
+Home persistence is opt-in through an enabled Home Manager profile and
+`theorem.home.base.persistence.enable`. The system persistence module may still
+prepare `/nix/persist/home/<user>` for a selected Home Manager user so files have
+a known place to be born during later repairs, but nothing from that home is
+bound into persistent storage unless the user's Home profile declares
+`home.persistence` entries.
+
+On `solanine`, `admin` keeps Home Manager only for repair tools and explicitly
+sets `theorem.home.base.persistence.enable = false`. `guest` has
+`home.enable = false`, so it receives no Home Manager persistence surface at all.
+If either account becomes a real working account later, name the workflow first
+and add only the persistence paths that can survive rollback without becoming
+hidden state.
 
 ## Home Profile Doctrine
 

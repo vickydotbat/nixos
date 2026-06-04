@@ -50,14 +50,9 @@ in
   };
 
   config = lib.mkIf cfg.enable {
+    theorem.nixos.security.sudo.enable = lib.mkForce false;
+
     assertions = [
-      {
-        assertion = !config.theorem.nixos.security.sudo.enable;
-        message = ''
-          Select only one elevation profile: `theorem.nixos.security.sudo.enable`
-          and `theorem.nixos.security.run0-sudo.enable` cannot both be true.
-        '';
-      }
       {
         assertion = cfg.authenticationCacheUsers != [ ] || cfg.authenticationCacheGroups != [ ];
         message = ''
@@ -73,6 +68,8 @@ in
     ];
 
     security = {
+      # Run0 is the elevation path for this profile. Force the traditional
+      # sudo service off even when the profile inherits a host that enables it.
       sudo.enable = lib.mkForce false;
 
       polkit.enable = true;
