@@ -72,9 +72,10 @@ in
       default = true;
       description = ''
         Apply conservative runtime kernel sysctl defaults. These settings reduce
-        kernel address disclosure, ptrace reach, kexec reuse, filesystem link
-        traps, and common redirect/source-route network surprises. Routing,
-        VPN, container, and deep debugging profiles should override individual
+        kernel address disclosure, ptrace reach, filesystem link traps, and
+        common redirect/source-route network surprises. NixOS already disables
+        kexec loading through its upstream security module. Routing, VPN,
+        container, and deep debugging profiles should override individual
         upstream sysctls directly when their repair path requires it.
       '';
     };
@@ -232,8 +233,7 @@ in
           "fs.protected_symlinks" = lib.mkDefault 1;
 
           "kernel.dmesg_restrict" = lib.mkDefault 1;
-          "kernel.kexec_load_disabled" = lib.mkDefault 1;
-          "kernel.kptr_restrict" = lib.mkDefault 2;
+          "kernel.kptr_restrict" = lib.mkOverride 900 2;
           "kernel.randomize_va_space" = lib.mkDefault 2;
           "kernel.yama.ptrace_scope" = lib.mkDefault 1;
 

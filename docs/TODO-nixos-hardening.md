@@ -446,10 +446,14 @@ decoration.
   - Completed: `modules/nixos/security/hardening.nix` now exposes
     `theorem.nixos.security.hardening.sysctl.safeDefaults.enable`, defaulting on
     inside the opted-in hardening profile. The first safe tier uses `mkDefault`
-    values for protected filesystem links, kernel pointer and dmesg disclosure,
-    kexec disablement, ASLR, same-UID ptrace restriction, and conservative IPv4
-    and IPv6 redirect/source-route handling. Routing, VPN, container, and deep
-    debugging profiles can still override individual upstream sysctls directly.
+    values for protected filesystem links, dmesg disclosure, ASLR, same-UID
+    ptrace restriction, and conservative IPv4 and IPv6 redirect/source-route
+    handling. It also raises upstream NixOS' kernel pointer restriction from
+    `1` to `2` with an override priority that ordinary host definitions can
+    still replace. Kexec disablement remains owned by NixOS' upstream security
+    module, avoiding a duplicate unique sysctl definition. Routing, VPN,
+    container, and deep debugging profiles can still override individual
+    upstream sysctls directly.
 
 - [ ] Reject or quarantine questionable sysctl items before implementation.
   - Why: the guide includes aggressive and environment-sensitive values, and at
