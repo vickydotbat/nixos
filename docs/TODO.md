@@ -73,11 +73,13 @@ as understandable as possible for newer maintainers.
   `lib/mkSystem.nix` remains the system-managed Home import gate. Do not add
   discovery of user-owned Home flakes here; design an exported baseline that
   personal repositories can import under their own authority.
-- Validation: create or simulate a non-repository user, evaluate the shared Home
-  baseline without Vicky imports, and prove that the user can build or activate
-  a personal Home flake from their own directory without write access to
-  `/nix/nixos`. Separately prove that the system rebuild does not import
-  user-writable Nix unless the host explicitly declares that trust gate.
+- Validation: `checks/home-shared-boundary.nix` now simulates a non-repository
+  Home profile that imports the shared Home module tree without Vicky profile
+  imports or a NixOS `osConfig`. Keep extending that check as the shared Home
+  export shape takes form. Separately prove that a personal Home flake can
+  build or activate from a user's own directory without write access to
+  `/nix/nixos`, and that system rebuilds do not import user-writable Nix unless
+  the host explicitly declares that trust gate.
 
 ## Module Hardening Queue
 
@@ -147,9 +149,9 @@ as understandable as possible for newer maintainers.
   and persistence assumptions explicitly. The failure mode is worse than a
   missing menu entry: a half-declared launcher can write toolset state into an
   unmanaged prefix or point at the wrong game install.
-- Validation: evaluate a second user with the shared Home modules enabled and no
-  Vicky profile imports. The result should install plain mechanisms, not Vicky's
-  editor theme, VS Code workflow, GIMP plugin build, Spotify extensions, Discord
+- Validation: keep `checks/home-shared-boundary.nix` passing. It should build a
+  plain synthetic Home profile from the shared module tree, not Vicky's editor
+  theme, VS Code workflow, GIMP plugin build, Spotify extensions, Discord
   autostart, command-not-found hook, or repository-specific ripgrep posture.
 
 ## In-File documentation

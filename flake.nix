@@ -136,6 +136,19 @@
 
       packages.${system} = import ./pkgs/packages.nix { inherit pkgs; };
 
+      checks.${system}.home-shared-boundary = import ./checks/home-shared-boundary.nix {
+        inherit
+          inputs
+          pkgs
+          stable
+          userRegistry
+          ;
+        repository = {
+          path = "/nix/nixos";
+          group = "nixcfg";
+        };
+      };
+
       devShells.${system} =
         let
           codex = pkgs.mkShell {
