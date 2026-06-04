@@ -12,16 +12,16 @@ authority, and it should not become portable user doctrine.
 
 ## Chosen Boundary
 
-Use one SOPS file per normal login principal:
+Use one prefixed SOPS file per normal login principal:
 
-- `secrets/admin.yaml`
-- `secrets/vicky.yaml`
-- `secrets/mattia.yaml`
+- `secrets/users-admin.yaml`
+- `secrets/users-vicky.yaml`
+- `secrets/users-mattia.yaml`
 
 Host files remain host-owned:
 
-- `secrets/solanine.yaml`
-- `secrets/firelink.yaml`
+- `secrets/hosts-solanine.yaml`
+- `secrets/hosts-firelink.yaml`
 
 The user file owns normal-user account secrets:
 
@@ -65,7 +65,7 @@ Update each normal user registry entry under `users/<name>/default.nix` to point
 at a single account secret file, for example:
 
 ```nix
-secrets.sopsFile = ../../secrets/vicky.yaml;
+secrets.sopsFile = ../../secrets/users-vicky.yaml;
 ```
 
 The existing SSH fields can then use that account secret file instead of
@@ -83,20 +83,27 @@ Update `hosts/<host>/secrets.nix` so:
 - `root.hashedPasswordFile` remains sourced from the host default SOPS file
 - host OpenSSH server keys remain sourced from the host default SOPS file
 
-Update `.sops.yaml` creation rules to cover the new account files. Each file's
-recipients should match the hosts allowed to administer that account:
+Update `.sops.yaml` creation rules to cover the prefixed account and host
+files. Each user file's recipients should match the hosts allowed to administer
+that account:
 
-- `secrets/admin.yaml`: `solanine` and `firelink`
-- `secrets/vicky.yaml`: `solanine`
-- `secrets/mattia.yaml`: `firelink`
+- `secrets/users-admin.yaml`: `solanine` and `firelink`
+- `secrets/users-vicky.yaml`: `solanine`
+- `secrets/users-mattia.yaml`: `firelink`
+
+Each host file should be decryptable only by that host unless a deliberate
+recovery recipient is added:
+
+- `secrets/hosts-solanine.yaml`: `solanine`
+- `secrets/hosts-firelink.yaml`: `firelink`
 
 Update `scripts/update-password-hash` so normal users default to
-`secrets/<account>.yaml`, while root continues to use a host file. A safe
-command shape is:
+`secrets/users-<account>.yaml`, while root continues to use an explicit host
+file. A safe command shape is:
 
 ```bash
 bash scripts/update-password-hash vicky
-bash scripts/update-password-hash root secrets/solanine.yaml
+bash scripts/update-password-hash root secrets/hosts-solanine.yaml
 ```
 
 Root should require an explicit host file in this change. Hidden host selection
@@ -109,14 +116,16 @@ shape, and the migration from `secrets/ssh-<user>.yaml`.
 
 For each existing user SSH file:
 
-1. Create the new user file with `sops edit secrets/<user>.yaml`.
+1. Create the new user file with `sops edit secrets/users-<user>.yaml`.
 2. Move that user's `ssh.<user>.*` entries into the new file.
 3. Move that user's `users.<user>.password` and `users.<user>.password-hash`
    entries from host files into the new file.
-4. Leave `users.root.*`, host OpenSSH keys, and host service secrets in
-   `secrets/<host>.yaml`.
-5. Add the new encrypted file to Git before evaluating the flake.
-6. Remove old `secrets/ssh-<user>.yaml` files only after Nix evaluation proves
+4. Move host-owned material from `secrets/<host>.yaml` into
+   `secrets/hosts-<host>.yaml`, including `users.root.*`, host OpenSSH keys,
+   and host service secrets.
+5. Add the new encrypted files to Git before evaluating the flake.
+6. Remove old `secrets/ssh-<user>.yaml` and `secrets/<host>.yaml` files only
+   after Nix evaluation proves
    no host references them.
 
 The migration should preserve encrypted material without exposing plaintext in
@@ -140,7 +149,7 @@ the working tree. Use `sops` operations, not manual decrypted copies.
 Run targeted checks before any switch:
 
 ```bash
-rg -n 'ssh-[a-z]+\.yaml|secrets/(admin|vicky|mattia)\.yaml|passwordHashSecret|sopsFile' \
+rg -n 'ssh-[a-z]+\.yaml|secrets/(users|hosts)-[a-z]+\.yaml|passwordHashSecret|sopsFile' \
   .sops.yaml hosts users scripts secrets/README.md
 nix eval --json .#nixosConfigurations.solanine.config.sops.secrets --apply builtins.attrNames
 nix eval --json .#nixosConfigurations.firelink.config.sops.secrets --apply builtins.attrNames
