@@ -5,25 +5,24 @@ keys:
   - &firelink age142lwvvtlu8v566ug6seyayesaf7dmreqjnpa5muwxg7cj9j8230qqq0px5
 
 creation_rules:
-  - path_regex: secrets/solanine\.yaml$
+  - path_regex: secrets/hosts-solanine\.yaml$
     key_groups:
       - age:
           - *solanine
-  - path_regex: secrets/firelink\.yaml$
+  - path_regex: secrets/hosts-firelink\.yaml$
     key_groups:
       - age:
           - *firelink
-  - path_regex: secrets/ssh-admin\.yaml$
-    key_groups:
-      - age:
-          - *solanine
-          - *firelink
-  - path_regex: secrets/ssh-vicky\.yaml$
+  - path_regex: secrets/users-admin\.yaml$
     key_groups:
       - age:
           - *solanine
           - *firelink
-  - path_regex: secrets/ssh-mattia\.yaml$
+  - path_regex: secrets/users-vicky\.yaml$
+    key_groups:
+      - age:
+          - *solanine
+  - path_regex: secrets/users-mattia\.yaml$
     key_groups:
       - age:
           - *firelink

@@ -18,6 +18,7 @@ they disagree, update the plan or repair the repository shape.
 - hardening compatibility and quarantine notes such as
   `hardening-compatibility.md` and `hardening-sysctl-quarantine.md`
 - host incident notes such as `solanine-amdgpu-freezes.md`
+- family emergency recovery guidance in `family-emergency-recovery.md`
 - the local threat model in `threat-model.md`
 - package inventory review notes such as `package-inventory.md`
 - historical context for structural repairs

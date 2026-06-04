@@ -64,6 +64,7 @@ in
                 };
 
                 "@persist" = {
+                  # TODO: Is mapping both of these explicitly necessary? Is the @nix mountpoint insufficient?
                   mountpoint = "/nix/persist";
                   mountOptions = btrfsMountOptions;
                 };

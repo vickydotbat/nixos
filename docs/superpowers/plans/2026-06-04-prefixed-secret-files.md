@@ -4,7 +4,7 @@
 
 **Goal:** Move the repository toward prefixed host and user SOPS files without editing encrypted secret payloads.
 
-**Architecture:** Add a transitional secret-file boundary: Nix prefers `secrets/users-<name>.yaml` and `secrets/hosts-<host>.yaml` when they exist, while falling back to existing files until the maintainer migrates encrypted material manually. Root remains host-local. Normal-user password hashes and outbound SSH keys share the selected user secret file once it exists.
+**Architecture:** Use prefixed secret-file boundaries directly. Root remains host-local in `secrets/hosts-<host>.yaml`; normal-user password hashes and outbound SSH keys share `secrets/users-<name>.yaml`.
 
 **Tech Stack:** NixOS modules, sops-nix, Bash, SOPS YAML creation rules, flake checks.
 
@@ -12,12 +12,12 @@
 
 ## File Structure
 
-- Modify `.sops.yaml`: add creation rules for prefixed user and host secret files while keeping legacy rules during migration.
-- Modify `users/admin/default.nix`, `users/vicky/default.nix`, and `users/mattia/default.nix`: define preferred prefixed account secret files and legacy SSH fallback files.
-- Modify `hosts/solanine/secrets.nix` and `hosts/firelink/secrets.nix`: prefer prefixed host files, use per-user files for password hashes only after those files exist, and keep legacy host defaults until migration.
+- Modify `.sops.yaml`: add creation rules for prefixed user and host secret files.
+- Modify `users/admin/default.nix`, `users/vicky/default.nix`, and `users/mattia/default.nix`: define prefixed account secret files.
+- Modify `hosts/solanine/secrets.nix` and `hosts/firelink/secrets.nix`: use prefixed host files and per-user files directly.
 - Modify `scripts/update-password-hash`: make normal users default to `secrets/users-<account>.yaml`; require an explicit host file for `root`.
 - Modify `scripts/README.md` and `secrets/README.md`: document the new command shape, file classes, manual migration barrier, and failure modes.
-- Create `checks/secret-file-boundary.nix`: assert that evaluated host configurations choose the correct transitional secret names and that the repository carries the expected prefixed creation rules.
+- Create `checks/secret-file-boundary.nix`: assert that evaluated host configurations choose the correct secret names and that the repository carries only the expected prefixed creation rules.
 - Modify `flake.nix`: include `secret-file-boundary` in `checks.${system}`.
 
 ## Task 1: Add Failing Boundary Check
@@ -88,7 +88,7 @@ Expected: FAIL because `.sops.yaml` does not yet contain `users-*` or `hosts-*` 
 
 - [ ] **Step 1: Update `.sops.yaml` creation rules**
 
-Add prefixed rules before the legacy user SSH rules:
+Replace the old unprefixed and `ssh-<user>` rules with prefixed rules:
 
 ```yaml
   - path_regex: secrets/hosts-solanine\.yaml$
@@ -120,12 +120,6 @@ In each normal user file, add these bindings to the `let` block:
 
 ```nix
   accountSecretsFile = ../../secrets/users-${thisUser}.yaml;
-  legacySshSecretsFile = ../../secrets/ssh-${thisUser}.yaml;
-  selectedSopsFile =
-    if builtins.pathExists accountSecretsFile then
-      accountSecretsFile
-    else
-      legacySshSecretsFile;
 ```
 
 Add this top-level attribute. This is plain registry data, so keep it as a
@@ -133,19 +127,14 @@ concrete value instead of using module combinators such as `lib.mkIf`:
 
 ```nix
   secrets = {
-    sopsFile = selectedSopsFile;
-    passwordSopsFile =
-      if builtins.pathExists accountSecretsFile then
-        accountSecretsFile
-      else
-        null;
+    sopsFile = accountSecretsFile;
   };
 ```
 
 Change each `ssh.sopsFile` to:
 
 ```nix
-    sopsFile = selectedSopsFile;
+    sopsFile = accountSecretsFile;
 ```
 
 - [ ] **Step 3: Run the boundary check and verify the current failure moves**
@@ -164,30 +153,18 @@ Expected: still FAIL if host secret wiring has not been updated yet, but the `.s
 - Modify: `hosts/solanine/secrets.nix`
 - Modify: `hosts/firelink/secrets.nix`
 
-- [ ] **Step 1: Prefer prefixed host files with legacy fallback**
+- [ ] **Step 1: Use prefixed host files directly**
 
 In `hosts/solanine/secrets.nix`, replace the host secret binding with:
 
 ```nix
-  preferredHostSecretsFile = ../../secrets/hosts-solanine.yaml;
-  legacyHostSecretsFile = ../../secrets/solanine.yaml;
-  hostSecretsFile =
-    if builtins.pathExists preferredHostSecretsFile then
-      preferredHostSecretsFile
-    else
-      legacyHostSecretsFile;
+  hostSecretsFile = ../../secrets/hosts-solanine.yaml;
 ```
 
 In `hosts/firelink/secrets.nix`, use:
 
 ```nix
-  preferredHostSecretsFile = ../../secrets/hosts-firelink.yaml;
-  legacyHostSecretsFile = ../../secrets/firelink.yaml;
-  hostSecretsFile =
-    if builtins.pathExists preferredHostSecretsFile then
-      preferredHostSecretsFile
-    else
-      legacyHostSecretsFile;
+  hostSecretsFile = ../../secrets/hosts-firelink.yaml;
 ```
 
 - [ ] **Step 2: Teach password hash secrets about per-user files**
@@ -199,14 +176,13 @@ Replace `mkPasswordSecret` with:
     name = user.passwordHashSecret;
     value = {
       neededForUsers = true;
-    }
-    // lib.optionalAttrs ((user.secrets.passwordSopsFile or null) != null) {
-      sopsFile = user.secrets.passwordSopsFile;
+      sopsFile = user.secrets.sopsFile;
     };
   };
 ```
 
-This keeps current host-file behavior until the prefixed user file exists.
+This makes normal-user password hashes come from the same prefixed user file as
+outbound SSH material.
 
 - [ ] **Step 3: Run the boundary check and verify it passes**
 
@@ -298,7 +274,8 @@ nix eval --json .#nixosConfigurations.solanine.config.sops.secrets --apply built
 nix eval --json .#nixosConfigurations.firelink.config.sops.secrets --apply builtins.attrNames
 ```
 
-Expected: all commands pass without needing new encrypted files because the Nix wiring still has legacy fallbacks.
+Expected: the shell syntax check and source scan pass. Nix evaluation will fail
+until the maintainer creates and adds the new encrypted files.
 
 - [ ] **Step 2: Stop for maintainer SOPS migration**
 
@@ -326,4 +303,5 @@ nixos-rebuild dry-build --flake .#solanine
 nixos-rebuild dry-build --flake .#firelink
 ```
 
-Expected: prefixed files are referenced, legacy `ssh-<user>.yaml` and unprefixed host files are visible only as transitional fallbacks until a follow-up cleanup removes them.
+Expected: prefixed files are referenced, and legacy `ssh-<user>.yaml` and
+unprefixed host files are no longer referenced by the source tree.

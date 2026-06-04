@@ -165,6 +165,14 @@ Git signing. This user identity mechanism is independent of whether the host
 runs the system OpenSSH server. The system SSH module owns inbound `sshd`,
 host keys, firewall exposure, and remote-login posture.
 
+Inbound SSH trust is declared per user with `ssh.authorizedUsers`. The named
+source users' public keys are deployed from their user SOPS files and assembled
+at runtime under `/run/ssh-authorized-keys/%u`; do not use NixOS
+`authorizedKeys.keyFiles` for these SOPS paths, because Nix reads those files at
+evaluation time. Keep the trust list short and human: `admin` logs into the
+repair account on each host, daily users log into their own account, and any
+cross-user trust must be intentional.
+
 When `theorem.home.shell.git.enable` and `theorem.home.base.ssh.enable` are both
 selected, the shared Git module signs commits with `~/.ssh/id_ed25519` by
 default. User Git files should still own personal identity such as name and

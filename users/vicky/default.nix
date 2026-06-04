@@ -1,6 +1,7 @@
 let
   thisUser = "vicky";
   thisUserName = "Vicky";
+  accountSecretsFile = ../../secrets/users-${thisUser}.yaml;
 in
 {
   username = "${thisUser}";
@@ -14,6 +15,10 @@ in
   ];
   passwordHashSecret = "users/${thisUser}/password-hash";
 
+  secrets = {
+    sopsFile = accountSecretsFile;
+  };
+
   home = {
     enable = true;
     module = ./home.nix;
@@ -21,7 +26,11 @@ in
 
   ssh = {
     enable = true;
-    sopsFile = ../../secrets/ssh-${thisUser}.yaml;
+    authorizedUsers = [
+      thisUser
+      "mattia"
+    ];
+    sopsFile = accountSecretsFile;
     privateKeySecret = "ssh/${thisUser}/id_ed25519";
     publicKeySecret = "ssh/${thisUser}/id_ed25519.pub";
     privateKeyPath = "/run/secrets/ssh-${thisUser}-id_ed25519";

@@ -6,7 +6,7 @@
   ...
 }:
 let
-  hostSecretsFile = ../../secrets/hosts-solanine.yaml;
+  hostSecretsFile = ../../secrets/hosts-firelink.yaml;
 
   hasHostSecretKey =
     key: builtins.pathExists hostSecretsFile && lib.hasInfix key (builtins.readFile hostSecretsFile);

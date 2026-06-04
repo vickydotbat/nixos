@@ -5,6 +5,12 @@
   ...
 }:
 let
+  sshAuthorizedKeyFiles =
+    user:
+    map (authorizedUser: "/run/secrets/ssh-${authorizedUser}-id_ed25519.pub") (
+      user.ssh.authorizedUsers or [ user.username ]
+    );
+
   mkAccount =
     _: user:
     {
@@ -12,6 +18,7 @@ let
       uid = user.uid;
       home = user.homeDirectory;
       extraGroups = user.extraGroups;
+      sshAuthorizedKeyFiles = sshAuthorizedKeyFiles user;
     }
     // lib.optionalAttrs ((user.avatar or null) != null) {
       avatar = user.avatar;
@@ -42,10 +49,13 @@ in
         unfreePackageNames = [
           "corefonts"
           "vista-fonts"
+          "discord"
+          "obsidian"
         ];
       };
       packages.enable = true;
       persistence.enable = true;
+      ssh.enable = true;
       users = {
         enable = true;
         accounts = lib.mapAttrs mkAccount selectedUsers;

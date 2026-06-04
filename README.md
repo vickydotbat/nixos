@@ -16,6 +16,17 @@ hardening, modularity, documentation, and verification. If a proposed change or
 current file shape fights that philosophy, change the shape. Do not bury the
 rule in a TODO ledger and keep building around it.
 
+## Family Emergency Recovery
+
+If Vicky is unavailable because of illness, death, travel, lost memory, or any
+other emergency, start with
+[`docs/family-emergency-recovery.md`](./docs/family-emergency-recovery.md).
+
+That guide explains the recovery chain in plain language: LUKS disk encryption,
+Linux login accounts, KeePassXC, SOPS age keys, encrypted secret files, and how
+to ask for technical help without accidentally destroying the evidence needed
+for repair.
+
 ## What It Controls
 
 - NixOS system configuration for `solanine`
@@ -32,10 +43,10 @@ evaluate the system again:
 
 1. Restore or keep `/nix/persist/secrets/sops/age/keys.txt`.
 2. Clone this repository, including committed encrypted files such as
-   `secrets/solanine.yaml` and per-user SSH files such as
-   `secrets/ssh-admin.yaml`.
+   `secrets/hosts-solanine.yaml` and per-user files such as
+   `secrets/users-admin.yaml`.
 3. Rebuild the system in the appropriate execution context.
-4. Let `sops-nix` decrypt `firefox-backup-age-identity` back into `/run/secrets/...`.
+4. Let `sops-nix` decrypt user-owned secrets back into `/run/secrets/...`.
 5. Let `firefox-state-restore` decrypt the Firefox archives.
 
 ## Failure Modes

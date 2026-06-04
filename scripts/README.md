@@ -9,14 +9,17 @@ This directory holds small maintenance rites that are safer as repeatable comman
 ## Usage
 
 ```bash
-scripts/update-password-hash root
 scripts/update-password-hash vicky
+scripts/update-password-hash root secrets/hosts-solanine.yaml
 ```
 
-Pass a second argument to use a different encrypted secrets file:
+Normal users default to `secrets/users-<name>.yaml`. Root is host-local, so
+pass the host secrets file explicitly:
 
 ```bash
-scripts/update-password-hash vicky secrets/solanine.yaml
+scripts/update-password-hash admin
+scripts/update-password-hash mattia
+scripts/update-password-hash root secrets/hosts-firelink.yaml
 ```
 
 ## Failure Modes
@@ -24,6 +27,7 @@ scripts/update-password-hash vicky secrets/solanine.yaml
 - The script requires `sops` and `mkpasswd` in the execution environment.
 - The SOPS key must be available, or decryption will fail before any repair can happen.
 - The target account must already have a plaintext password entry at `users.<name>.password`.
+- `root` has no default file; choosing the host recovery password is an explicit act.
 
 ## Maintenance Reminders
 

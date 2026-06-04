@@ -68,9 +68,8 @@ at a single account secret file, for example:
 secrets.sopsFile = ../../secrets/users-vicky.yaml;
 ```
 
-The existing SSH fields can then use that account secret file instead of
-`../../secrets/ssh-vicky.yaml`. Password hash declarations should use the same
-file for normal users.
+The existing SSH fields should use that account secret file. Password hash
+declarations should use the same file for normal users.
 
 Keep `passwordHashSecret = "users/<name>/password-hash"` unchanged. The runtime
 path remains `/run/secrets-for-users/users/<name>/password-hash`, so
@@ -124,9 +123,9 @@ For each existing user SSH file:
    `secrets/hosts-<host>.yaml`, including `users.root.*`, host OpenSSH keys,
    and host service secrets.
 5. Add the new encrypted files to Git before evaluating the flake.
-6. Remove old `secrets/ssh-<user>.yaml` and `secrets/<host>.yaml` files only
-   after Nix evaluation proves
-   no host references them.
+6. Remove old `secrets/ssh-<user>.yaml` and `secrets/<host>.yaml` files after
+   the prefixed files have been added and the source tree no longer references
+   the legacy names.
 
 The migration should preserve encrypted material without exposing plaintext in
 the working tree. Use `sops` operations, not manual decrypted copies.
@@ -139,8 +138,8 @@ the working tree. Use `sops` operations, not manual decrypted copies.
   creating users because `neededForUsers = true` secrets are required early.
 - If `.sops.yaml` does not grant the target host recipient, the host will build
   a theorem it cannot decrypt.
-- If old `ssh-<user>.yaml` files remain referenced, password and SSH rotation
-  will be split again.
+- If old `ssh-<user>.yaml` or unprefixed host files remain referenced, password
+  and SSH rotation will be split again.
 - If root is moved into a user file by accident, host recovery authority becomes
   less local and less clear.
 

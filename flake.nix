@@ -183,6 +183,10 @@
           inherit inputs pkgs;
         };
 
+        firelink-discord-boundary = import ./checks/firelink-discord-boundary.nix {
+          inherit inputs pkgs;
+        };
+
         solanine-libvirt-boundary = import ./checks/solanine-libvirt-boundary.nix {
           inherit inputs pkgs;
         };
@@ -192,6 +196,14 @@
         };
 
         plasma-browser-boundary = import ./checks/plasma-browser-boundary.nix {
+          inherit inputs pkgs;
+        };
+
+        secret-file-boundary = import ./checks/secret-file-boundary.nix {
+          inherit inputs pkgs;
+        };
+
+        ssh-approved-hosts-boundary = import ./checks/ssh-approved-hosts-boundary.nix {
           inherit inputs pkgs;
         };
       };
@@ -237,7 +249,7 @@
         self = inputs.self;
         hostPath = ./hosts/firelink;
         selectedUsers = {
-          inherit (userRegistry) admin;
+          inherit (userRegistry) admin mattia;
         };
       };
     };

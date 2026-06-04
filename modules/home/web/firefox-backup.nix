@@ -28,7 +28,7 @@ let
   user = config.home.username;
   profileDir = "/nix/persist/home/${user}/.mozilla/firefox/${user}";
   backupDir = "/nix/persist/home/${user}/Backups/firefox-state";
-  identityFile = "/run/secrets/firefox-backup-age-identity";
+  identityFile = "/run/secrets/firefox-backup-${user}-age-identity";
 
   firefoxStateBackup = pkgs.writeShellApplication {
     name = "firefox-state-backup";
@@ -52,7 +52,7 @@ let
 
       if [[ ! -r "$identity_file" ]]; then
         echo "Firefox backup age identity is unavailable: $identity_file" >&2
-        echo "Create and deploy secrets/solanine.yaml with firefox-backup-age-identity first." >&2
+        echo "Create and deploy the selected user's SOPS file with firefox-backup-age-identity first." >&2
         exit 1
       fi
 

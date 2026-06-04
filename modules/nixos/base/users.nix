@@ -52,6 +52,16 @@ let
           description = "Path to a file containing this account's hashed password.";
         };
 
+        sshAuthorizedKeyFiles = lib.mkOption {
+          type = lib.types.listOf lib.types.str;
+          default = [ ];
+          description = ''
+            Runtime public-key files allowed to log into this account through
+            OpenSSH. These are strings, not Nix paths, because SOPS material
+            appears under `/run/secrets` after evaluation.
+          '';
+        };
+
         avatar = lib.mkOption {
           type = lib.types.nullOr lib.types.path;
           default = null;
