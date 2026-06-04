@@ -1,16 +1,117 @@
 {
   config,
-  inputs,
   lib,
+  osConfig ? null,
   pkgs,
   ...
 }:
 
+/*
+  TODO:
+
+  Ble.sh was used in the past for zsh-like inline suggestions but broke numerous
+  shell integrations. We could consider implementing it again but it would need
+  to be done carefully.
+
+  Alternatively: lightweight completion suggestions and command highlighting
+  would go a long way.
+*/
+
+# Interactive shell substrate. This module owns broadly useful Bash behavior and
+# command-line tools, while exposing aliases as options so user profiles can
+# keep personal shorthand out of the reusable layer. NixOS repair aliases only
+# appear when Home Manager is evaluated with an `osConfig`.
 let
   cfg = config.theorem.home.shell.shell;
+  hasOsConfig = osConfig != null;
+  run0Enabled = hasOsConfig && (osConfig.theorem.nixos.security.run0-sudo.enable or false);
+  sudoEnabled = hasOsConfig && (osConfig.theorem.nixos.security.sudo.enable or false);
+
+  defaultElevationCommand =
+    if run0Enabled then
+      "run0"
+    else if sudoEnabled then
+      "sudo"
+    else
+      "sudo";
+
+  defaultAliases = {
+    cp = "cp -i";
+    df = "df -h";
+    du = "du -h";
+    grep = "grep --color=auto";
+    mkdir = "mkdir -p";
+    mv = "mv -i";
+    rm = "rm -I";
+
+    ls = "eza";
+    ll = "eza -lah --git";
+    la = "eza -a";
+    tree = "eza --tree";
+  };
 in
 {
-  options.theorem.home.shell.shell.enable = lib.mkEnableOption "interactive shell";
+  options.theorem.home.shell.shell = {
+    enable = lib.mkEnableOption "interactive shell"; # FIXME: Should be enabled by default.
+
+    aliases = lib.mkOption {
+      type = lib.types.attrsOf lib.types.str;
+      default = defaultAliases;
+      description = ''
+        Base shell aliases provided by the reusable shell theorem. Keep this set
+        unsurprising; personal shortcuts and project-specific habits belong in
+        user profiles through `extraAliases`.
+      '';
+    };
+
+    extraAliases = lib.mkOption {
+      type = lib.types.attrsOf lib.types.str;
+      default = { };
+      description = "User or host aliases appended to the reusable shell aliases.";
+    };
+
+    nixosAliases = {
+      enable = lib.mkOption {
+        type = lib.types.bool;
+        default = hasOsConfig; # FIXME: This should also depend on whether `nh` is enabled. Not just when the system exists.
+        defaultText = lib.literalExpression "osConfig != null";
+        description = ''
+          Install short NixOS repair aliases. Defaults on only when this Home
+          profile is evaluated as part of a NixOS system, so standalone personal
+          Home flakes do not receive aliases that depend on host state.
+        '';
+      };
+
+      flake = lib.mkOption {
+        type = lib.types.str;
+        default = "$NIXOS_CONFIG_FLAKE"; # FIXME: Use the repo path where able. There is no guarantee this variable will be set.
+        description = "Flake reference used by the short NixOS repair aliases.";
+      };
+    };
+
+    elevationAlias = {
+      enable = lib.mkOption {
+        type = lib.types.bool;
+        default = true;
+        description = "Install `please` as a retry alias for the active elevation command.";
+      };
+
+      command = lib.mkOption {
+        type = lib.types.str;
+        default = defaultElevationCommand;
+        defaultText = lib.literalExpression ''
+          if osConfig.theorem.nixos.security.run0-sudo.enable then "run0"
+          else if osConfig.theorem.nixos.security.sudo.enable then "sudo"
+          else "sudo"
+        '';
+        description = ''
+          Elevation command used by the `please` alias. It follows the active
+          NixOS elevation theorem when available and remains overrideable for
+          standalone Home profiles.
+        '';
+      };
+    };
+  };
 
   config = lib.mkIf cfg.enable {
     programs.bash = {
@@ -55,28 +156,19 @@ in
         LESSHISTFILE = "-";
       };
 
-      shellAliases = {
-        cp = "cp -i";
-        df = "df -h";
-        du = "du -h";
-        grep = "grep --color=auto";
-        mkdir = "mkdir -p";
-        mv = "mv -i";
-        rm = "rm -I";
-
-        ls = "eza";
-        ll = "eza -lah --git";
-        la = "eza -a";
-        tree = "eza --tree";
-
-        ns = "nh os switch $NIXOS_CONFIG_FLAKE";
-        nb = "nh os boot $NIXOS_CONFIG_FLAKE";
-        nt = "nh os test $NIXOS_CONFIG_FLAKE";
-        nd = "nh os dry $NIXOS_CONFIG_FLAKE";
-
-        # Pretty please?
-        please = "sudo $(fc -ln -1)";
-      };
+      shellAliases =
+        cfg.aliases
+        // lib.optionalAttrs cfg.nixosAliases.enable {
+          ns = "nh os switch ${cfg.nixosAliases.flake}";
+          nb = "nh os boot ${cfg.nixosAliases.flake}";
+          nt = "nh os test ${cfg.nixosAliases.flake}";
+          nd = "nh os dry ${cfg.nixosAliases.flake}";
+          # TODO: Add convenience aliases for the other "nh" possible commands.
+        }
+        // lib.optionalAttrs cfg.elevationAlias.enable {
+          please = "${cfg.elevationAlias.command} $(fc -ln -1)"; # FIXME: Does this trick work for run0? It works for sudo. It essentially re-runs the last command with sudo, I think.
+        }
+        // cfg.extraAliases;
 
       initExtra = ''
         _bash_history_sync() {
@@ -231,7 +323,7 @@ in
       ];
 
       files = [
-        ".bash_history"
+        ".bash_history" # TODO: Make sure this is persisting correctly.
       ];
     };
   };
