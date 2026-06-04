@@ -4,6 +4,10 @@
   repository,
   ...
 }:
+# Experimental run0 elevation profile. This module replaces the traditional
+# sudo path with systemd-run plus Polkit, keeps a compatibility alias available
+# while repair notes still say `sudo`, and force-disables the sudo theorem when
+# selected. Test login, rebuild, and rollback before making it a host default.
 let
   cfg = config.theorem.nixos.security.run0-sudo;
   repositoryGroup = repository.group or "nixcfg";

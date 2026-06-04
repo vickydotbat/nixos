@@ -3,6 +3,10 @@
   lib,
   ...
 }:
+# Traditional sudo elevation profile for hosts that have not moved to run0.
+# The profile keeps wheel as the administrative boundary and grants passwordless
+# power and mount operations for local repair. Do not enable it beside
+# `theorem.nixos.security.run0-sudo`; the run0 module owns that exclusion.
 let
   cfg = config.theorem.nixos.security.sudo;
 

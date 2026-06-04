@@ -5,6 +5,10 @@
   selectedUsers,
   ...
 }:
+# Podman substrate for rootless containers and Docker-shaped compatibility.
+# Rootless use does not need a standing group grant; the `podman` group is added
+# only when the Docker-compatible socket is enabled, because that socket is an
+# engine-control surface and should follow repository stewardship.
 let
   cfg = config.theorem.nixos.virtualisation.podman;
   repositoryGroup = repository.group or "nixcfg";

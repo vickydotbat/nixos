@@ -1,4 +1,7 @@
 { config, lib, ... }:
+# Base OpenSSH server posture. This owns inbound `sshd` only; user SSH client
+# identities live in Home Manager so Git signing and outbound access do not
+# imply that the host accepts remote logins.
 let
   cfg = config.theorem.nixos.base.ssh;
 in

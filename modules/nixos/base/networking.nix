@@ -5,6 +5,10 @@
   selectedUsers,
   ...
 }:
+# Base NetworkManager posture. Enabling the module starts NetworkManager and
+# grants its control group only to selected repository stewards, so network
+# repair remains available to maintainers without turning every local account
+# into a network operator.
 let
   cfg = config.theorem.nixos.base.networking;
   repositoryGroup = repository.group or "nixcfg";

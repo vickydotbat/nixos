@@ -5,6 +5,9 @@
   ...
 }:
 
+# Derive Nix daemon trusted users from repository stewardship. Anyone trusted to
+# maintain `/nix/nixos` may need to build, substitute, and repair the theorem;
+# outside accounts should not gain daemon trust merely by existing on the host.
 let
   repositoryGroup = repository.group or "nixcfg";
 

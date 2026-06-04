@@ -5,6 +5,11 @@
   repository,
   ...
 }:
+# Declarative account and repository-stewardship substrate. Hosts pass selected
+# user doctrines into this module; it creates normal users, the shared
+# repository group, and the activation repair for AccountsService avatars. Keep
+# service-specific access groups out of static user entries when a service
+# module can own them, so disabled services do not leave old authority behind.
 let
   cfg = config.theorem.nixos.base.users;
   accountType = lib.types.submodule (

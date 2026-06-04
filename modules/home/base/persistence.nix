@@ -5,6 +5,10 @@
   pkgs,
   ...
 }:
+# Home Manager persistence baseline for impermanent hosts. It follows the
+# system persistence substrate by default, but individual users can opt out when
+# their home should stay ephemeral. The volatile Downloads service keeps casual
+# downloads boot-scoped while preserving the declared working directories.
 let
   cfg = config.theorem.home.base.persistence;
 

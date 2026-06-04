@@ -12,6 +12,11 @@
   },
 }:
 
+# Shared host constructor for this flake. It wires the reusable system module
+# tree, host facts, overlays, and Home Manager together around the selected user
+# set. Keep trust boundaries visible here: `selectedUsers` decides which account
+# doctrines a host receives, while `homeUsers` filters that set down to accounts
+# allowed to import Home Manager code into the system evaluation.
 let
   lib = inputs.nixpkgs.lib;
   homeUsers = lib.filterAttrs (_: user: user.home.enable or false) selectedUsers;

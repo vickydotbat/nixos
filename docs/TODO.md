@@ -140,6 +140,15 @@ the validation rite that proves it still holds.
 - Progress: `modules/nixos/README.md` and `modules/home/README.md` now name the
   boundary between reusable system mechanisms, reusable Home mechanisms, host
   facts, and user-specific working-surface choices.
+- Progress: central stewardship modules now carry top-of-file purpose blocks:
+  `lib/mkSystem.nix`, `modules/nixos/base/users.nix`,
+  `modules/nixos/base/networking.nix`,
+  `modules/nixos/base/nix-trusted-users.nix`,
+  `modules/nixos/base/ssh.nix`, `modules/nixos/virtualisation/podman.nix`,
+  `modules/nixos/security/sudo.nix`, `modules/nixos/security/run0.nix`, and
+  `modules/home/base/persistence.nix`. The next pass should continue module by
+  module, placing the doctrine beside the mechanism instead of burying it in a
+  distant checklist.
 
 ## YubiKey Support
 
@@ -388,6 +397,15 @@ the validation rite that proves it still holds.
     and derivation literacy. The local doctrine remains: recipes live under
     `pkgs/`, modules and profiles decide installation, and package-bearing
     changes go through [`docs/package-inventory.md`](./package-inventory.md).
+  - Move fast-moving package feeds out of broad flake input doctrine when a
+    narrower module or package wrapper can own the churn. Codex CLI,
+    superpowers, NUR-backed browser choices, and any future nightly browser
+    channel should not force unrelated operators to refresh the whole theorem
+    just to receive frequent tool updates. The failure mode is lockfile churn
+    becoming ordinary maintenance noise, hiding the updates that actually need
+    review. Validation: prove the consuming module still evaluates, the package
+    update path is explicit, and `nix flake check` plus the host dry build no
+    longer change unrelated inputs for that tool.
   - Document a local-nixpkgs repair workflow before using one for production
     fixes: clone or worktree location, how the flake input is temporarily
     pointed at it, how overlays differ from direct package definitions, and how
@@ -427,9 +445,64 @@ Research sources to revisit and distill when working a specific slice:
   files are not persisted unless that user's Home profile declares
   `home.persistence` entries.
 
-## NEW: Assert line-by-line and module-by-module documentation where intelligent
+## NEW:
 
-TODO: Many modules are only loosely documented. Ensure every module has a section
-at the very top documenting the purpose and, if possible, explain the purpose of
-lines that seem less obvious than others right next to, or above the line. This
-is a long-standing chore and should be standard with every implementation.
+TODO: Fix AMDGPU plasma freezes on Solanine
+
+Solanine still experiences the well-documented "flip_done" freeze despite some
+kernel module workarounds being applied. There is also a real world workaround
+where the user unplugs the monitor cable from the back of the PC, plugs it back
+in, and hits a key a few times to wake the monitor. This is documented as working
+during two such freeze cases.
+
+Read documentation of the issue online before pursuing.
+
+Below is some of the journalctl output.
+
+```
+Jun 04 08:55:30 solanine kdeconnectd[3911]: There are no outputs - creating placeholder screen
+Jun 04 08:55:30 solanine kactivitymanagerd[3775]: There are no outputs - creating placeholder screen
+Jun 04 08:55:30 solanine polkit-kde-authentication-agent-1[3779]: There are no outputs - creating placeholder screen
+Jun 04 08:55:30 solanine baloorunner[10023]: There are no outputs - creating placeholder screen
+Jun 04 08:55:30 solanine baloo_file_extractor[13063]: There are no outputs - creating placeholder screen
+Jun 04 08:55:30 solanine plasmashell[3748]: There are no outputs - creating placeholder screen
+Jun 04 08:55:30 solanine org_kde_powerdevil[3780]: There are no outputs - creating placeholder screen
+Jun 04 08:55:30 solanine systemd[3422]: Started dbus-:1.2-org.kde.KSplash@1.service.
+Jun 04 08:55:32 solanine pipewire-pulse[3878]: mod.protocol-pulse: setsockopt(SO_PRIORITY) failed: Bad file descriptor
+Jun 04 08:55:32 solanine pipewire-pulse[3878]: mod.protocol-pulse: client 0x5ba79e7fd760: no peercred: Bad file descriptor
+Jun 04 08:55:32 solanine plasmashell[3748]: qrc:/qt/qml/plasma/applet/org/kde/plasma/notifications/global/Globals.qml:575:17: Unable to assign QString to int
+Jun 04 08:55:32 solanine kded6[3701]: Failed to notify "Created too many similar notifications in quick succession"
+Jun 04 08:55:43 solanine kernel: amdgpu 0000:03:00.0: [drm] *ERROR* flip_done timed out
+Jun 04 08:55:43 solanine kernel: amdgpu 0000:03:00.0: [drm] *ERROR* [CRTC:363:crtc-0] commit wait timed out
+Jun 04 08:55:51 solanine discord[3908]: 08:55:51.727 › The resource https://discord.com/assets/ce3b8055f5114434.woff2 was preloaded using link preload but not used within a few seconds from the window's load >
+Jun 04 08:55:51 solanine discord[3908]: 08:55:51.727 › The resource https://discord.com/assets/cb2006dbced0e246.woff2 was preloaded using link preload but not used within a few seconds from the window's load >
+Jun 04 08:55:51 solanine discord[3908]: 08:55:51.728 › The resource https://discord.com/assets/7a6a566c2e88a35d.woff2 was preloaded using link preload but not used within a few seconds from the window's load >
+Jun 04 08:55:51 solanine discord[3908]: 08:55:51.728 › The resource https://discord.com/assets/e52f0cba712e2fb4.woff2 was preloaded using link preload but not used within a few seconds from the window's load >
+Jun 04 08:55:51 solanine discord[3908]: 08:55:51.728 › The resource https://discord.com/assets/dd24010f3cf7def7.woff2 was preloaded using link preload but not used within a few seconds from the window's load >
+Jun 04 08:55:53 solanine kernel: amdgpu 0000:03:00.0: [drm] *ERROR* flip_done timed out
+Jun 04 08:55:53 solanine kernel: amdgpu 0000:03:00.0: [drm] *ERROR* [PLANE:360:plane-6] commit wait timed out
+Jun 04 08:55:54 solanine kernel: ------------[ cut here ]------------
+Jun 04 08:55:54 solanine kernel: WARNING: drivers/gpu/drm/amd/amdgpu/../display/amdgpu_dm/amdgpu_dm.c:9576 at amdgpu_dm_atomic_commit_tail+0x3635/0x3690 [amdgpu], CPU#2: kworker/2:1H/629
+Jun 04 08:55:54 solanine kernel: Modules linked in: ccm rfcomm snd_seq_dummy snd_hrtimer snd_seq snd_seq_device af_packet cmac algif_hash algif_skcipher af_alg bnep nls_iso8859_1 rtw89_8852be nls_cp437 r8169 >
+Jun 04 08:55:54 solanine kernel:  video hid_generic mt792x_lib mt76_connac_lib tiny_power_button rtc_cmos mt76_usb mt76 gpio_amdpt wmi gpio_generic button mac80211 btusb btrtl btintel btmtk btbcm cfg80211 blu>
+Jun 04 08:55:54 solanine kernel: CPU: 2 UID: 0 PID: 629 Comm: kworker/2:1H Not tainted 7.0.10 #1-NixOS PREEMPT(lazy)
+Jun 04 08:55:54 solanine kernel: Hardware name: ASUS System Product Name/PRIME B650M-A WIFI II, BIOS 3263 06/09/2025
+Jun 04 08:55:54 solanine kernel: Workqueue: events_highpri dm_irq_work_func [amdgpu]
+Jun 04 08:55:54 solanine kernel: RIP: 0010:amdgpu_dm_atomic_commit_tail+0x3635/0x3690 [amdgpu]
+Jun 04 08:55:54 solanine kernel: Code: ff ff 90 0f 0b 49 8d 84 24 40 5b 04 00 c6 85 18 fe ff ff 00 48 89 85 20 fe ff ff e9 56 d0 ff ff 90 0f 0b 90 e9 9f d0 ff ff 90 <0f> 0b 90 e9 fc f7 ff ff 48 c7 85 18 fe ff>
+Jun 04 08:55:54 solanine kernel: RSP: 0018:ffffd39041e67ac8 EFLAGS: 00010086
+Jun 04 08:55:54 solanine kernel: RAX: 0000000000000001 RBX: 0000000000000296 RCX: ffff8e560591f118
+Jun 04 08:55:54 solanine kernel: RDX: 0000000000000001 RSI: 0000000000000286 RDI: ffff8e563c480178
+Jun 04 08:55:54 solanine kernel: RBP: ffffd39041e67d40 R08: ffffd39041e679bc R09: 0000000000000000
+Jun 04 08:55:54 solanine kernel: R10: ffff8e5606d52e00 R11: ffffd39041e67a2c R12: ffff8e560591f118
+Jun 04 08:55:54 solanine kernel: R13: 0000000000000000 R14: ffff8e56118c7600 R15: ffff8e560591f000
+Jun 04 08:55:54 solanine kernel: FS:  0000000000000000(0000) GS:ffff8e5db7bdd000(0000) knlGS:0000000000000000
+Jun 04 08:55:54 solanine kernel: CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+Jun 04 08:55:54 solanine kernel: CR2: 00003be40573e3fc CR3: 00000002ec224000 CR4: 0000000000f50ef0
+Jun 04 08:55:54 solanine kernel: PKRU: 55555554
+Jun 04 08:55:54 solanine kernel: Call Trace:
+Jun 04 08:55:54 solanine kernel:  <TASK>
+Jun 04 08:55:54 solanine kernel:  commit_tail+0xd1/0x160
+Jun 04 08:55:54 solanine kernel:  drm_atomic_helper_commit+0x13c/0x180
+lines 919-962/1000 97%
+```
