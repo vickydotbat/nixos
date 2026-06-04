@@ -2,6 +2,10 @@
 
 This directory holds repository-level user doctrine.
 
+User shape is governed by [`docs/philosophy.md`](../docs/philosophy.md). A user
+profile may carry personal working-surface choices; reusable mechanisms and
+system authority belong elsewhere unless the boundary is declared and reviewed.
+
 Hosts choose from these declarations. The user tree names the person or account
 role, the groups it needs, the password secret it expects, and whether Home
 Manager should be forged for it. System modules consume the chosen accounts;

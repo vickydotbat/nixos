@@ -2,7 +2,14 @@
 
 This directory contains reusable NixOS and Home Manager mechanisms.
 
-The module trees are imported recursively through `import-tree`, so every `.nix` file here is part of the evaluated configuration. This is convenient, and therefore sharp: files should expose options and remain quiet until a host or user profile enables them.
+[`docs/philosophy.md`](../docs/philosophy.md) is the boundary law for this tree.
+If a module needs personal taste, host facts, hidden state, or broad implicit
+behavior to make sense, change the module boundary before adding more options.
+
+The module trees are imported recursively through `import-tree`, so every `.nix`
+file here is part of the evaluated configuration. This is convenient, and
+therefore sharp: files should expose options and remain quiet until a host or
+user profile enables them.
 
 ## What It Controls
 

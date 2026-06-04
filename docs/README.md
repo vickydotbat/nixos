@@ -2,10 +2,17 @@
 
 This directory holds plans and notes for repository maintenance.
 
-These files are not the system configuration itself. They are the repair ledger: what was intended, what order made sense, and which failure modes were visible before the work began.
+These files are not the system configuration itself. They are the repair
+ledger: what was intended, what order made sense, and which failure modes were
+visible before the work began.
+
+[`philosophy.md`](./philosophy.md) is the exception in weight, not in
+location: it is the repository heart. Plans and TODO ledgers must serve it. If
+they disagree, update the plan or repair the repository shape.
 
 ## What It Controls
 
+- the canonical repository philosophy in `philosophy.md`
 - implementation plans under `superpowers/plans/`
 - agent-facing task notes that should remain executable
 - hardening compatibility and quarantine notes such as

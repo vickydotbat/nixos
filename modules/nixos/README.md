@@ -2,6 +2,10 @@
 
 This tree declares reusable system mechanisms under `theorem.nixos.*`.
 
+Apply [`docs/philosophy.md`](../../docs/philosophy.md) here as system doctrine:
+root-owned mechanisms should be explicit, reproducible, host-selectable, and
+validated before activation.
+
 Each module should stay quiet until a host profile enables it. A good module
 names one repairable mechanism, exposes the smallest useful option surface, and
 then maps that choice onto native NixOS options. Host identity, hardware facts,

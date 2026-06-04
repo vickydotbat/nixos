@@ -2,6 +2,10 @@
 
 This tree declares reusable Home Manager mechanisms under `theorem.home.*`.
 
+Apply [`docs/philosophy.md`](../../docs/philosophy.md) here as Home doctrine:
+shared Home modules should provide reusable mechanisms, not one operator's
+private working surface by accident.
+
 Home modules should provide shared working-surface mechanisms and conservative
 defaults, not personal doctrine disguised as reusable code. Put broadly useful
 shell integration, editor substrate, browser policy, persistence hooks, and

@@ -1,8 +1,24 @@
 # Agent Instructions
 
-This repository carries a NixOS system theorem and the small rites needed to keep it repairable.
+This repository carries a NixOS system theorem and the small rites needed to
+keep it repairable.
 
-The `docs/nixos-managing` skill is the dedicated maintenance manual for that work: rebuilds, flakes, modules, deployment, impermanence, LUKS remote unlock, monitoring, and the usual places where a tired operator can make one sharp mistake.
+The `docs/nixos-managing` skill is the dedicated maintenance manual for that
+work: rebuilds, flakes, modules, deployment, impermanence, LUKS remote unlock,
+monitoring, and the usual places where a tired operator can make one sharp
+mistake.
+
+## Project Philosophy
+
+Treat [`docs/philosophy.md`](docs/philosophy.md) as the beating heart of this
+repository. Every agent and maintainer must use it before making structural
+choices about hosts, modules, users, packages, secrets, hardening, persistence,
+documentation, or workflow.
+
+Be firm about it: if the repository shape does not follow that philosophy,
+repair the shape instead of working around it. TODO ledgers, plans, and local
+preferences are subordinate to the philosophy unless the user explicitly changes
+the doctrine.
 
 ## Documentation Voice
 

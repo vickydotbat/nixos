@@ -2,6 +2,10 @@
 
 This directory holds host identity and host-specific state.
 
+Host shape is governed by [`docs/philosophy.md`](../docs/philosophy.md).
+If a host profile starts carrying reusable behavior, personal Home choices, or
+implicit machine discovery, repair the boundary before building on it.
+
 The reusable mechanisms live elsewhere. A host should declare which theorems it accepts, what hardware it is bound to, and what state must survive when the rest of the machine is rebuilt or wiped clean.
 
 ## What It Controls

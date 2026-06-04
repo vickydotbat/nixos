@@ -516,3 +516,11 @@ The detailed repair ledger now lives in
 [`docs/solanine-amdgpu-freezes.md`](./solanine-amdgpu-freezes.md). Keep future
 evidence, tried parameters, rollback notes, and capture commands there so the
 mechanism has one memory.
+
+## Repository Philosophy
+
+- Completed: the repository philosophy has been promoted into
+  [`docs/philosophy.md`](./philosophy.md). Treat that file as the beating heart
+  of the theorem: TODO ledgers, plans, modules, host profiles, user profiles,
+  and agent behavior must serve it. If the repository shape disagrees with that
+  doctrine, repair the shape instead of burying the mismatch here.
