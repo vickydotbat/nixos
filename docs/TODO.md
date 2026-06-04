@@ -73,13 +73,17 @@ as understandable as possible for newer maintainers.
   `lib/mkSystem.nix` remains the system-managed Home import gate. Do not add
   discovery of user-owned Home flakes here; design an exported baseline that
   personal repositories can import under their own authority.
-- Validation: `checks/home-shared-boundary.nix` now simulates a non-repository
-  Home profile that imports the shared Home module tree without Vicky profile
-  imports or a NixOS `osConfig`. Keep extending that check as the shared Home
-  export shape takes form. Separately prove that a personal Home flake can
-  build or activate from a user's own directory without write access to
-  `/nix/nixos`, and that system rebuilds do not import user-writable Nix unless
-  the host explicitly declares that trust gate.
+- Exported baseline: `homeModules.shared` now gives user-owned Home flakes a
+  reusable entry point for this repository's Home modules without selecting a
+  host, login account, SOPS identity, or Vicky profile. Optional persistence and
+  Plasma hooks stay quiet unless their option providers are present; selecting
+  those substrates without the provider fails with a clear assertion.
+- Validation: `checks/home-shared-boundary.nix` simulates a non-repository Home
+  profile through `homeModules.shared`, without Vicky profile imports or a NixOS
+  `osConfig`. Separately prove that a personal Home flake can build or activate
+  from a user's own directory without write access to `/nix/nixos`, and that
+  system rebuilds do not import user-writable Nix unless the host explicitly
+  declares that trust gate.
 
 ## Module Hardening Queue
 

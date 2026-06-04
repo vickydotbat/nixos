@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  options,
   pkgs,
   ...
 }:
@@ -9,6 +10,7 @@
 # persists game state only when the user has selected Home persistence.
 let
   cfg = config.theorem.home.gaming.nwn;
+  hasHomePersistence = options.home ? persistence;
 
   persistenceEnabled = (config.theorem.home.base.persistence.enable or false);
 
@@ -131,48 +133,51 @@ in
 {
   options.theorem.home.gaming.nwn.enable = lib.mkEnableOption "Neverwinter Nights tooling";
 
-  config = lib.mkIf cfg.enable {
-    home.packages = [
-      nwnBlender
-      pkgs.cleanmodels
-      pkgs.neverwinter-nim
-      (pkgs.nwnexplorer.override {
-        nwnInstallDir = "${config.home.homeDirectory}/.local/share/Steam/steamapps/common/Neverwinter Nights";
-      })
-    ];
-
-    home.persistence."/nix/persist" = lib.mkIf persistenceEnabled {
-      directories = [
-        ".local/share/Neverwinter Nights"
-        ".config/blender/${nwnBlenderConfigVersion}"
+  config = lib.mkMerge [
+    (lib.mkIf cfg.enable {
+      home.packages = [
+        nwnBlender
+        pkgs.cleanmodels
+        pkgs.neverwinter-nim
+        (pkgs.nwnexplorer.override {
+          nwnInstallDir = "${config.home.homeDirectory}/.local/share/Steam/steamapps/common/Neverwinter Nights";
+        })
       ];
-    };
 
-    home.activation.nwnDocumentsLayout = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-      nwn_data_dir=${lib.escapeShellArg nwnDataDir}
-      nwn_documents_dir=${lib.escapeShellArg nwnDocumentsDir}
-      nwn_directories=(${lib.escapeShellArgs nwnDirectories})
+      home.activation.nwnDocumentsLayout = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+        nwn_data_dir=${lib.escapeShellArg nwnDataDir}
+        nwn_documents_dir=${lib.escapeShellArg nwnDocumentsDir}
+        nwn_directories=(${lib.escapeShellArgs nwnDirectories})
 
-      $DRY_RUN_CMD ${pkgs.coreutils}/bin/mkdir -p "$nwn_data_dir" "$nwn_documents_dir"
+        $DRY_RUN_CMD ${pkgs.coreutils}/bin/mkdir -p "$nwn_data_dir" "$nwn_documents_dir"
 
-      for nwn_directory in "''${nwn_directories[@]}"; do
-        $DRY_RUN_CMD ${pkgs.coreutils}/bin/mkdir -p "$nwn_data_dir/$nwn_directory"
-      done
+        for nwn_directory in "''${nwn_directories[@]}"; do
+          $DRY_RUN_CMD ${pkgs.coreutils}/bin/mkdir -p "$nwn_data_dir/$nwn_directory"
+        done
 
-      while IFS= read -r -d "" source_dir; do
-        name="''${source_dir##*/}"
-        target="$nwn_documents_dir/$name"
+        while IFS= read -r -d "" source_dir; do
+          name="''${source_dir##*/}"
+          target="$nwn_documents_dir/$name"
 
-        if [[ -e "$target" && ! -L "$target" ]]; then
-          echo "Skipping $target because it already exists and is not a symlink" >&2
-          continue
-        fi
+          if [[ -e "$target" && ! -L "$target" ]]; then
+            echo "Skipping $target because it already exists and is not a symlink" >&2
+            continue
+          fi
 
-        $DRY_RUN_CMD ${pkgs.coreutils}/bin/ln -sfn "$source_dir" "$target"
-      done < <(${pkgs.findutils}/bin/find "$nwn_data_dir" -mindepth 1 -maxdepth 1 -type d -print0)
+          $DRY_RUN_CMD ${pkgs.coreutils}/bin/ln -sfn "$source_dir" "$target"
+        done < <(${pkgs.findutils}/bin/find "$nwn_data_dir" -mindepth 1 -maxdepth 1 -type d -print0)
 
-      $DRY_RUN_CMD ${pkgs.coreutils}/bin/install -m 0644 ${pkgs.writeText "nwn-data.ini" nwnDataIni} "$nwn_data_dir/nwn.ini"
-      $DRY_RUN_CMD ${pkgs.coreutils}/bin/install -m 0644 ${pkgs.writeText "nwn.ini" nwnIni} "$nwn_documents_dir/nwn.ini"
-    '';
-  };
+        $DRY_RUN_CMD ${pkgs.coreutils}/bin/install -m 0644 ${pkgs.writeText "nwn-data.ini" nwnDataIni} "$nwn_data_dir/nwn.ini"
+        $DRY_RUN_CMD ${pkgs.coreutils}/bin/install -m 0644 ${pkgs.writeText "nwn.ini" nwnIni} "$nwn_documents_dir/nwn.ini"
+      '';
+    })
+    (lib.optionalAttrs hasHomePersistence {
+      home.persistence."/nix/persist" = lib.mkIf (cfg.enable && persistenceEnabled) {
+        directories = [
+          ".local/share/Neverwinter Nights"
+          ".config/blender/${nwnBlenderConfigVersion}"
+        ];
+      };
+    })
+  ];
 }

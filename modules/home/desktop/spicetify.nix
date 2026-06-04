@@ -1,7 +1,7 @@
 {
   config,
-  inputs,
   lib,
+  options,
   ...
 }:
 # Spicetify wires the Spotify customization substrate while leaving extension
@@ -9,6 +9,7 @@
 # making one listener's taste part of the base desktop.
 let
   cfg = config.theorem.home.desktop.spicetify;
+  hasHomePersistence = options.home ? persistence;
 in
 {
   options.theorem.home.desktop.spicetify = {
@@ -31,19 +32,20 @@ in
     };
   };
 
-  imports = [ inputs.spicetify-nix.homeManagerModules.spicetify ];
+  config = lib.mkMerge [
+    (lib.mkIf cfg.enable {
+      programs.spicetify = {
+        enable = true;
 
-  config = lib.mkIf cfg.enable {
-    programs.spicetify = {
-      enable = true;
-
-      enabledExtensions = cfg.enabledExtensions;
-    };
-
-    home.persistence."/nix/persist" = lib.mkIf cfg.persistConfig {
-      directories = [
-        ".config/spotify"
-      ];
-    };
-  };
+        enabledExtensions = cfg.enabledExtensions;
+      };
+    })
+    (lib.optionalAttrs hasHomePersistence {
+      home.persistence."/nix/persist" = lib.mkIf (cfg.enable && cfg.persistConfig) {
+        directories = [
+          ".config/spotify"
+        ];
+      };
+    })
+  ];
 }

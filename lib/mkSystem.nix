@@ -63,7 +63,7 @@ inputs.nixpkgs.lib.nixosSystem {
 
       home-manager.users = lib.mapAttrs (_: user: {
         imports = [
-          (inputs.import-tree ../modules/home)
+          self.homeModules.shared
           user.home.module
         ];
       }) homeUsers;

@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  options,
   osConfig ? null,
   pkgs,
   repository ? {
@@ -15,6 +16,7 @@
 # appear when Home Manager is evaluated with an `osConfig`.
 let
   cfg = config.theorem.home.shell.shell;
+  hasHomePersistence = options.home ? persistence;
   hasOsConfig = osConfig != null;
   nhEnabled = hasOsConfig && (osConfig.programs.nh.enable or false);
   run0Enabled = hasOsConfig && (osConfig.theorem.nixos.security.run0-sudo.enable or false);
@@ -124,230 +126,236 @@ in
     };
   };
 
-  config = lib.mkIf cfg.enable {
-    programs.bash = {
-      enable = true;
-      enableCompletion = true;
+  config = lib.mkMerge [
+    (lib.mkIf cfg.enable {
+      programs.bash = {
+        enable = true;
+        enableCompletion = true;
 
-      historyFile = "$HOME/.bash_history";
-      historySize = 100000;
-      historyFileSize = 100000;
-      historyControl = [
-        "ignoreboth"
-        "erasedups"
-      ];
-      historyIgnore = [
-        "bg"
-        "cd"
-        "exit"
-        "fg"
-        "history"
-        "jobs"
-        "ls"
-        "pwd"
-        "ll"
-      ];
+        historyFile = "$HOME/.bash_history";
+        historySize = 100000;
+        historyFileSize = 100000;
+        historyControl = [
+          "ignoreboth"
+          "erasedups"
+        ];
+        historyIgnore = [
+          "bg"
+          "cd"
+          "exit"
+          "fg"
+          "history"
+          "jobs"
+          "ls"
+          "pwd"
+          "ll"
+        ];
 
-      shellOptions = [
-        "histappend"
-        "cmdhist"
-        "lithist"
-        "checkjobs"
-        "checkwinsize"
-        "autocd"
-        "cdspell"
-        "dirspell"
-        "extglob"
-        "globstar"
-      ];
+        shellOptions = [
+          "histappend"
+          "cmdhist"
+          "lithist"
+          "checkjobs"
+          "checkwinsize"
+          "autocd"
+          "cdspell"
+          "dirspell"
+          "extglob"
+          "globstar"
+        ];
 
-      sessionVariables = {
-        PAGER = "less";
-        LESS = "-FR";
-        LESSHISTFILE = "-";
-      };
+        sessionVariables = {
+          PAGER = "less";
+          LESS = "-FR";
+          LESSHISTFILE = "-";
+        };
 
-      shellAliases =
-        cfg.aliases
-        // lib.optionalAttrs cfg.nixosAliases.enable {
-          ns = "nh os ${defaultNhElevationOption}switch ${defaultNhSpecialisationOption}${cfg.nixosAliases.flake}";
-          nb = "nh os ${defaultNhElevationOption}boot ${defaultNhSpecialisationOption}${cfg.nixosAliases.flake}";
-          nt = "nh os ${defaultNhElevationOption}test ${defaultNhSpecialisationOption}${cfg.nixosAliases.flake}";
-          nd = "nh os ${defaultNhElevationOption}build ${defaultNhSpecialisationOption}${cfg.nixosAliases.flake}";
-          nr = "nh os ${defaultNhElevationOption}build ${defaultNhSpecialisationOption}${cfg.nixosAliases.flake}";
-        }
-        // cfg.extraAliases;
-
-      initExtra = ''
-        ${lib.optionalString cfg.elevationAlias.enable ''
-          please() {
-            local previous_command
-            previous_command="$(fc -ln -1)"
-
-            if [[ -z "$previous_command" ]]; then
-              return 1
-            fi
-
-            ${lib.escapeShellArg cfg.elevationAlias.command} bash -lc "$previous_command"
+        shellAliases =
+          cfg.aliases
+          // lib.optionalAttrs cfg.nixosAliases.enable {
+            ns = "nh os ${defaultNhElevationOption}switch ${defaultNhSpecialisationOption}${cfg.nixosAliases.flake}";
+            nb = "nh os ${defaultNhElevationOption}boot ${defaultNhSpecialisationOption}${cfg.nixosAliases.flake}";
+            nt = "nh os ${defaultNhElevationOption}test ${defaultNhSpecialisationOption}${cfg.nixosAliases.flake}";
+            nd = "nh os ${defaultNhElevationOption}build ${defaultNhSpecialisationOption}${cfg.nixosAliases.flake}";
+            nr = "nh os ${defaultNhElevationOption}build ${defaultNhSpecialisationOption}${cfg.nixosAliases.flake}";
           }
-        ''}
+          // cfg.extraAliases;
 
-        _bash_history_sync() {
-          history -a
-          history -n
-        }
+        initExtra = ''
+          ${lib.optionalString cfg.elevationAlias.enable ''
+            please() {
+              local previous_command
+              previous_command="$(fc -ln -1)"
 
-        case ";$PROMPT_COMMAND;" in
-          *";_bash_history_sync;"*) ;;
-          *) PROMPT_COMMAND="_bash_history_sync''${PROMPT_COMMAND:+;$PROMPT_COMMAND}" ;;
-        esac
+              if [[ -z "$previous_command" ]]; then
+                return 1
+              fi
 
-        bind 'set completion-ignore-case on'
-        bind 'set completion-map-case on'
-        bind 'set mark-symlinked-directories on'
-        bind 'set show-all-if-ambiguous on'
-        bind 'set colored-stats on'
-        bind 'set visible-stats on'
+              ${lib.escapeShellArg cfg.elevationAlias.command} bash -lc "$previous_command"
+            }
+          ''}
 
-        # Prefix-aware history search:
-        # Type "nix", press Up, and Bash searches previous commands starting with "nix".
-        bind '"\e[A": history-search-backward'
-        bind '"\e[B": history-search-forward'
-        bind '"\e[1;5A": history-search-backward'
-        bind '"\e[1;5B": history-search-forward'
-      '';
-    };
+          _bash_history_sync() {
+            history -a
+            history -n
+          }
 
-    programs.jq = {
-      enable = true;
-    };
+          case ";$PROMPT_COMMAND;" in
+            *";_bash_history_sync;"*) ;;
+            *) PROMPT_COMMAND="_bash_history_sync''${PROMPT_COMMAND:+;$PROMPT_COMMAND}" ;;
+          esac
 
-    programs.fastfetch = {
-      enable = true;
-    };
+          bind 'set completion-ignore-case on'
+          bind 'set completion-map-case on'
+          bind 'set mark-symlinked-directories on'
+          bind 'set show-all-if-ambiguous on'
+          bind 'set colored-stats on'
+          bind 'set visible-stats on'
 
-    programs.atuin = {
-      enable = true;
-      enableBashIntegration = true;
-
-      # Keeps normal up-arrow history behavior.
-      flags = [ "--disable-up-arrow" ];
-
-      settings = {
-        auto_sync = false;
-        enter_accept = false;
-        filter_mode_shell_up_key_binding = "session";
-        search_mode = "fuzzy";
-        style = "compact";
-        update_check = false;
+          # Prefix-aware history search:
+          # Type "nix", press Up, and Bash searches previous commands starting with "nix".
+          bind '"\e[A": history-search-backward'
+          bind '"\e[B": history-search-forward'
+          bind '"\e[1;5A": history-search-backward'
+          bind '"\e[1;5B": history-search-forward'
+        '';
       };
-    };
 
-    programs.carapace = {
-      enable = true;
-      enableBashIntegration = true;
-      ignoreCase = true;
-    };
+      programs.jq = {
+        enable = true;
+      };
 
-    programs.direnv = {
-      enable = true;
-      enableBashIntegration = true;
-      nix-direnv.enable = true;
-      silent = true;
-    };
+      programs.fastfetch = {
+        enable = true;
+      };
 
-    programs.eza = {
-      enable = true;
-      enableBashIntegration = true;
-      colors = "auto";
-      extraOptions = [
-        "--group-directories-first"
-        "--header"
-      ];
-      git = true;
-      icons = "auto";
-    };
+      programs.atuin = {
+        enable = true;
+        enableBashIntegration = true;
 
-    programs.fd = {
-      enable = true;
-      hidden = true;
-      ignores = [
-        ".cache/"
-        ".git/"
-        "node_modules/"
-        "result"
-      ];
-    };
+        # Keeps normal up-arrow history behavior.
+        flags = [ "--disable-up-arrow" ];
 
-    programs.fzf = {
-      enable = true;
-      enableBashIntegration = true;
+        settings = {
+          auto_sync = false;
+          enter_accept = false;
+          filter_mode_shell_up_key_binding = "session";
+          search_mode = "fuzzy";
+          style = "compact";
+          update_check = false;
+        };
+      };
 
-      changeDirWidgetCommand = "fd --type d --hidden --follow --exclude .git";
-      changeDirWidgetOptions = [
-        "--preview 'eza --tree --level=2 --color=always --icons=auto {} | head -200'"
-      ];
+      programs.carapace = {
+        enable = true;
+        enableBashIntegration = true;
+        ignoreCase = true;
+      };
 
-      defaultCommand = "fd --type f --hidden --follow --exclude .git";
-      defaultOptions = [
-        "--height=40%"
-        "--layout=reverse"
-        "--border"
-        "--inline-info"
-        "--cycle"
-        "--bind=ctrl-u:preview-page-up,ctrl-d:preview-page-down"
-      ];
+      programs.direnv = {
+        enable = true;
+        enableBashIntegration = true;
+        nix-direnv.enable = true;
+        silent = true;
+      };
 
-      fileWidgetCommand = "fd --type f --hidden --follow --exclude .git";
-      fileWidgetOptions = [
-        "--preview 'bat --style=numbers --color=always --line-range=:200 {}'"
-      ];
+      programs.eza = {
+        enable = true;
+        enableBashIntegration = true;
+        colors = "auto";
+        extraOptions = [
+          "--group-directories-first"
+          "--header"
+        ];
+        git = true;
+        icons = "auto";
+      };
 
-      # Remove this if Atuin owns history:
-      # historyWidgetOptions = [
-      #   "--sort"
-      #   "--exact"
-      # ];
-    };
+      programs.fd = {
+        enable = true;
+        hidden = true;
+        ignores = [
+          ".cache/"
+          ".git/"
+          "node_modules/"
+          "result"
+        ];
+      };
 
-    programs.zoxide = {
-      enable = true;
-      enableBashIntegration = true;
-      options = [ "--cmd cd" ];
-    };
+      programs.fzf = {
+        enable = true;
+        enableBashIntegration = true;
 
-    programs.lazygit = {
-      enable = true;
-      enableBashIntegration = true;
-    };
+        changeDirWidgetCommand = "fd --type d --hidden --follow --exclude .git";
+        changeDirWidgetOptions = [
+          "--preview 'eza --tree --level=2 --color=always --icons=auto {} | head -200'"
+        ];
 
-    # See: https://github.com/NixOS/nixpkgs/blob/master/nixos/modules/programs/nano.nix
-    xdg.configFile."nano/nanorc".text = ''
-      include "${pkgs.nano}/share/nano/*.nanorc"
+        defaultCommand = "fd --type f --hidden --follow --exclude .git";
+        defaultOptions = [
+          "--height=40%"
+          "--layout=reverse"
+          "--border"
+          "--inline-info"
+          "--cycle"
+          "--bind=ctrl-u:preview-page-up,ctrl-d:preview-page-down"
+        ];
 
-      set atblanks
-      set autoindent
-      set constantshow
-      set guidestripe 100
-      set indicator
-      set linenumbers
-      set mouse
-      set smarthome
-      set softwrap
-      set tabsize 4
-      set zap
-    '';
-    home.persistence."/nix/persist" = lib.mkIf config.theorem.home.base.persistence.enable {
-      directories = [
-        ".local/share/atuin"
-        ".local/share/zoxide"
-      ];
+        fileWidgetCommand = "fd --type f --hidden --follow --exclude .git";
+        fileWidgetOptions = [
+          "--preview 'bat --style=numbers --color=always --line-range=:200 {}'"
+        ];
 
-      files = [
-        # Impermanence persists this file path directly; `_bash_history_sync`
-        # flushes interactive commands into it at each prompt.
-        ".bash_history"
-      ];
-    };
-  };
+        # Remove this if Atuin owns history:
+        # historyWidgetOptions = [
+        #   "--sort"
+        #   "--exact"
+        # ];
+      };
+
+      programs.zoxide = {
+        enable = true;
+        enableBashIntegration = true;
+        options = [ "--cmd cd" ];
+      };
+
+      programs.lazygit = {
+        enable = true;
+        enableBashIntegration = true;
+      };
+
+      # See: https://github.com/NixOS/nixpkgs/blob/master/nixos/modules/programs/nano.nix
+      xdg.configFile."nano/nanorc".text = ''
+        include "${pkgs.nano}/share/nano/*.nanorc"
+
+        set atblanks
+        set autoindent
+        set constantshow
+        set guidestripe 100
+        set indicator
+        set linenumbers
+        set mouse
+        set smarthome
+        set softwrap
+        set tabsize 4
+        set zap
+      '';
+    })
+    (lib.optionalAttrs hasHomePersistence {
+      home.persistence."/nix/persist" =
+        lib.mkIf (cfg.enable && config.theorem.home.base.persistence.enable)
+          {
+            directories = [
+              ".local/share/atuin"
+              ".local/share/zoxide"
+            ];
+
+            files = [
+              # Impermanence persists this file path directly; `_bash_history_sync`
+              # flushes interactive commands into it at each prompt.
+              ".bash_history"
+            ];
+          };
+    })
+  ];
 }

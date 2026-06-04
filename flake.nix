@@ -136,17 +136,36 @@
 
       packages.${system} = import ./pkgs/packages.nix { inherit pkgs; };
 
-      checks.${system}.home-shared-boundary = import ./checks/home-shared-boundary.nix {
-        inherit
-          inputs
-          pkgs
-          stable
-          userRegistry
-          ;
-        repository = {
-          path = "/nix/nixos";
-          group = "nixcfg";
+      homeModules =
+        let
+          shared = {
+            _module.args = {
+              inherit
+                inputs
+                stable
+                userRegistry
+                ;
+              selectedUsers = { };
+              repository = {
+                path = "$NIXOS_CONFIG_FLAKE";
+                group = "nixcfg";
+              };
+            };
+
+            imports = [
+              inputs.nix-index-database.homeModules.nix-index
+              inputs.spicetify-nix.homeManagerModules.spicetify
+              (inputs.import-tree ./modules/home)
+            ];
+          };
+        in
+        {
+          default = shared;
+          shared = shared;
         };
+
+      checks.${system}.home-shared-boundary = import ./checks/home-shared-boundary.nix {
+        inherit inputs pkgs;
       };
 
       devShells.${system} =

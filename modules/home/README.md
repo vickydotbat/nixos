@@ -6,6 +6,24 @@ Apply [`docs/philosophy.md`](../../docs/philosophy.md) here as Home doctrine:
 shared Home modules should provide reusable mechanisms, not one operator's
 private working surface by accident.
 
+## External Home Flakes
+
+User-owned Home flakes may import this repository's shared Home baseline through
+`inputs.<this-flake>.homeModules.shared`. That export injects the ordinary
+module arguments expected by this tree and imports the reusable Home modules
+without selecting any host, login account, SOPS identity, or Vicky profile.
+
+The export is a mechanism library, not a trust gate into the system theorem. A
+personal Home flake that consumes it still owns its applications, themes, shell
+habits, editor posture, and activation command from the user's directory. If a
+host later imports user-owned Home code during `nixos-rebuild`, that is a
+separate root-affecting decision and must be declared by a repository steward.
+
+`checks/home-shared-boundary.nix` is the standing proof for this boundary. It
+builds a synthetic Home profile from `homeModules.shared` with no NixOS
+`osConfig`, no Impermanence Home option provider, no Plasma Manager provider,
+and no `users/vicky` imports. Keep it passing when adding shared modules.
+
 Home modules should provide shared working-surface mechanisms and conservative
 defaults, not personal doctrine disguised as reusable code. Put broadly useful
 shell integration, editor substrate, browser policy, persistence hooks, and

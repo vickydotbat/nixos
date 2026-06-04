@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  options,
   osConfig ? null,
   pkgs,
   ...
@@ -11,6 +12,7 @@
 # selects it directly.
 let
   cfg = config.theorem.home.base.fonts;
+  hasHomePersistence = options.home ? persistence;
   graphicsEnabled =
     if osConfig == null then false else osConfig.theorem.nixos.desktop.graphics.enable or false;
 in
@@ -39,42 +41,47 @@ in
     };
   };
 
-  config = lib.mkIf cfg.enable {
-    home.packages = with pkgs; [
-      # Broad Unicode coverage
-      noto-fonts
-      noto-fonts-cjk-sans
-      noto-fonts-cjk-serif
-      noto-fonts-color-emoji
+  config = lib.mkMerge [
+    (lib.mkIf cfg.enable {
+      home.packages = with pkgs; [
+        # Broad Unicode coverage
+        noto-fonts
+        noto-fonts-cjk-sans
+        noto-fonts-cjk-serif
+        noto-fonts-color-emoji
 
-      # Good defaults / document compatibility
-      liberation_ttf
-      dejavu_fonts
+        # Good defaults / document compatibility
+        liberation_ttf
+        dejavu_fonts
 
-      # Coding fonts
-      fira-code
-      fira-code-symbols
-      jetbrains-mono
+        # Coding fonts
+        fira-code
+        fira-code-symbols
+        jetbrains-mono
 
-      # Terminal / icon glyphs
-      nerd-fonts.symbols-only
-      # Or use a patched font instead:
-      # nerd-fonts.fira-code
-      # nerd-fonts.jetbrains-mono
+        # Terminal / icon glyphs
+        nerd-fonts.symbols-only
+        # Or use a patched font instead:
+        # nerd-fonts.fira-code
+        # nerd-fonts.jetbrains-mono
 
-      # Optional: Microsoft-ish compatibility
-      corefonts
-      vista-fonts
-    ];
-
-    fonts.fontconfig = lib.mkIf cfg.fontconfig.enable {
-      enable = true;
-    };
-
-    home.persistence."/nix/persist" = lib.mkIf (cfg.fontconfig.enable && config.theorem.home.base.persistence.enable) {
-      directories = [
-        ".cache/fontconfig"
+        # Optional: Microsoft-ish compatibility
+        corefonts
+        vista-fonts
       ];
-    };
-  };
+
+      fonts.fontconfig = lib.mkIf cfg.fontconfig.enable {
+        enable = true;
+      };
+    })
+    (lib.optionalAttrs hasHomePersistence {
+      home.persistence."/nix/persist" =
+        lib.mkIf (cfg.enable && cfg.fontconfig.enable && config.theorem.home.base.persistence.enable)
+          {
+            directories = [
+              ".cache/fontconfig"
+            ];
+          };
+    })
+  ];
 }

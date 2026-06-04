@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  options,
   pkgs,
   ...
 }:
@@ -9,6 +10,7 @@
 # telemetry defaults; personal workflows belong in user profiles.
 let
   cfg = config.theorem.home.editor.vscode;
+  hasHomePersistence = options.home ? persistence;
 in
 {
   options.theorem.home.editor.vscode = {
@@ -99,25 +101,28 @@ in
     };
   };
 
-  config = lib.mkIf cfg.enable {
-    programs.vscode = {
-      enable = true;
+  config = lib.mkMerge [
+    (lib.mkIf cfg.enable {
+      programs.vscode = {
+        enable = true;
 
-      profiles.default = {
-        enableExtensionUpdateCheck = false;
-        enableUpdateCheck = false;
-        extensions = cfg.extensions;
-        userSettings = cfg.userSettings;
+        profiles.default = {
+          enableExtensionUpdateCheck = false;
+          enableUpdateCheck = false;
+          extensions = cfg.extensions;
+          userSettings = cfg.userSettings;
+        };
       };
-    };
 
-    home.packages = cfg.extraPackages;
-
-    home.persistence."/nix/persist" = lib.mkIf cfg.persistState {
-      directories = [
-        ".config/Code/User/globalStorage"
-        ".config/Code/User/workspaceStorage"
-      ];
-    };
-  };
+      home.packages = cfg.extraPackages;
+    })
+    (lib.optionalAttrs hasHomePersistence {
+      home.persistence."/nix/persist" = lib.mkIf (cfg.enable && cfg.persistState) {
+        directories = [
+          ".config/Code/User/globalStorage"
+          ".config/Code/User/workspaceStorage"
+        ];
+      };
+    })
+  ];
 }

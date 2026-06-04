@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  options,
   pkgs,
   ...
 }:
@@ -9,6 +10,7 @@
 # Blender expects; custom builds and plugin sets stay in user profiles.
 let
   cfg = config.theorem.home.desktop.blender;
+  hasHomePersistence = options.home ? persistence;
 in
 {
   options.theorem.home.desktop.blender = {
@@ -37,16 +39,21 @@ in
     };
   };
 
-  config = lib.mkIf cfg.enable {
-    home.packages = [
-      cfg.package
-    ];
-
-    home.persistence."/nix/persist" = lib.mkIf config.theorem.home.base.persistence.enable {
-      directories = [
-        "Blender"
-      ]
-      ++ map (version: ".config/blender/${version}") cfg.persistedConfigVersions;
-    };
-  };
+  config = lib.mkMerge [
+    (lib.mkIf cfg.enable {
+      home.packages = [
+        cfg.package
+      ];
+    })
+    (lib.optionalAttrs hasHomePersistence {
+      home.persistence."/nix/persist" =
+        lib.mkIf (cfg.enable && config.theorem.home.base.persistence.enable)
+          {
+            directories = [
+              "Blender"
+            ]
+            ++ map (version: ".config/blender/${version}") cfg.persistedConfigVersions;
+          };
+    })
+  ];
 }

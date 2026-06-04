@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  options,
   osConfig ? null,
   pkgs,
   ...
@@ -11,6 +12,7 @@
 # downloads boot-scoped while preserving the declared working directories.
 let
   cfg = config.theorem.home.base.persistence;
+  hasHomePersistence = options.home ? persistence;
 
   systemPersistenceEnabled =
     if osConfig == null then false else osConfig.theorem.nixos.base.persistence.enable or false;
@@ -49,74 +51,90 @@ in
     };
   };
 
-  config = lib.mkIf cfg.enable {
-    home.persistence."/nix/persist" = {
-      directories = [
-        ".local/share/systemd/timers"
-        # User-scoped Nix state for profile and registry metadata when the home
-        # directory is rebuilt from an ephemeral root.
-        ".local/share/nix"
-        ".cache/nix" # Nix cache -- must keep when using tmpfs
-
-        # XDG Directories
-        "Documents"
-        "Pictures"
-        "Videos"
-        "Projects"
-        "Music"
-        "Templates"
-        "Public"
-        "Desktop"
-
-        # My custom directories
-        "Repositories"
-        "Backups"
-        "Games"
-        "Applications"
-
-      ]
-      ++ lib.optionals (!cfg.volatileDownloads.enable) [
-        "Downloads"
+  config = lib.mkMerge [
+    {
+      assertions = [
+        {
+          assertion = !cfg.enable || hasHomePersistence;
+          message = ''
+            theorem.home.base.persistence.enable requires the Home persistence
+            option provider. Import the Impermanence Home Manager module through
+            the NixOS persistence substrate before enabling this theorem.
+          '';
+        }
       ];
+    }
+    (lib.optionalAttrs hasHomePersistence {
+      home.persistence."/nix/persist" = lib.mkIf cfg.enable {
+        directories = [
+          ".local/share/systemd/timers"
+          # User-scoped Nix state for profile and registry metadata when the home
+          # directory is rebuilt from an ephemeral root.
+          ".local/share/nix"
+          ".cache/nix" # Nix cache -- must keep when using tmpfs
 
-      files = [ ];
-    };
+          # XDG Directories
+          "Documents"
+          "Pictures"
+          "Videos"
+          "Projects"
+          "Music"
+          "Templates"
+          "Public"
+          "Desktop"
 
-    systemd.user.services.volatile-downloads = lib.mkIf cfg.volatileDownloads.enable {
-      Unit = {
-        Description = "Prepare boot-scoped Downloads directory";
+          # My custom directories
+          "Repositories"
+          "Backups"
+          "Games"
+          "Applications"
+
+        ]
+        ++ lib.optionals (!cfg.volatileDownloads.enable) [
+          "Downloads"
+        ];
+
+        files = [ ];
       };
 
-      Service = {
-        Type = "oneshot";
+    })
+    (lib.mkIf cfg.enable {
+      systemd.user.services.volatile-downloads = lib.mkIf cfg.volatileDownloads.enable {
+        Unit = {
+          Description = "Prepare boot-scoped Downloads directory";
+        };
 
-        ExecStart = pkgs.writeShellScript "volatile-downloads" ''
-          set -eu
+        Service = {
+          Type = "oneshot";
 
-          parent="${downloadsParent}"
-          backing="${backingDownloads}"
+          ExecStart = pkgs.writeShellScript "volatile-downloads" ''
+            set -eu
 
-          # /tmp is disk-backed by system persistence and cleaned on boot.
-          mkdir -p /tmp/home
-          chmod 1777 /tmp/home
+            parent="${downloadsParent}"
+            backing="${backingDownloads}"
 
-          mkdir -p "$parent"
-          chmod 0755 "$parent"
-          mkdir -p "$backing"
-          chmod 0755 "$backing"
+            # /tmp is disk-backed by system persistence and cleaned on boot.
+            mkdir -p /tmp/home
+            chmod 1777 /tmp/home
 
-          # Set Btrfs NoCoW. This only affects new files created afterward.
-          ${pkgs.e2fsprogs}/bin/chattr +C "$backing" || true
+            mkdir -p "$parent"
+            chmod 0755 "$parent"
+            mkdir -p "$backing"
+            chmod 0755 "$backing"
 
-          # Ensure ~/Downloads points at the disk-backed volatile directory.
-          # A real directory in the way should fail loudly rather than lose data.
-          ln -sfnT "$backing" "${home}/Downloads"
-        '';
+            # Set Btrfs NoCoW. This only affects new files created afterward.
+            ${pkgs.e2fsprogs}/bin/chattr +C "$backing" || true
+
+            # Ensure ~/Downloads points at the disk-backed volatile directory.
+            # A real directory in the way should fail loudly rather than lose data.
+            ln -sfnT "$backing" "${home}/Downloads"
+          '';
+        };
+
+        Install = {
+          WantedBy = [ "default.target" ];
+        };
       };
-
-      Install = {
-        WantedBy = [ "default.target" ];
-      };
-    };
-  };
+    })
+  ];
 }

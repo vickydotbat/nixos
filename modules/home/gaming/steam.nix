@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  options,
   osConfig ? null,
   ...
 }:
@@ -13,10 +14,11 @@ let
     if osConfig == null then false else osConfig.theorem.nixos.gaming.steam.enable or false;
 
   persistenceEnabled = (config.theorem.home.base.persistence.enable or false);
+  hasHomePersistence = options.home ? persistence;
 in
 {
-  config = lib.mkIf steamEnabled {
-    home.persistence."/nix/persist" = lib.mkIf persistenceEnabled {
+  config = lib.optionalAttrs hasHomePersistence {
+    home.persistence."/nix/persist" = lib.mkIf (steamEnabled && persistenceEnabled) {
       directories = [
         ".local/share/Steam"
       ];

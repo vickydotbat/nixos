@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  options,
   pkgs,
   ...
 }:
@@ -9,6 +10,7 @@
 # shell theorem that will actually consume them.
 let
   cfg = config.theorem.home.shell.bat;
+  hasHomePersistence = options.home ? persistence;
 in
 {
   options.theorem.home.shell.bat = {
@@ -22,40 +24,45 @@ in
     };
   };
 
-  config = lib.mkIf cfg.enable {
-    programs.bat = {
-      enable = true;
-      config = {
-        italic-text = "always";
-        pager = "less -FR";
-        style = "numbers,changes,header";
-        theme = "TwoDark";
-      };
-      extraPackages = with pkgs.bat-extras; [
-        batdiff
-        batgrep
-        batman
-        batwatch
-      ];
-    };
-
-    home.persistence."/nix/persist" = lib.mkIf config.theorem.home.base.persistence.enable {
-      directories = [
-        ".cache/bat"
-      ];
-    };
-
-    programs.bash = lib.mkIf cfg.bashIntegration.enable {
-
-      sessionVariables = {
-        BAT_PAGER = "less -FR";
-        MANPAGER = "sh -c 'col -bx | bat -l man -p'";
+  config = lib.mkMerge [
+    (lib.mkIf cfg.enable {
+      programs.bat = {
+        enable = true;
+        config = {
+          italic-text = "always";
+          pager = "less -FR";
+          style = "numbers,changes,header";
+          theme = "TwoDark";
+        };
+        extraPackages = with pkgs.bat-extras; [
+          batdiff
+          batgrep
+          batman
+          batwatch
+        ];
       };
 
-      shellAliases = {
-        cat = "bat --paging=never --style=plain";
-        bat = "bat --paging=never";
+      programs.bash = lib.mkIf cfg.bashIntegration.enable {
+
+        sessionVariables = {
+          BAT_PAGER = "less -FR";
+          MANPAGER = "sh -c 'col -bx | bat -l man -p'";
+        };
+
+        shellAliases = {
+          cat = "bat --paging=never --style=plain";
+          bat = "bat --paging=never";
+        };
       };
-    };
-  };
+    })
+    (lib.optionalAttrs hasHomePersistence {
+      home.persistence."/nix/persist" =
+        lib.mkIf (cfg.enable && config.theorem.home.base.persistence.enable)
+          {
+            directories = [
+              ".cache/bat"
+            ];
+          };
+    })
+  ];
 }

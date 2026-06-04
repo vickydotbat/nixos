@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  options,
   pkgs,
   ...
 }:
@@ -9,6 +10,7 @@
 # desktop layer does not inherit one operator's studio.
 let
   cfg = config.theorem.home.desktop.gimp;
+  hasHomePersistence = options.home ? persistence;
 in
 {
   options.theorem.home.desktop.gimp = {
@@ -32,15 +34,18 @@ in
     };
   };
 
-  config = lib.mkIf cfg.enable {
-    home.packages = [
-      cfg.package
-    ];
-
-    home.persistence."/nix/persist" = lib.mkIf cfg.persistConfig {
-      directories = [
-        ".config/GIMP"
+  config = lib.mkMerge [
+    (lib.mkIf cfg.enable {
+      home.packages = [
+        cfg.package
       ];
-    };
-  };
+    })
+    (lib.optionalAttrs hasHomePersistence {
+      home.persistence."/nix/persist" = lib.mkIf (cfg.enable && cfg.persistConfig) {
+        directories = [
+          ".config/GIMP"
+        ];
+      };
+    })
+  ];
 }

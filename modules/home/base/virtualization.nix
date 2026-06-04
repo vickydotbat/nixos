@@ -2,6 +2,7 @@
   config,
   osConfig ? null,
   lib,
+  options,
   ...
 }:
 # Home-side Distrobox integration. It activates only when the surrounding NixOS
@@ -16,6 +17,7 @@ let
     && (osConfig.virtualisation.podman.enable or false);
 
   persistenceEnabled = (config.theorem.home.base.persistence.enable or false);
+  hasHomePersistence = options.home ? persistence;
 in
 {
   options.theorem.home.base.distrobox = {
@@ -32,17 +34,20 @@ in
     };
   };
 
-  config = lib.mkIf (cfg.enable && podmanEnabled) {
-    services.podman.enable = true;
+  config = lib.mkMerge [
+    (lib.mkIf (cfg.enable && podmanEnabled) {
+      services.podman.enable = true;
 
-    home.persistence."/nix/persist" = lib.mkIf cfg.persistContainers {
-      directories = [
-        ".local/share/containers"
-      ];
-    };
-
-    programs.distrobox = {
-      enable = true;
-    };
-  };
+      programs.distrobox = {
+        enable = true;
+      };
+    })
+    (lib.optionalAttrs hasHomePersistence {
+      home.persistence."/nix/persist" = lib.mkIf (cfg.enable && podmanEnabled && cfg.persistContainers) {
+        directories = [
+          ".local/share/containers"
+        ];
+      };
+    })
+  ];
 }

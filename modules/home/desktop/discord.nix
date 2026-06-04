@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  options,
   pkgs,
   ...
 }:
@@ -9,6 +10,7 @@
 # decision to start it automatically explicit.
 let
   cfg = config.theorem.home.desktop.discord;
+  hasHomePersistence = options.home ? persistence;
 in
 {
   options.theorem.home.desktop.discord = {
@@ -25,25 +27,31 @@ in
     };
   };
 
-  config = lib.mkIf cfg.enable {
-    programs.discord.enable = true;
-    services.arrpc.enable = true;
+  config = lib.mkMerge [
+    (lib.mkIf cfg.enable {
+      programs.discord.enable = true;
+      services.arrpc.enable = true;
 
-    home.persistence."/nix/persist" = lib.mkIf config.theorem.home.base.persistence.enable {
-      directories = [
-        ".config/discord"
-      ];
-    };
-    xdg.configFile."autostart/discord.desktop".text = lib.mkIf cfg.autostart.enable ''
-      [Desktop Entry]
-      Type=Application
-      Name=Discord
-      Comment=Start Discord
-      Exec=${pkgs.discord}/bin/discord --start-minimized
-      Icon=discord
-      Terminal=false
-      X-GNOME-Autostart-enabled=true
-      X-KDE-autostart-after=panel
-    '';
-  };
+      xdg.configFile."autostart/discord.desktop".text = lib.mkIf cfg.autostart.enable ''
+        [Desktop Entry]
+        Type=Application
+        Name=Discord
+        Comment=Start Discord
+        Exec=${pkgs.discord}/bin/discord --start-minimized
+        Icon=discord
+        Terminal=false
+        X-GNOME-Autostart-enabled=true
+        X-KDE-autostart-after=panel
+      '';
+    })
+    (lib.optionalAttrs hasHomePersistence {
+      home.persistence."/nix/persist" =
+        lib.mkIf (cfg.enable && config.theorem.home.base.persistence.enable)
+          {
+            directories = [
+              ".config/discord"
+            ];
+          };
+    })
+  ];
 }
