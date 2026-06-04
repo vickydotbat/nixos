@@ -29,6 +29,4 @@
       size = 16 * 1024;
     }
   ];
-
-  services.fstrim.enable = true;
 }

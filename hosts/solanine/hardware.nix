@@ -1,7 +1,7 @@
 # Generated baseline. host-specific hardware posture may be lifted into focused
 # modules when the mechanism becomes reusable.
 {
-  config,
+  inputs,
   lib,
   modulesPath,
   ...
@@ -10,6 +10,9 @@
 {
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
+    inputs.nixos-hardware.nixosModules.common-cpu-amd-pstate
+    inputs.nixos-hardware.nixosModules.common-gpu-amd
+    inputs.nixos-hardware.nixosModules.common-pc-ssd
   ];
 
   # Solanine hardware discovery. Disk and persistence policy lives in
@@ -42,7 +45,8 @@
     "amdgpu.runpm=0"
   ];
 
-  # Host platform and CPU firmware posture for this machine.
+  # Host platform for this machine. AMD CPU firmware, pstate, GPU, and SSD
+  # defaults are imported from nixos-hardware above; Solanine keeps only the
+  # local facts and active display-crash mitigations here.
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
-  hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
 }
