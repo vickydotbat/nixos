@@ -30,8 +30,15 @@
     # Forces the driver to ignore the integrated display block entirely
     "amdgpu.sg_display=0"
 
-    # Disables Panel Self Refresh (PSR) which causes sudden frame-drop freezes on Wayland
-    "amdgpu.dcdebugmask=0x10"
+    # Solanine still sees Plasma/Wayland `flip_done timed out` freezes with
+    # `0x10`. `0x12` is the next documented AMDGPU display workaround to test.
+    # Keep this host-scoped until real uptime proves the rite.
+    "amdgpu.dcdebugmask=0x12"
+
+    # This desktop is not battery-bound. Keep the discrete GPU out of runtime
+    # power-down while diagnosing "no outputs" freezes; remove if idle power or
+    # thermals become the sharper failure mode.
+    "amdgpu.runpm=0"
   ];
 
   # Host platform and CPU firmware posture for this machine.
