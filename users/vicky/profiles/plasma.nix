@@ -1,6 +1,8 @@
 {
   config,
   lib,
+  osConfig ? null,
+  pkgs,
   ...
 }:
 
@@ -9,6 +11,81 @@
 # persistence live here because they are operator posture, not shared substrate.
 let
   trashPath = "${config.home.homeDirectory}/.local/share/Trash";
+
+  # Plasma 6 stores accepted output state here. This captures Solanine's
+  # manually confirmed DisplayPort mode so the next activation does not drift
+  # back to the monitor's 144 Hz preferred timing.
+  solanineKwinOutputConfig = pkgs.writeText "solanine-kwinoutputconfig.json" (
+    builtins.toJSON [
+      {
+        name = "outputs";
+        data = [
+          {
+            allowDdcCi = true;
+            allowSdrSoftwareBrightness = true;
+            autoBrightnessCurve = [
+              0
+              0
+              0
+              0
+              0
+              0
+            ];
+            autoRotation = "InTabletMode";
+            automaticBrightness = false;
+            brightness = 1;
+            colorPowerTradeoff = "PreferEfficiency";
+            colorProfileSource = "sRGB";
+            connectorName = "DP-2";
+            customModes = [ ];
+            detectedDdcCi = false;
+            edidHash = "8d353588464c024908579c11d7992ad2";
+            edidIdentifier = "ACR 1425 2449505196 20 2019 0";
+            edrPolicy = "always";
+            highDynamicRange = false;
+            iccProfilePath = "";
+            maxBitsPerColor = 0;
+            mode = {
+              flags = 0;
+              height = 1080;
+              refreshRate = 119982;
+              width = 1920;
+            };
+            overscan = 0;
+            rgbRange = "Automatic";
+            scale = 1;
+            sdrBrightness = 200;
+            sdrGamutWideness = 0;
+            sharpness = 0;
+            transform = "Normal";
+            uuid = "e786cb11-200e-4d4e-bac7-17673b9568a7";
+            vrrPolicy = "Never";
+            wideColorGamut = false;
+          }
+        ];
+      }
+      {
+        name = "setups";
+        data = [
+          {
+            lidClosed = false;
+            outputs = [
+              {
+                enabled = true;
+                outputIndex = 0;
+                position = {
+                  x = 0;
+                  y = 0;
+                };
+                priority = 1;
+                replicationSource = "";
+              }
+            ];
+          }
+        ];
+      }
+    ]
+  );
 in
 {
   programs.plasma = {
@@ -354,6 +431,15 @@ in
   };
 
   services.kdeconnect.enable = true;
+
+  home.activation.solanineKwinOutputConfig =
+    lib.mkIf (osConfig != null && osConfig.networking.hostName == "solanine")
+      (
+        lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+          $DRY_RUN_CMD ${pkgs.coreutils}/bin/install -D -m 0644 ${solanineKwinOutputConfig} \
+            ${config.xdg.configHome}/kwinoutputconfig.json
+        ''
+      );
 
   # Keep Plasma wallet, Baloo index, and KDE Connect pairing state across
   # impermanent boots when Vicky's Home persistence is enabled.

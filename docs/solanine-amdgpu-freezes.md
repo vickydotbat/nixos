@@ -13,7 +13,7 @@ AMDGPU Display Core problem until new evidence says otherwise.
 - Board: ASUS PRIME B650M-A WIFI II
 - Discrete GPU in the failing trace: `0000:03:00.0`
 - Integrated GPU also present: `0000:0e:00.0`
-- Current kernel observed during the June 4 traces: `7.0.10`
+- Current kernel observed during the June 4-5 traces: `7.0.10`
 - Current host-scoped boot parameters:
   - `amdgpu.sg_display=0`
   - `amdgpu.dcdebugmask=0x52`
@@ -21,8 +21,9 @@ AMDGPU Display Core problem until new evidence says otherwise.
 
 `amdgpu.sg_display=0` keeps the integrated display block out of the display
 theorem. `amdgpu.runpm=0` keeps the discrete GPU out of runtime power-down
-while this is being diagnosed. `amdgpu.dcdebugmask=0x52` is the current trial:
-it disables stutter (`0x2`), PSR (`0x10`), and multi-plane offloading (`0x40`).
+while this is being diagnosed. `amdgpu.dcdebugmask=0x52` is the current
+configured mask: it disables stutter (`0x2`), PSR (`0x10`), and multi-plane
+offloading (`0x40`).
 
 ## Symptoms
 
@@ -59,23 +60,58 @@ On June 4, 2026 around `10:44`, after rebooting with
 - Plasma services again reported no outputs
 
 The `10:44` trace matters because it includes a plane commit timeout. That is
-why the current trial adds AMD Display Core multi-plane offload disablement.
+why the next trial added AMD Display Core multi-plane offload disablement.
+
+On June 5, 2026, the machine booted at `08:00:17 CEST`, and Vicky's Plasma
+Wayland session opened at `08:00:37 CEST`. The display froze around `09:10`,
+with the first journal evidence at `09:09:14`: about `1:08:57` after boot and
+`1:08:37` after session start.
+
+The boot was running the current parameter set:
+
+- `amdgpu.sg_display=0`
+- `amdgpu.dcdebugmask=0x52`
+- `amdgpu.runpm=0`
+
+The failure still repeated:
+
+- `kwin_wayland`: `Pageflip timed out! This is a bug in the amdgpu kernel
+  driver`
+- kernel: `amdgpu 0000:03:00.0: [drm] *ERROR* [CRTC:257:crtc-0] flip_done
+  timed out`
+- kernel: `amdgpu 0000:03:00.0: [drm] *ERROR* [CRTC:257:crtc-0] commit wait
+  timed out`
+- kernel: `amdgpu 0000:03:00.0: [drm] *ERROR* [PLANE:254:plane-4] commit wait
+  timed out`
+- kernel warning in `amdgpu_dm_atomic_commit_tail`
+- Powerdevil saw DRM hotplug events for connector `287`, again reported as
+  `card0-DP-5`
+- Plasma services again reported `There are no outputs - creating placeholder
+  screen`
+
+Recovery matched the standing monitor-link pattern: turning the monitor off
+played KDE's disconnect tone, and turning it back on caused a delayed reconnect
+tone and restored the display. No second pageflip or AMDGPU timeout trace was
+present after `09:12:30` as of the `09:15` check, but the day is still young;
+do not let one quiet interval become doctrine.
 
 ## Tried So Far
 
 - Kernel 6.12.
 - NixOS LTS/default kernel trial recorded in the old ledger.
-- Latest unstable kernel, observed as `7.0.10` during the June 4 traces.
+- Latest unstable kernel, observed as `7.0.10` during the June 4-5 traces.
 - `amdgpu.dcdebugmask=0x10`, disabling PSR.
 - `amdgpu.dcdebugmask=0x12`, disabling PSR and stutter.
+- `amdgpu.dcdebugmask=0x52`, disabling PSR, stutter, and multi-plane
+  offloading. This did not prevent the June 5 freeze.
 - `amdgpu.runpm=0`, disabling runtime power management for the GPU while this
   fault is being diagnosed.
 - `amdgpu.sg_display=0`, avoiding the integrated display block.
 
-The `0x10` and `0x12` trials did not hold. Do not repeat them as if they were
-untried.
+The `0x10`, `0x12`, and `0x52` trials did not hold. Do not repeat them as if
+they were untried.
 
-## Current Trial
+## Current State
 
 `hosts/solanine/hardware.nix` now sets:
 
@@ -89,10 +125,10 @@ The mask is:
 - `0x10`: disable Panel Self Refresh
 - `0x40`: disable multi-plane offloading
 
-This is deliberately host-scoped. If the next boot survives normal Plasma
-uptime, leave the parameter in place long enough to gain confidence. If idle
-power, thermals, performance, or display correctness become worse, roll back
-only the newest change first: return `0x52` to `0x12`.
+This is deliberately host-scoped, but it is no longer a successful trial. The
+June 5 trace proves that disabling multi-plane offloading with `0x40` did not
+remove the fault class. Keep the setting stable until the next deliberate test
+unless power, thermals, performance, or display correctness become worse.
 
 ## References
 
@@ -137,8 +173,9 @@ forging another parameter.
   settings.
 - Does disabling VRR/adaptive sync reduce the fault? This is a strong candidate
   because the symptom is a pageflip/commit wait failure in the display path.
-- Does the freeze correlate with KWin planes or direct scanout? If `0x52`
-  changes behavior, keep that result tied to the `0x40` multi-plane offload bit.
+- Does the freeze correlate with KWin planes or direct scanout? The June 5
+  failure still had a plane commit timeout under `0x52`, so the `0x40`
+  multi-plane offload bit was not enough by itself.
 - Does the failure only appear with the current DisplayPort path? Record the
   connector reported by logs, the physical GPU port, cable, adapter, and monitor
   input used for each trial.
@@ -199,14 +236,20 @@ training, KWin planes, runtime power, VRR, Mesa, firmware, or kernel version.
 Do these one at a time. The forge cannot tell which charm held if three are
 changed in one boot.
 
-1. If `0x52` fails, capture logs and consider a display path trial: different
-   GPU port, different DisplayPort cable, or HDMI if available.
-2. If the same plane timeout repeats, test disabling VRR/adaptive sync in Plasma
+1. Consider a display path trial: different GPU port, different DisplayPort
+   cable, or HDMI if available.
+2. KScreen mode `3:1920x1080@119.98` is now the current lower-refresh trial.
+   A direct `kscreen-doctor output.DP-2.mode.3` switch briefly produced a black
+   screen and monitor-side `Input not supported` flashing on June 5, 2026, but
+   selecting the same mode through Plasma's Display Configuration was accepted.
+   The declarative state should therefore mirror Plasma's accepted
+   `kwinoutputconfig.json`, not a hand-built timing guess.
+3. Test disabling VRR/adaptive sync in Plasma
    for this monitor before adding more kernel parameters.
-3. If runtime power or thermal cost becomes too high while freezes continue,
+4. If runtime power or thermal cost becomes too high while freezes continue,
    remove `amdgpu.runpm=0` first.
-4. If a newer kernel or firmware update claims AMD Display Core fixes, test that
+5. If a newer kernel or firmware update claims AMD Display Core fixes, test that
    in a separate generation and keep the boot parameter change otherwise stable.
-5. If upstream reporting becomes useful, attach `sudo dmesg` or `journalctl -b
+6. If upstream reporting becomes useful, attach `sudo dmesg` or `journalctl -b
    -k`, plus `journalctl --user-unit plasma-kwin_wayland --boot 0`, matching the
    KWin request printed in the logs.

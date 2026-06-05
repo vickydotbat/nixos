@@ -517,3 +517,53 @@ The detailed repair ledger now lives in
 [`docs/solanine-amdgpu-freezes.md`](./solanine-amdgpu-freezes.md). Keep future
 evidence, tried parameters, rollback notes, and capture commands there so the
 mechanism has one memory.
+
+## Saturnine Laptop Commissioning
+
+Saturnine is now declared as a buildable host with an Intel CPU, Intel desktop
+graphics, NVIDIA PRIME offload, redistributable firmware, and the same encrypted
+Btrfs persistence shape used by Firelink. The old laptop notes from
+<https://github.com/vickydotbat/.dotfiles/> have been triaged: firmware support
+graduated into `hosts/saturnine/hardware.nix`, while low-latency audio, broad
+networking changes, Bluetooth codec tweaks, PAM audio limits, and copied sysctl
+tuning remain research until a local failure demands them.
+
+- Replace `CHANGE-ME-saturnine-system-disk` with the real stable
+  `/dev/disk/by-id/` path before running `disko`. Validation:
+  `ls -l /dev/disk/by-id/`, then
+  `nix eval .#nixosConfigurations.saturnine.config.disko.devices.disk.main.device`.
+- Re-check the PRIME bus IDs with `lspci` during installation. The active
+  expectation is Intel at `PCI:0:2:0` and NVIDIA at `PCI:1:0:0`; wrong IDs can
+  leave the display stack without the GPU it thinks it owns. Validation:
+  `nix eval --json .#nixosConfigurations.saturnine.config.hardware.nvidia.prime`.
+- Revisit `hardware.nvidia.open` after the exact GPU generation is known. The
+  current host default is `false` because it is compatible with older NVIDIA
+  hardware; Turing-or-newer GPUs may move to open kernel modules after a boot
+  test and rollback path are prepared.
+- Decide the second-disk persistence rite only after both internal drives have
+  stable by-id names. The current storage module intentionally leaves the
+  secondary disk untouched so a guessed `nvme0` or `nvme1` name cannot wipe the
+  wrong device.
+- Test the EFI-variable workaround before changing it. Saturnine currently
+  keeps `boot.loader.efi.canTouchEfiVariables = false` because the previous
+  installation reported fragile firmware writes. Validation: inspect
+  `bootctl status`, run a dry build, and only then test NVRAM writes on hardware
+  with recovery media nearby.
+- Treat latency, Bluetooth, DNS, and sysctl tuning as separate mechanisms. Each
+  needs a named symptom, an option verification pass, and a rollback path before
+  it belongs in active host configuration.
+
+## Host Account And Secret Repetition
+
+The repeated `secrets.nix` and `profiles.nix` account material in Solanine,
+Firelink, and Saturnine is now visible enough to review, but it should not be
+collapsed casually. The shared shape touches SOPS files, runtime secret owners,
+SSH authorized-key paths, password hashes, and selected-user trust.
+
+- Consider a small host helper only after a fourth repeated host proves the
+  abstraction pays rent. The helper would need to preserve per-host secret file
+  names, user-owned SOPS files, authorized public-key restoration, and the
+  explicit `selectedUsers` gate in `lib/mkSystem.nix`.
+- Validation: keep `checks/secret-file-boundary.nix` and
+  `checks/ssh-approved-hosts-boundary.nix` passing, add a Saturnine-specific
+  assertion before changing the helper shape, and dry-build every affected host.

@@ -1,8 +1,19 @@
 {
   config,
   repository,
+  lib,
   ...
 }:
+let
+  home = config.home.homeDirectory;
+  trustedProjects = [
+    "${home}/Projects/westgate/module"
+    "${home}/Projects/westgate/toolkit"
+    "${home}/Projects/westgate/assets"
+    "${home}/Projects/westgate/devkit"
+    "${home}/Obsidian/Echo-Reliquary"
+  ];
+in
 {
   theorem.home.shell = {
     bat.enable = true;
@@ -36,14 +47,9 @@
 
         shell_environment_policy."inherit" = "core";
 
-        projects = {
-          "${config.home.homeDirectory}/Projects" = {
-            trust_level = "trusted";
-          };
-          "${config.home.homeDirectory}/Repositories" = {
-            trust_level = "trusted";
-          };
-        };
+        projects = lib.genAttrs trustedProjects (_: {
+          trust_level = "trusted";
+        });
       };
 
     };
