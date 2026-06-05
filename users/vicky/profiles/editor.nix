@@ -296,6 +296,16 @@
         "[haskell]"."editor.insertSpaces" = true;
         "[python]"."editor.insertSpaces" = true;
         "[agda]"."editor.insertSpaces" = true;
+        "[json]" = {
+          "editor.defaultFormatter" = "vscode.json-language-features";
+          "editor.insertSpaces" = false;
+          "editor.tabSize" = 1;
+        };
+        "[jsonc]" = {
+          "editor.defaultFormatter" = "vscode.json-language-features";
+          "editor.insertSpaces" = false;
+          "editor.tabSize" = 1;
+        };
 
         "todo-tree.general.tags" = [
           "TODO"

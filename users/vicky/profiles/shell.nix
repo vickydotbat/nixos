@@ -7,6 +7,7 @@
 let
   home = config.home.homeDirectory;
   trustedProjects = [
+    "${home}/Projects/westgate"
     "${home}/Projects/westgate/module"
     "${home}/Projects/westgate/toolkit"
     "${home}/Projects/westgate/assets"
