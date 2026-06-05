@@ -187,6 +187,10 @@
           inherit inputs pkgs;
         };
 
+        saturnine-disko-boundary = import ./checks/saturnine-disko-boundary.nix {
+          inherit inputs pkgs;
+        };
+
         solanine-libvirt-boundary = import ./checks/solanine-libvirt-boundary.nix {
           inherit inputs pkgs;
         };
@@ -250,6 +254,20 @@
         hostPath = ./hosts/firelink;
         selectedUsers = {
           inherit (userRegistry) admin mattia;
+        };
+      };
+
+      nixosConfigurations.saturnine = mkSystem {
+        inherit
+          inputs
+          system
+          stable
+          userRegistry
+          ;
+        self = inputs.self;
+        hostPath = ./hosts/saturnine;
+        selectedUsers = {
+          inherit (userRegistry) admin vicky;
         };
       };
     };
