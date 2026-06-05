@@ -299,12 +299,12 @@
         "[json]" = {
           "editor.defaultFormatter" = "vscode.json-language-features";
           "editor.insertSpaces" = false;
-          "editor.tabSize" = 1;
+          "editor.tabSize" = 4;
         };
         "[jsonc]" = {
           "editor.defaultFormatter" = "vscode.json-language-features";
           "editor.insertSpaces" = false;
-          "editor.tabSize" = 1;
+          "editor.tabSize" = 4;
         };
 
         "todo-tree.general.tags" = [
