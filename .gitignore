@@ -1,7 +1,231 @@
-.cache/
-.codex-cache/
+# -----------------------------------------------------------------------------
+# Repository allowlist
+#
+# Ignore everything at the repository root unless explicitly allowed below.
+# This keeps the repo intentional and prevents accidental commits of local state,
+# generated output, private notes, machine junk, and temporary files.
+# -----------------------------------------------------------------------------
 
-# NixOS Build Results
-.local-nix-store/
+/*
+
+# Keep selected root directories
+!/assets/
+!/checks/
+!/docs/
+!/hosts/
+!/lib/
+!/modules/
+!/pkgs/
+!/scripts/
+!/secrets/
+!/users/
+
+# Keep everything inside selected root directories
+!/assets/**
+!/checks/**
+!/docs/**
+!/hosts/**
+!/lib/**
+!/modules/**
+!/pkgs/**
+!/scripts/**
+!/secrets/**
+!/users/**
+
+# Keep selected root files
+!/.sops.yaml
+!/AGENTS.md
+!/flake.lock
+!/flake.nix
+!/README.md
+
+# Keep this file
+!/.gitignore
+
+
+# -----------------------------------------------------------------------------
+# Nix build output
+# -----------------------------------------------------------------------------
+
 result
-result/
+result-*
+/result
+/result-*
+
+# Common nix-build / shell artifacts
+*.drv
+*.nar
+*.narinfo
+
+
+# -----------------------------------------------------------------------------
+# Flakes, direnv, and local development state
+# -----------------------------------------------------------------------------
+
+.direnv/
+.envrc.local
+.env
+.env.*
+!.env.example
+!.envrc
+
+# Lorri / nix-direnv leftovers
+/.lorri/
+
+
+# -----------------------------------------------------------------------------
+# Secrets and local private material
+#
+# SOPS-encrypted secrets may be tracked under secrets/.
+# Plaintext or locally decrypted secrets should not be.
+# -----------------------------------------------------------------------------
+
+*.agekey
+*.age.key
+*.asc
+*.gpg
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa
+id_ed25519
+id_ecdsa
+id_dsa
+*_rsa
+*_ed25519
+*_ecdsa
+*_dsa
+
+# Common decrypted secret outputs
+*.decrypted
+*.dec
+*.plain
+*.plaintext
+secrets/**/*.decrypted
+secrets/**/*.dec
+secrets/**/*.plain
+secrets/**/*.plaintext
+
+# Allow explicitly encrypted SOPS/YAML/JSON/etc. secret files
+!secrets/**/*.yaml
+!secrets/**/*.yml
+!secrets/**/*.json
+!secrets/**/*.env
+!secrets/**/*.age
+
+
+# -----------------------------------------------------------------------------
+# Editor and IDE files
+# -----------------------------------------------------------------------------
+
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/tasks.json
+!.vscode/launch.json
+
+.idea/
+*.swp
+*.swo
+*.swn
+*~
+.\#*
+\#*\#
+
+# Helix / Kakoune / Vim sessions
+Session.vim
+.session.vim
+.kakrc.local
+
+
+# -----------------------------------------------------------------------------
+# OS and filesystem junk
+# -----------------------------------------------------------------------------
+
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+Desktop.ini
+
+.Trash-*
+.fuse_hidden*
+.nfs*
+
+
+# -----------------------------------------------------------------------------
+# Logs, caches, temp files
+# -----------------------------------------------------------------------------
+
+*.log
+*.log.*
+logs/
+log/
+
+.cache/
+tmp/
+temp/
+.tmp/
+*.tmp
+*.temp
+*.bak
+*.backup
+*.old
+*.orig
+*.rej
+
+# Python / tooling caches, useful if scripts/checks use Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage/
+htmlcov/
+
+# Node tooling, useful if docs/assets use JS tooling
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+
+# -----------------------------------------------------------------------------
+# Generated docs/assets
+#
+# Keep source assets/docs, ignore common generated output.
+# Remove entries here if you intentionally version generated files.
+# -----------------------------------------------------------------------------
+
+docs/.vitepress/cache/
+docs/.vitepress/dist/
+docs/public/build/
+site/
+public/
+dist/
+build/
+
+# Generated archives
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.7z
+*.rar
+
+
+# -----------------------------------------------------------------------------
+# Local machine notes
+# -----------------------------------------------------------------------------
+
+TODO.local*
+NOTES.local*
+*.local.md
