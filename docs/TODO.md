@@ -143,6 +143,10 @@ as understandable as possible for newer maintainers.
   and intentionally keeps run0 password-gated; the working passwordless knob is
   broader systemd unit-management authority, not a narrow NixOS rebuild cache.
   Prove login, elevation, rebuild, and rollback before making it a default.
+- Completed: `run0` works well during testing, seemingly even allowing the
+  unprivileged user to switch to the administrator account to quickly
+  authenticate for things like nix rebuilds. Login, elevation, and rebuild
+  were all tested with the Vicky user. (TODO: Switch all hosts to run0)
 
 ## Home Module Boundary
 
@@ -180,7 +184,21 @@ as understandable as possible for newer maintainers.
   ble.sh previously broke multiple shell integrations, but lightweight command
   suggestions or highlighting may be worth revisiting behind a separate option
   after Bash, Atuin, Carapace, Direnv, FZF, Zellij, and editor-embedded
-  terminals are tested together.
+  terminals are tested together. (NOTE: Zellij compatibility with Ghostty is
+  flimsy at best, with numerous pane-related problems, scrollback sometimes
+  breaking, and the hotkeys remaining unintuitive for the common workflow.
+  Zellij itself is useful, conceptually; in a TTY window where no desktop
+  environment / terminal emulator exists, it is invaluable. The problem is that
+  Ghostty especially clashes with it quite often. The config for Zellij and
+  Ghostty likely both need revision to preserve greater compatability, with
+  Zellij configured primarily for TTY use. There is also the friction of being
+  used to opening new terminal windows when I want to do something different. I
+  seem to be too used to this method over just adding a new tab. Opening a new
+  Ghostty window just opens the existing Zellij sessions, which is confusing for
+  existing workflow habits. I also don't understand how to use Zellij yet, and
+  many of its features are still foreign for a user that more or less only opens
+  the terminal to run commands or do some necessary workflows, not someone who
+  frequently manages ongoing sessions.)
 - Neverwinter Nights still needs an Aurora Toolset launcher decision. Decide
   whether the launcher belongs in the NWN Home module or in a package wrapper,
   then name the executable, working directory, Wine or Proton environment, icon,
@@ -567,3 +585,51 @@ SSH authorized-key paths, password hashes, and selected-user trust.
 - Validation: keep `checks/secret-file-boundary.nix` and
   `checks/ssh-approved-hosts-boundary.nix` passing, add a Saturnine-specific
   assertion before changing the helper shape, and dry-build every affected host.
+
+## NOTE: Something notable to add to the philosophy
+
+`lib.mkIf` returns a module fragment/set-like conditional value, not a list. Inside a list concatenation, use `lib.optionals`.
+
+This fix recently had to be applied to the nixos global plasma module to add
+a specific package to the global package pool. It was updated accordingly in
+`modules/nixos/desktop/plasma.nix`
+
+## Rule of thumb
+
+Use:
+
+```nix
+lib.mkIf condition { ... }
+```
+
+when conditionally enabling **attribute sets / module config blocks**.
+
+Use:
+
+```nix
+lib.optionals condition [ ... ]
+```
+
+when conditionally adding items to a **list**.
+
+Use:
+
+```nix
+lib.optional condition item
+```
+
+when conditionally adding a **single list item**.
+
+So this is wrong:
+
+```nix
+[ pkgs.foo ] ++ lib.mkIf cfg.enable [ pkgs.bar ]
+```
+
+because `++` expects lists on both sides.
+
+This is right:
+
+```nix
+[ pkgs.foo ] ++ lib.optionals cfg.enable [ pkgs.bar ]
+```

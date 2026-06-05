@@ -41,11 +41,15 @@ in
 
   config = lib.mkIf cfg.enable {
     environment = {
-      systemPackages = lib.mkIf cfg.browserIntegration.enable [
+      systemPackages = [
+        pkgs.kdePackages.kfind
+        pkgs.krename
+      ]
+      ++ lib.optionals cfg.browserIntegration.enable [
         pkgs.kdePackages.plasma-browser-integration
       ];
 
-      plasma6.excludePackages = lib.mkIf (!cfg.browserIntegration.enable) [
+      plasma6.excludePackages = lib.optionals (!cfg.browserIntegration.enable) [
         pkgs.kdePackages.plasma-browser-integration
       ];
     };

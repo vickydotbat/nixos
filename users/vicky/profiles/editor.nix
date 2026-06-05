@@ -47,6 +47,7 @@
         ms-vscode.cmake-tools
         pkief.material-icon-theme
         streetsidesoftware.code-spell-checker
+        evertjunior.mass-renamer
       ];
       extraPackages = with pkgs; [
         nixd

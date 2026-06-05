@@ -203,6 +203,14 @@
           inherit inputs pkgs;
         };
 
+        plasma-file-tools-boundary = import ./checks/plasma-file-tools-boundary.nix {
+          inherit inputs pkgs;
+        };
+
+        vicky-vscode-renamer-boundary = import ./checks/vicky-vscode-renamer-boundary.nix {
+          inherit inputs pkgs;
+        };
+
         secret-file-boundary = import ./checks/secret-file-boundary.nix {
           inherit inputs pkgs;
         };
@@ -225,7 +233,16 @@
           codex = codex;
         };
 
-      overlays.default = final: prev: import ./pkgs/packages.nix { pkgs = final; };
+      overlays.default =
+        final: prev:
+        (import ./pkgs/packages.nix { pkgs = final; })
+        // {
+          vscode-extensions = prev.vscode-extensions // {
+            evertjunior = (prev.vscode-extensions.evertjunior or { }) // {
+              mass-renamer = final.callPackage ./pkgs/vscode-extensions/evertjunior/mass-renamer.nix { };
+            };
+          };
+        };
 
       nixosConfigurations.solanine = mkSystem {
         inherit
