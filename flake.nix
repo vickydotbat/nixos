@@ -211,6 +211,14 @@
           inherit inputs pkgs;
         };
 
+        vicky-vscode-format-boundary = import ./checks/vicky-vscode-format-boundary.nix {
+          inherit inputs pkgs;
+        };
+
+        vicky-vscode-theme-boundary = import ./checks/vicky-vscode-theme-boundary.nix {
+          inherit inputs pkgs;
+        };
+
         secret-file-boundary = import ./checks/secret-file-boundary.nix {
           inherit inputs pkgs;
         };

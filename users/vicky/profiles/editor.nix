@@ -2,6 +2,17 @@
   pkgs,
   ...
 }:
+let
+  prettierFormatter = {
+    "editor.defaultFormatter" = "esbenp.prettier-vscode";
+  };
+
+  prettierTwoSpaceFormatter = prettierFormatter // {
+    "editor.insertSpaces" = true;
+    "editor.tabSize" = 2;
+    "prettier.tabWidth" = 2;
+  };
+in
 {
   theorem.home.editor = {
     helix = {
@@ -45,6 +56,8 @@
         ms-python.vscode-pylance
         ms-vscode.cpptools
         ms-vscode.cmake-tools
+        catppuccin.catppuccin-vsc
+        esbenp.prettier-vscode
         pkief.material-icon-theme
         streetsidesoftware.code-spell-checker
         evertjunior.mass-renamer
@@ -53,6 +66,7 @@
         nixd
         nil
         nixfmt
+        prettier
         statix
         deadnix
       ];
@@ -85,8 +99,12 @@
         "editor.fontLigatures" = true;
         "editor.fontSize" = 14;
         "editor.rulers" = [ 80 ];
-        "editor.renderWhitespace" = "boundary";
+        "editor.renderWhitespace" = "none";
         "workbench.colorCustomizations"."editorWhitespace.foreground" = "#3a3a3a";
+        "window.autoDetectColorScheme" = true;
+        "workbench.colorTheme" = "Catppuccin Mocha";
+        "workbench.preferredLightColorTheme" = "Catppuccin Latte";
+        "workbench.preferredDarkColorTheme" = "Catppuccin Mocha";
         "workbench.iconTheme" = "material-icon-theme";
 
         "editor.minimap.enabled" = false;
@@ -118,10 +136,16 @@
         "editor.formatOnSave" = true;
         "editor.formatOnPaste" = false;
         "editor.formatOnType" = false;
+        "editor.defaultFormatter" = "esbenp.prettier-vscode";
 
-        "editor.insertSpaces" = false;
+        "editor.insertSpaces" = true;
         "editor.tabSize" = 4;
-        "editor.detectIndentation" = true;
+        "editor.detectIndentation" = false;
+        "prettier.enable" = true;
+        "prettier.requireConfig" = false;
+        "prettier.useEditorConfig" = true;
+        "prettier.useTabs" = false;
+        "prettier.tabWidth" = 4;
 
         "editor.wordWrapColumn" = 100;
         "editor.wordWrap" = "on";
@@ -295,24 +319,27 @@
           "editor.insertSpaces" = true;
           "editor.tabSize" = 2;
         };
-        "[markdown]" = {
+        "[javascript]" = prettierTwoSpaceFormatter;
+        "[javascriptreact]" = prettierTwoSpaceFormatter;
+        "[typescript]" = prettierTwoSpaceFormatter;
+        "[typescriptreact]" = prettierTwoSpaceFormatter;
+        "[json]" = prettierTwoSpaceFormatter;
+        "[jsonc]" = prettierTwoSpaceFormatter;
+        "[html]" = prettierTwoSpaceFormatter;
+        "[css]" = prettierTwoSpaceFormatter;
+        "[scss]" = prettierTwoSpaceFormatter;
+        "[less]" = prettierTwoSpaceFormatter;
+        "[vue]" = prettierTwoSpaceFormatter;
+        "[svelte]" = prettierTwoSpaceFormatter;
+        "[graphql]" = prettierTwoSpaceFormatter;
+        "[yaml]" = prettierTwoSpaceFormatter;
+        "[markdown]" = prettierTwoSpaceFormatter // {
           "editor.wordWrap" = "bounded";
-          "editor.insertSpaces" = true;
-          "editor.tabSize" = 2;
         };
+        "[mdx]" = prettierTwoSpaceFormatter;
         "[haskell]"."editor.insertSpaces" = true;
         "[python]"."editor.insertSpaces" = true;
         "[agda]"."editor.insertSpaces" = true;
-        "[json]" = {
-          "editor.defaultFormatter" = "vscode.json-language-features";
-          "editor.insertSpaces" = false;
-          "editor.tabSize" = 4;
-        };
-        "[jsonc]" = {
-          "editor.defaultFormatter" = "vscode.json-language-features";
-          "editor.insertSpaces" = false;
-          "editor.tabSize" = 4;
-        };
 
         "todo-tree.general.tags" = [
           "TODO"
