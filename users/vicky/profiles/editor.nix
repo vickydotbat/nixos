@@ -43,6 +43,11 @@ in
     vscode = {
       enable = true;
       extensions = with pkgs.vscode-extensions; [
+        # Theming
+        pkief.material-icon-theme
+        catppuccin.catppuccin-vsc
+
+        # Core
         jnoortheen.nix-ide
         mkhl.direnv
         editorconfig.editorconfig
@@ -50,17 +55,23 @@ in
         redhat.vscode-yaml
         mhutchie.git-graph
         waderyan.gitblame
-        usernamehw.errorlens
-        gruntfuggly.todo-tree
         ms-python.python
         ms-python.vscode-pylance
         ms-vscode.cpptools
         ms-vscode.cmake-tools
-        catppuccin.catppuccin-vsc
         esbenp.prettier-vscode
-        pkief.material-icon-theme
+
+        # QOL
+        usernamehw.errorlens
+        gruntfuggly.todo-tree
         streetsidesoftware.code-spell-checker
         evertjunior.mass-renamer
+
+        # C# / .NET
+        ms-dotnettools.csharp
+        ms-dotnettools.csdevkit
+        ms-dotnettools.vscode-dotnet-runtime
+        csharpier.csharpier-vscode
       ];
       extraPackages = with pkgs; [
         nixd
@@ -68,6 +79,8 @@ in
         prettier
         statix
         deadnix
+        csharpier
+        dotnet-sdk
       ];
       userSettings = {
         "workbench.startupEditor" = "none";
@@ -337,6 +350,25 @@ in
           "editor.wordWrap" = "bounded";
         };
         "[mdx]" = prettierTwoSpaceFormatter;
+        "[csharp]"."editor.defaultFormatter" = "csharpier.csharpier-vscode";
+
+        # DotNet
+        "dotnet.dotnetPath" = "${pkgs.dotnet-sdk}/bin/dotnet";
+        "omnisharp.dotNetCliPaths" = [
+          "${pkgs.dotnet-sdk}/bin/dotnet"
+        ];
+        "dotnetAcquisitionExtension.sharedExistingDotnetPath" = "${pkgs.dotnet-sdk}/bin/dotnet";
+
+        "dotnetAcquisitionExtension.existingDotnetPath" = [
+          {
+            extensionId = "ms-dotnettools.csdevkit";
+            path = "${pkgs.dotnet-sdk}/bin/dotnet";
+          }
+          {
+            extensionId = "ms-dotnettools.csharp";
+            path = "${pkgs.dotnet-sdk}/bin/dotnet";
+          }
+        ];
 
         "todo-tree.general.tags" = [
           "TODO"
