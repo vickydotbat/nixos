@@ -53,6 +53,9 @@ in
         });
       };
 
+      context = ''
+        Be extremely concise. Sacrifice grammar for concision.
+      '';
     };
     ghostty.enable = true;
     git.enable = true;
