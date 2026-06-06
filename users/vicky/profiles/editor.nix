@@ -12,8 +12,22 @@ let
     "editor.tabSize" = 2;
     "prettier.tabWidth" = 2;
   };
+
+  dotnet = pkgs.dotnetCorePackages.combinePackages [
+    pkgs.dotnetCorePackages.sdk_10_0
+    pkgs.dotnetCorePackages.aspnetcore_10_0
+  ];
 in
 {
+  home.persistence."/nix/persist" = {
+    directories = [
+      # FIXME these are only needed if NuGet is being prepared, so probably could be conditionally persisted. Also clean this up if needed, and look for anything else that needs to be persisted for our workflow.
+      ".nuget/packages"
+      ".local/share/NuGet"
+      ".config/NuGet"
+    ];
+  };
+
   theorem.home.editor = {
     helix = {
       enable = true;
@@ -45,7 +59,7 @@ in
       extensions = with pkgs.vscode-extensions; [
         # Theming
         pkief.material-icon-theme
-        catppuccin.catppuccin-vsc
+        catppuccin.catppuccin-vsc # FIXME: There's an error in some windows: "Unable to load schema from 'https://raw.githubusercontent.com/catppuccin/vscode/catppuccin-vsc-v3.19.0/packages/catppuccin-vsc/schemas/customUIColors.schema.json': Location https://raw.githubusercontent.com/catppuccin/vscode/catppuccin-vsc-v3.19.0/packages/catppuccin-vsc/schemas/customUIColors.schema.json is untrusted."
 
         # Core
         jnoortheen.nix-ide
@@ -69,6 +83,7 @@ in
 
         # C# / .NET
         ms-dotnettools.csharp
+        ms-dotnettools.vscode-dotnet-runtime
         csharpier.csharpier-vscode
       ];
       extraPackages = with pkgs; [
@@ -78,7 +93,7 @@ in
         statix
         deadnix
         csharpier
-        dotnet-sdk
+        dotnet
       ];
       userSettings = {
         "workbench.startupEditor" = "none";
@@ -112,7 +127,7 @@ in
         "editor.renderWhitespace" = "none";
         "workbench.colorCustomizations"."editorWhitespace.foreground" = "#3a3a3a";
         "window.autoDetectColorScheme" = true;
-        "workbench.colorTheme" = "Catppuccin Mocha";
+        "workbench.colorTheme" = "Catppuccin Mocha"; # FIXME: There's an error in some windows: "Unable to load schema from 'https://raw.githubusercontent.com/catppuccin/vscode/catppuccin-vsc-v3.19.0/packages/catppuccin-vsc/schemas/customUIColors.schema.json': Location https://raw.githubusercontent.com/catppuccin/vscode/catppuccin-vsc-v3.19.0/packages/catppuccin-vsc/schemas/customUIColors.schema.json is untrusted."
         "workbench.preferredLightColorTheme" = "Catppuccin Latte";
         "workbench.preferredDarkColorTheme" = "Catppuccin Mocha";
         "workbench.iconTheme" = "material-icon-theme";
@@ -348,12 +363,19 @@ in
           "editor.wordWrap" = "bounded";
         };
         "[mdx]" = prettierTwoSpaceFormatter;
-        "[csharp]"."editor.defaultFormatter" = "csharpier.csharpier-vscode";
 
         # DotNet
-        "dotnet.dotnetPath" = "${pkgs.dotnet-sdk}/bin/dotnet";
+        "[csharp]"."editor.defaultFormatter" = "csharpier.csharpier-vscode";
+        "dotnet.dotnetPath" = "${dotnet}/bin/dotnet";
         "omnisharp.dotNetCliPaths" = [
-          "${pkgs.dotnet-sdk}/bin/dotnet"
+          "${dotnet}/bin/dotnet"
+        ];
+        "dotnetAcquisitionExtension.sharedExistingDotnetPath" = "${dotnet}/bin/dotnet";
+        "dotnetAcquisitionExtension.existingDotnetPath" = [
+          {
+            extensionId = "ms-dotnettools.csharp";
+            path = "${dotnet}/bin/dotnet";
+          }
         ];
 
         "todo-tree.general.tags" = [

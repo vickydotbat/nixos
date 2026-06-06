@@ -68,10 +68,7 @@ in
       home.persistence."/nix/persist" = lib.mkIf cfg.enable {
         directories = [
           ".local/share/systemd/timers"
-          # User-scoped Nix state for profile and registry metadata when the home
-          # directory is rebuilt from an ephemeral root.
           ".local/share/nix"
-          ".cache/nix" # Nix cache -- must keep when using tmpfs
 
           # XDG Directories
           "Documents"
@@ -83,12 +80,15 @@ in
           "Public"
           "Desktop"
 
-          # My custom directories
-          "Repositories"
-          "Backups"
+          # Additional global directories
           "Games"
           "Applications"
+          "Backups"
+          "Repositories"
 
+          # Nix cache -- must keep when using tmpfs home
+          # TODO: Disable on btrfs persistence setups. This is only necessary for home on tmpfs.
+          ".cache/nix"
         ]
         ++ lib.optionals (!cfg.volatileDownloads.enable) [
           "Downloads"
