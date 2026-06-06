@@ -63,7 +63,6 @@ in
         "vscode-extension-ms-python-python"
         "vscode-extension-ms-vscode-cpptools"
         "vscode-extension-mhutchie-git-graph"
-        "vscode-extension-ms-dotnettools-csdevkit"
         "vscode-extension-ms-dotnettools-csharp"
       ];
       packages.enable = true;

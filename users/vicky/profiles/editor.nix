@@ -69,8 +69,6 @@ in
 
         # C# / .NET
         ms-dotnettools.csharp
-        ms-dotnettools.csdevkit
-        ms-dotnettools.vscode-dotnet-runtime
         csharpier.csharpier-vscode
       ];
       extraPackages = with pkgs; [
@@ -356,18 +354,6 @@ in
         "dotnet.dotnetPath" = "${pkgs.dotnet-sdk}/bin/dotnet";
         "omnisharp.dotNetCliPaths" = [
           "${pkgs.dotnet-sdk}/bin/dotnet"
-        ];
-        "dotnetAcquisitionExtension.sharedExistingDotnetPath" = "${pkgs.dotnet-sdk}/bin/dotnet";
-
-        "dotnetAcquisitionExtension.existingDotnetPath" = [
-          {
-            extensionId = "ms-dotnettools.csdevkit";
-            path = "${pkgs.dotnet-sdk}/bin/dotnet";
-          }
-          {
-            extensionId = "ms-dotnettools.csharp";
-            path = "${pkgs.dotnet-sdk}/bin/dotnet";
-          }
         ];
 
         "todo-tree.general.tags" = [
