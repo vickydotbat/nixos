@@ -15,11 +15,21 @@ let
   persistenceEnabled = (config.theorem.home.base.persistence.enable or false);
 
   # Default mechanism, kept in the reusable module; home/ may override it.
+  nwnInstallDir = "${config.home.homeDirectory}/.local/share/Steam/steamapps/common/Neverwinter Nights";
   nwnDataDir = "${config.home.homeDirectory}/.local/share/Neverwinter Nights";
   nwnDocumentsDir = "${config.home.homeDirectory}/Documents/Neverwinter Nights";
+  winePrefixDir = "${config.home.homeDirectory}/.local/share/wineprefixes";
   windowsDocumentsDir = "C:\\users\\${config.home.username}\\Documents\\Neverwinter Nights";
   nwnBlender = pkgs.blender-402-bin;
   nwnBlenderConfigVersion = lib.versions.majorMinor nwnBlender.version;
+  nwtoolset = pkgs.nwtoolset.override {
+    inherit nwnInstallDir;
+    winePrefix = "${winePrefixDir}/nwtoolset";
+  };
+  nwnexplorer = pkgs.nwnexplorer.override {
+    inherit nwnInstallDir;
+    winePrefix = "${winePrefixDir}/nwnexplorer";
+  };
 
   nwnDataAliasesBeforeHome = [
     "CRASHREPORT"
@@ -134,24 +144,13 @@ in
 
   config = lib.mkMerge [
     (lib.mkIf cfg.enable {
-      home.packages =
-        let
-          nwnInstallDir = "${config.home.homeDirectory}/.local/share/Steam/steamapps/common/Neverwinter Nights";
-          winePrefixDir = "${config.home.homeDirectory}/.local/share/wineprefixes";
-        in
-        [
-          nwnBlender
-          pkgs.cleanmodels
-          pkgs.neverwinter-nim
-          (pkgs.nwtoolset.override {
-            nwnInstallDir = "${nwnInstallDir}";
-            winePrefix = "${winePrefixDir}/nwtoolset";
-          })
-          (pkgs.nwnexplorer.override {
-            nwnInstallDir = "${nwnInstallDir}";
-            winePrefix = "${winePrefixDir}/nwnexplorer";
-          })
-        ];
+      home.packages = [
+        nwnBlender
+        pkgs.cleanmodels
+        pkgs.neverwinter-nim
+        nwtoolset
+        nwnexplorer
+      ];
 
       home.activation.nwnDocumentsLayout = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
         nwn_data_dir=${lib.escapeShellArg nwnDataDir}
