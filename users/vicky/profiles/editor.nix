@@ -174,12 +174,13 @@
         "git.confirmSync" = true;
         "git.rebaseWhenSync" = false;
 
-        "git.enableSmartCommit" = true;
+        "git.enableSmartCommit" = false;
         "git.openRepositoryInParentFolders" = "never";
 
         # Shared-repo safety:
         "git.allowForcePush" = false;
         "git.confirmForcePush" = true;
+        "git.useForcePushWithLease" = true;
 
         "git.closeDiffOnOperation" = true;
         "diffEditor.experimental.showMoves" = true;

@@ -64,12 +64,12 @@ in
       };
     };
 
-    programs.nh = lib.mkDefault {
-      enable = true;
-      flake = repository.path;
+    programs.nh = {
+      enable = lib.mkDefault true;
+      flake = lib.mkDefault repository.path;
       clean = {
-        enable = true;
-        extraArgs = "--keep 5 --keep-since 7d";
+        enable = lib.mkDefault true;
+        extraArgs = lib.mkDefault "--keep 5 --keep-since 7d";
       };
     };
 

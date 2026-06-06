@@ -1,38 +1,36 @@
 {
-  programs.git = {
-    settings.user = {
+  programs.git.settings = {
+    user = {
       name = "vickydotbat";
       email = "vickydotbat@tutamail.com";
     };
 
-    extraConfig = {
-      pull = {
-        ff = "only";
-      };
+    pull = {
+      ff = "only";
+    };
 
-      push = {
-        default = "simple";
-        autoSetupRemote = true;
-        followTags = true;
-      };
+    push = {
+      default = "simple";
+      autoSetupRemote = false;
+      followTags = true;
+    };
 
-      fetch = {
-        prune = true;
-        pruneTags = true;
-        showForcedUpdates = true;
-      };
+    fetch = {
+      prune = true;
+      pruneTags = true;
+      showForcedUpdates = true;
+    };
 
-      merge = {
-        conflictStyle = "zdiff3";
-      };
+    merge = {
+      conflictStyle = "zdiff3";
+    };
 
-      rerere = {
-        enabled = true;
-      };
+    rerere = {
+      enabled = true;
+    };
 
-      init = {
-        defaultBranch = "main";
-      };
+    init = {
+      defaultBranch = "main";
     };
   };
 }

@@ -77,6 +77,13 @@ must remain replaceable unless there is a deliberate safety reason. Use
 when the module is intentionally enforcing a boundary and the reason is visible
 near the code.
 
+When defaulting a nested configuration set, default the leaves and combine
+fragments with `lib.mkMerge`. Do not wrap a whole attrset in `lib.mkDefault`
+when another user, host, or profile may set one child beneath it. That shape can
+silently discard sibling defaults such as safety checks, persistence hooks, or
+trust declarations. The correct repair is a mergeable mechanism, not a sharper
+override.
+
 Vicky's defaults are field-tested notes, not universal law. Preserve what is
 broadly useful; keep personal doctrine out of shared mechanisms.
 

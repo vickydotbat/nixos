@@ -76,6 +76,13 @@ persistence, graphics/audio following a chosen desktop or gaming profile, and
 sandbox support following a sandboxed application. Keep these defaults
 overrideable with normal option assignment.
 
+Nested defaults must be leaf defaults. If a module supplies defaults under an
+attrset that profiles may also edit, use `lib.mkMerge` and put `lib.mkDefault`
+on the child values. Do not set `some.attr = lib.mkDefault { ... };` for a
+shared mechanism unless replacing the entire subtree is the intended repair
+boundary. Whole-subtree defaults are easy to lose when a user profile adds one
+personal setting beside them.
+
 Do not derive optional applications, games, backup jobs, hardware conveniences,
 or compatibility layers just because their substrate is present. Those remain
 profile choices. Steam can provide the library and persistence substrate; it

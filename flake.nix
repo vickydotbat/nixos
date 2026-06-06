@@ -218,6 +218,14 @@
         ssh-approved-hosts-boundary = import ./checks/ssh-approved-hosts-boundary.nix {
           inherit inputs pkgs;
         };
+
+        git-safety-boundary = import ./checks/git-safety-boundary.nix {
+          inherit inputs pkgs;
+        };
+
+        module-default-boundary = import ./checks/module-default-boundary.nix {
+          inherit inputs pkgs;
+        };
       };
 
       devShells.${system} =
