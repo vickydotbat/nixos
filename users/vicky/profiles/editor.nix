@@ -175,6 +175,7 @@
         "git.allowForcePush" = true;
         "git.confirmForcePush" = false;
         "git.openRepositoryInParentFolders" = "never";
+        "git.rebaseWhenSync" = true;
 
         "git.closeDiffOnOperation" = true;
         "diffEditor.experimental.showMoves" = true;
