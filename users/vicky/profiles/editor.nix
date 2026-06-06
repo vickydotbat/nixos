@@ -315,10 +315,7 @@ in
         "terminal.integrated.initialHint" = false;
         "terminal.integrated.enablePersistentSessions" = false;
 
-        "[scala]" = {
-          "editor.insertSpaces" = true;
-          "editor.tabSize" = 2;
-        };
+        "[scala]" = prettierTwoSpaceFormatter;
         "[javascript]" = prettierTwoSpaceFormatter;
         "[javascriptreact]" = prettierTwoSpaceFormatter;
         "[typescript]" = prettierTwoSpaceFormatter;
@@ -337,9 +334,6 @@ in
           "editor.wordWrap" = "bounded";
         };
         "[mdx]" = prettierTwoSpaceFormatter;
-        "[haskell]"."editor.insertSpaces" = true;
-        "[python]"."editor.insertSpaces" = true;
-        "[agda]"."editor.insertSpaces" = true;
 
         "todo-tree.general.tags" = [
           "TODO"
