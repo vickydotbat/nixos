@@ -10,7 +10,6 @@ in
   homeDirectory = "/home/${thisUser}";
   avatar = ./avatar.png;
   extraGroups = [
-    "wheel"
     "nixcfg"
   ];
   passwordHashSecret = "users/${thisUser}/password-hash";

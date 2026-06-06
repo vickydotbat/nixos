@@ -9,6 +9,27 @@ place. Use `README.md` and `docs/` as readable sources for what purpose every
 change serves. Documentation maintenance is critical for keeping the repo
 as understandable as possible for newer maintainers.
 
+## Immediate Next Repair
+
+- Treat the Solanine installation as stable enough to stop using host bring-up
+  as the next organizing fire. The immediate useful repair is the user-owned
+  Home Manager lane: prove that Vicky can own and activate her Home theorem from
+  `/home/vicky/Repositories/nix-home` without touching `/nix/nixos`.
+- This should be a migration crucible, not a replacement spree. First create a
+  minimal personal Home flake that imports this repository's
+  `homeModules.shared` through a local `path:/nix/nixos` input, declares Vicky's
+  Home identity, and builds an activation package with no host-level trust gate.
+  After that works, move Vicky-specific settings in reviewable slices.
+- Keep system authority here while the Home surface moves out: login account
+  creation, groups, persistence substrate, SOPS integration, service-owned
+  permissions, login shell choices, and any deliberate host import of
+  user-writable Nix remain repository-stewarded mechanisms.
+- Validation: `nix flake check` in `/nix/nixos`, the activation-package build
+  or check in `/home/vicky/Repositories/nix-home`, and a user-owned
+  `home-manager switch --flake /home/vicky/Repositories/nix-home#vicky` only
+  after both builds are clean. The system theorem must not import arbitrary
+  home flakes during this proof.
+
 ## Bootstrap And Spawning
 
 - Add a first-install bootstrap path built around `disko` plus explicit
@@ -80,32 +101,37 @@ as understandable as possible for newer maintainers.
   those substrates without the provider fails with a clear assertion.
 - External-user posture: this flake should be safe for other users to consume
   without inheriting Vicky's private working surface. Vicky's Home Manager
-  theorem now belongs in `/home/vicky/Repositories/nix-home`, which should be
-  treated as a user-owned flake consuming this repository's exported Home
-  baseline rather than as configuration hidden inside the shared system flake.
+  theorem now belongs in `/home/vicky/Repositories/nix-home`. That repository
+  currently exists as a clean user-owned Git repository with only a README; make
+  it the proof that a personal flake can consume this repository's exported Home
+  baseline without writing to `/nix/nixos`.
 - Vicky Home migration rite:
   1. In `/home/vicky/Repositories/nix-home`, declare a Home Manager flake that
      imports this repository's `homeModules.shared` entry point, first through a
-     local path during repair and later through the public repository URL that
-     external users will see.
-  2. Move Vicky-specific Home imports in small, reviewable slices from
+     local `path:/nix/nixos` input during repair and later through the public
+     repository URL that external users will see.
+  2. Start with a minimal activation package that carries identity and one small
+     low-risk profile slice. Do not move SOPS-backed SSH material, persistence,
+     service groups, or desktop service assumptions until the bare Home flake
+     builds under Vicky's own authority.
+  3. Move Vicky-specific Home imports in small, reviewable slices from
      `users/vicky/` into the personal Home flake: identity, Git posture,
      SSH host aliases, desktop preferences, editor settings, shell habits,
      application selections, and other private workshop calibration.
-  3. Leave system authority in this repository: login account creation, groups,
+  4. Leave system authority in this repository: login account creation, groups,
      persistence substrate, SOPS integration, service-owned permissions, login
      shell choices, and any host declaration that intentionally trusts
      user-writable Home code.
-  4. If a host still evaluates Vicky's Home through `nixos-rebuild` during the
+  5. If a host still evaluates Vicky's Home through `nixos-rebuild` during the
      transition, declare the trust gate explicitly as
      `/home/vicky/Repositories/nix-home`; do not add auto-discovery of home
      flakes or imports from arbitrary user-writable paths.
-  5. Validate both sides before activation: keep this repository's
+  6. Validate both sides before activation: keep this repository's
      `checks/home-shared-boundary.nix` passing, run `nix flake check` here, run
      the corresponding check or activation-package build in
      `/home/vicky/Repositories/nix-home`, and only then activate Vicky's Home
      from the user-owned repository.
-  6. Once Vicky's Home activates from the personal repository, remove or narrow
+  7. Once Vicky's Home activates from the personal repository, remove or narrow
      any remaining Vicky-only Home imports from this shared flake so external
      users see reusable modules, defaults, and examples rather than one
      operator's private workshop.
@@ -143,10 +169,13 @@ as understandable as possible for newer maintainers.
   and intentionally keeps run0 password-gated; the working passwordless knob is
   broader systemd unit-management authority, not a narrow NixOS rebuild cache.
   Prove login, elevation, rebuild, and rollback before making it a default.
-- Completed: `run0` works well during testing, seemingly even allowing the
-  unprivileged user to switch to the administrator account to quickly
-  authenticate for things like nix rebuilds. Login, elevation, and rebuild
-  were all tested with the Vicky user. (TODO: Switch all hosts to run0)
+- `run0` works well during Solanine testing, including Vicky authenticating
+  through the administrator path for rebuild work. The remaining work is a host
+  migration decision: switch each host deliberately, or keep `sudo` where a host
+  still needs the older habit for recovery.
+- Validation: for each host that moves to `run0`, prove login, `run0` elevation,
+  rebuild, rollback, and the configured `sudo` compatibility behavior before
+  removing the old path.
 
 ## Home Module Boundary
 

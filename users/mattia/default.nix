@@ -9,10 +9,7 @@ in
   uid = 1002;
   homeDirectory = "/home/${thisUser}";
   avatar = ./avatar.png;
-  extraGroups = [
-    "wheel"
-    "nixcfg"
-  ];
+  extraGroups = [ ];
   passwordHashSecret = "users/${thisUser}/password-hash";
 
   secrets = {

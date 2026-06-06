@@ -64,7 +64,6 @@ in
       ];
       extraPackages = with pkgs; [
         nixd
-        nil
         nixfmt
         prettier
         statix
@@ -237,6 +236,10 @@ in
           "editor.tabSize" = 2;
           "editor.codeActionsOnSave" = { };
         };
+        "nix.hiddenLanguageServerErrors" = [
+          "textDocument/definition"
+        ];
+
         "cSpell.enabledFileTypes".nix = false;
         "cSpell.allowCompoundWords" = true;
         "cSpell.dictionaries" = [
