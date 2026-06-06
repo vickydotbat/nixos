@@ -170,12 +170,16 @@
 
         "git.autofetch" = "all";
         "git.autofetchPeriod" = 120;
-        "git.confirmSync" = false;
+
+        "git.confirmSync" = true;
+        "git.rebaseWhenSync" = false;
+
         "git.enableSmartCommit" = true;
-        "git.allowForcePush" = true;
-        "git.confirmForcePush" = false;
         "git.openRepositoryInParentFolders" = "never";
-        "git.rebaseWhenSync" = true;
+
+        # Shared-repo safety:
+        "git.allowForcePush" = false;
+        "git.confirmForcePush" = true;
 
         "git.closeDiffOnOperation" = true;
         "diffEditor.experimental.showMoves" = true;

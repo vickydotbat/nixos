@@ -7,26 +7,31 @@
 
     extraConfig = {
       pull = {
-        # Make `git pull` rebase instead of merge when fast-forward is not possible.
-        rebase = true;
-
-        # Optional: only allow fast-forward when not rebasing.
-        # I would usually omit this if pull.rebase=true is your main policy.
-        # ff = "only";
+        ff = "only";
       };
 
-      rebase = {
-        # Temporarily stash dirty worktree changes before rebasing, then reapply.
-        autoStash = true;
-
-        # Better when rebasing branches with merge commits.
-        # Safe to omit if you mostly use linear feature branches.
-        rebaseMerges = true;
+      push = {
+        default = "simple";
+        autoSetupRemote = true;
+        followTags = true;
       };
 
-      branch = {
-        # New tracking branches default to pull --rebase behavior.
-        autosetuprebase = "always";
+      fetch = {
+        prune = true;
+        pruneTags = true;
+        showForcedUpdates = true;
+      };
+
+      merge = {
+        conflictStyle = "zdiff3";
+      };
+
+      rerere = {
+        enabled = true;
+      };
+
+      init = {
+        defaultBranch = "main";
       };
     };
   };
