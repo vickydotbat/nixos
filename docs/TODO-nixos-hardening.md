@@ -16,7 +16,7 @@ decoration.
 ## Default Doctrine
 
 - [x] Build a `theorem.nixos.security.hardening` profile with explicit
-  sub-options instead of scattering hardening across unrelated modules.
+      sub-options instead of scattering hardening across unrelated modules.
   - Why: hardening must be auditable as one posture while still allowing
     host-specific escape hatches.
   - How: create narrowly scoped modules under `modules/nixos/security/`, use
@@ -65,7 +65,7 @@ decoration.
     that rite before package-bearing modules or local derivations grow.
 
 - [x] Keep `allowUnfree = false` as the repository default and require explicit
-  predicates for exceptions.
+      predicates for exceptions.
   - Why: proprietary software is harder to audit and often has weaker repair
     paths.
   - How: preserve the current flake posture and ensure any future unfree package
@@ -116,7 +116,7 @@ decoration.
     hardware.
 
 - [ ] Require LUKS encryption for new physical hosts unless a host documents why
-  data-at-rest encryption is impossible or inappropriate.
+      data-at-rest encryption is impossible or inappropriate.
   - Why: encryption protects stored data from theft, loss, and unauthorized
     offline access.
   - How: use the repository installation path with LUKS and documented key
@@ -159,7 +159,7 @@ decoration.
   - Validation: confirm portal backend and screen-sharing behavior per desktop.
 
 - [ ] Decide whether the disposable browser should use LibreWolf, Mullvad
-  Browser, or both.
+      Browser, or both.
   - Why: fingerprint resistance is hard to bolt onto a normal browser. Mullvad
     Browser is designed around the Tor Browser privacy model without the Tor
     network, while LibreWolf is already packaged and wrapped in this repository
@@ -260,10 +260,11 @@ decoration.
     builds a `run0-sudo` specialisation that inherits the normal host profile
     and enables the run0 profile there. This gives the operator a reversible
     boot or `switch-to-configuration test` path before the default elevation
-    rite is changed.
+    rite is changed. (FIXME: We no longer have the specialization, this is now
+    native behavior.)
 
 - [ ] Separate daily users from administrator accounts where the host can bear
-  it.
+      it.
   - Why: least privilege limits the blast radius of browser, editor, or chat
     compromise.
   - How: keep `admin` as a declared administrative user; remove daily users from
@@ -276,7 +277,7 @@ decoration.
     test common desktop operations.
 
 - [x] Keep `users.mutableUsers = false` wherever declarative user management is
-  complete.
+      complete.
   - Why: imperative password or user drift weakens reproducibility and hides
     access changes outside the flake.
   - How: ensure every declared account has a managed password hash or secret
@@ -305,7 +306,7 @@ decoration.
     AppImage, Podman, Flatpak, and mount workflows as applicable.
 
 - [ ] Validate Bluetooth service hardening on real hardware before tightening
-  it further.
+      it further.
   - Why: BlueZ is a hardware-facing daemon. Aggressive sandboxing can build
     cleanly while causing pairing, firmware, suspend/resume, or headset
     reconnect failures during normal use.
@@ -384,7 +385,7 @@ decoration.
     before and after in a test generation.
 
 - [ ] Keep the default kernel unless a host profile proves it can tolerate the
-  hardened kernel.
+      hardened kernel.
   - Why: `linuxPackages_hardened` prioritizes security but breaks common
     workflows that require unprivileged user namespaces, including Flatpak and
     Chromium-family browser sandboxes, and can affect kernel-specific drivers.
@@ -396,7 +397,7 @@ decoration.
   - Default posture: conditional. Headless server candidates first; desktop
     default remains normal kernel until proven.
   - Validation: build and boot a specialization with `boot.kernelPackages =
-    pkgs.linuxPackages_hardened`, then test declared workloads.
+pkgs.linuxPackages_hardened`, then test declared workloads.
 
 - [x] Add kernel hardening checker tooling to a diagnostics profile.
   - Why: `kernel-hardening-checker` gives a repeatable way to compare kernel
@@ -406,7 +407,7 @@ decoration.
   - Achieves: measurable hardening audits.
   - Default posture: optional tool, safe when needed.
   - Validation: run `kernel-hardening-checker -l /proc/cmdline -c
-    /proc/config.gz -s ./params.txt` after capturing `sysctl -a`.
+/proc/config.gz -s ./params.txt` after capturing `sysctl -a`.
   - Progress: `theorem.nixos.security.diagnostics` now exists as an opt-in tool
     profile. `kernel-hardening-checker` still needs exact package verification
     against the pinned nixpkgs before it is referenced.
@@ -511,7 +512,7 @@ decoration.
     removable media still work.
 
 - [ ] Evaluate `environment.memoryAllocator.provider =
-  "graphene-hardened-light"` as a conditional desktop/server default.
+"graphene-hardened-light"` as a conditional desktop/server default.
   - Why: hardened allocators reduce exploitability of memory corruption bugs.
   - How: test the light Graphene allocator first; gate full
     `"graphene-hardened"` behind explicit opt-in. Derive default disablement if
@@ -616,7 +617,7 @@ decoration.
 ## Auditing, Malware Scanning, And Vulnerability Scans
 
 - [x] Add a diagnostics/audit profile with Lynis, AIDE, ClamAV, `sbomnix`, and
-  `grype` as explicit tools.
+      `grype` as explicit tools.
   - Why: audit tools make hardening measurable and reveal drift, but they are
     not all necessary runtime dependencies.
   - How: expose tools through a maintenance profile or flake app instead of
@@ -704,7 +705,7 @@ decoration.
     inbound `sshd`, host keys, firewall exposure, and remote-login posture.
 
 - [x] Keep secrets encrypted with `sops-nix`; do not introduce plaintext secret
-  paths.
+      paths.
   - Why: secrets in the repository must not enter the Nix store or Git history
     unencrypted.
   - How: continue the existing `sops` modules and document where new secrets
@@ -722,7 +723,7 @@ decoration.
 ## USB And Physical-Port Protection
 
 - [ ] Add USBGuard as an opt-in hardening module with a boot specialization that
-  disables it.
+      disables it.
   - Why: USBGuard can block BadUSB devices, data-exfiltration gadgets, and
     suspicious composite devices, but bad rules can lock out keyboards and mice.
   - How: create `theorem.nixos.security.usbguard` with
@@ -738,7 +739,7 @@ decoration.
 ## Application Sandboxing
 
 - [x] Treat Firejail as an explicit per-application profile, not a blanket
-  default.
+      default.
   - Why: Firejail can sandbox applications but is itself SUID and has critics
     who treat it as additional privilege-escalation surface.
   - How: keep `modules/nixos/security/firejail.nix`; add

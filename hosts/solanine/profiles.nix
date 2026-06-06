@@ -64,6 +64,7 @@ in
         "vscode-extension-ms-vscode-cpptools"
         "vscode-extension-mhutchie-git-graph"
         "vscode-extension-ms-dotnettools-csharp"
+        "nwtoolset"
       ];
       packages.enable = true;
       persistence.enable = true;
@@ -112,17 +113,8 @@ in
       firejail.enable = true;
       hardening.enable = true;
       polkit.enable = true;
-      sudo.enable = true;
+      run0-sudo.enable = true;
       diagnostics.enable = true;
-    };
-  };
-
-  specialisation.run0-sudo = {
-    inheritParentConfig = true;
-    configuration = {
-      theorem.nixos.security = {
-        run0-sudo.enable = true;
-      };
     };
   };
 
@@ -130,10 +122,8 @@ in
     unrar
     p7zip
     e2fsprogs
-    btrfs-progs
-    nvme-cli
+    btrfs-progs # FIXME: Make this available only when btrfs is enabled
+    nvme-cli # FIXME: Make this available only on NVME systems
     smartmontools
-
-    wineWow64Packages.staging
   ];
 }

@@ -195,6 +195,15 @@
           inherit inputs pkgs;
         };
 
+        solanine-podman-boundary = import ./checks/solanine-podman-boundary.nix {
+          inherit inputs pkgs;
+        };
+
+        nwtoolset-wine-boundary = import ./checks/nwtoolset-wine-boundary.nix {
+          inherit pkgs;
+          nwtoolset = inputs.self.packages.${system}.nwtoolset;
+        };
+
         btrfs-rollback-boundary = import ./checks/btrfs-rollback-boundary.nix {
           inherit inputs pkgs;
         };

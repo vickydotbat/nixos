@@ -5,21 +5,18 @@
   stdenvNoCC,
   unzip,
   wineWow64Packages,
-  writeText,
+  util-linux,
+  coreutils,
   nwnInstallDir ? "$HOME/.local/share/Steam/steamapps/common/Neverwinter Nights",
+  winePrefix ? "$HOME/.local/share/wineprefixes/nwnexplorer",
 }:
 
 let
-  toWineZPath = path: "Z:${lib.replaceStrings [ "/" ] [ "\\\\" ] path}";
+  escapeHereDoc = lib.replaceStrings [ "$" "`" "\\" ] [ "\\$" "\\`" "\\\\" ];
 
-  nwnDirectoryWine = "${toWineZPath nwnInstallDir}\\\\";
-
-  nwnexplorerReg = writeText "nwnexplorer.reg" ''
-    Windows Registry Editor Version 5.00
-
-    [HKEY_CURRENT_USER\Software\Torlack\nwnexplorer]
-    "NwnDirectory"="${nwnDirectoryWine}"
-  '';
+  wine = wineWow64Packages.staging;
+  runtimeNwnInstallDir = escapeHereDoc nwnInstallDir;
+  runtimeWinePrefix = escapeHereDoc winePrefix;
 in
 stdenvNoCC.mkDerivation rec {
   pname = "nwnexplorer";
@@ -57,20 +54,66 @@ stdenvNoCC.mkDerivation rec {
 
         cat > $out/bin/nwnexplorer <<EOF
     #!${runtimeShell}
-    set -e
+    set -euo pipefail
 
-    if [ -z "''${WINEPREFIX:-}" ]; then
-      export WINEPREFIX="\$HOME/.local/share/wineprefixes/nwnexplorer"
-    fi
-
+    export WINEPREFIX="\''${WINEPREFIX:-${runtimeWinePrefix}}"
     export WINEDEBUG="-all"
     export WINEDLLOVERRIDES="mscoree,mshtml="
 
-    mkdir -p "\$WINEPREFIX"
+    nwn_install_dir="${runtimeNwnInstallDir}"
+    exe="$exe"
 
-    ${wineWow64Packages.staging}/bin/wine regedit /S ${nwnexplorerReg}
+    state_dir="\''${XDG_STATE_HOME:-\$HOME/.local/state}/nwnexplorer"
+    log_file="\$state_dir/wine.log"
 
-    exec ${wineWow64Packages.staging}/bin/wine "$exe" "\$@"
+    ${coreutils}/bin/mkdir -p "\$state_dir"
+    exec >>"\$log_file" 2>&1
+
+    echo
+    echo "=== launching nwnexplorer at \$(${coreutils}/bin/date) ==="
+    echo "WINEPREFIX=\$WINEPREFIX"
+    echo "nwn_install_dir=\$nwn_install_dir"
+    echo "exe=\$exe"
+
+    if [ ! -f "\$exe" ]; then
+      echo "Could not find nwnexplorer.exe:"
+      echo "  \$exe"
+      exit 1
+    fi
+
+    if [ ! -d "\$nwn_install_dir" ]; then
+      echo "Could not find Neverwinter Nights install directory:"
+      echo "  \$nwn_install_dir"
+      exit 1
+    fi
+
+    prefix_parent="\$(${coreutils}/bin/dirname "\$WINEPREFIX")"
+    lock_file="\$prefix_parent/.nwnexplorer-wineprefix.lock"
+
+    ${coreutils}/bin/mkdir -p "\$prefix_parent"
+
+    (
+      ${util-linux}/bin/flock 9
+
+      if [ ! -f "\$WINEPREFIX/system.reg" ]; then
+        echo "Initializing Wine prefix..."
+
+        ${wine}/bin/wineboot -u
+      fi
+
+      echo "Writing NWN Explorer registry configuration..."
+
+      nwn_dir_wine="\$(${wine}/bin/winepath -w "\$nwn_install_dir/")"
+
+      ${wine}/bin/wine reg add "HKCU\\Software\\Torlack\\nwnexplorer" \\
+        /v NwnDirectory \\
+        /t REG_SZ \\
+        /d "\$nwn_dir_wine" \\
+        /f
+    ) 9>"\$lock_file"
+
+    echo "Starting NWN Explorer..."
+    exec ${wine}/bin/wine "\$exe" "\$@"
     EOF
 
         chmod +x $out/bin/nwnexplorer
@@ -86,7 +129,7 @@ stdenvNoCC.mkDerivation rec {
     Exec=$out/bin/nwnexplorer
     Icon=applications-utilities
     Terminal=false
-    Categories=Development;Game;Utility;
+    Categories=Development;
     EOF
 
         runHook postInstall

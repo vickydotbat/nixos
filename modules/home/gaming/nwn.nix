@@ -128,21 +128,30 @@ let
     "tempclient"
     "tlk"
   ];
-
 in
 {
   options.theorem.home.gaming.nwn.enable = lib.mkEnableOption "Neverwinter Nights tooling";
 
   config = lib.mkMerge [
     (lib.mkIf cfg.enable {
-      home.packages = [
-        nwnBlender
-        pkgs.cleanmodels
-        pkgs.neverwinter-nim
-        (pkgs.nwnexplorer.override {
+      home.packages =
+        let
           nwnInstallDir = "${config.home.homeDirectory}/.local/share/Steam/steamapps/common/Neverwinter Nights";
-        })
-      ];
+          winePrefixDir = "${config.home.homeDirectory}/.local/share/wineprefixes";
+        in
+        [
+          nwnBlender
+          pkgs.cleanmodels
+          pkgs.neverwinter-nim
+          (pkgs.nwtoolset.override {
+            nwnInstallDir = "${nwnInstallDir}";
+            winePrefix = "${winePrefixDir}/nwtoolset";
+          })
+          (pkgs.nwnexplorer.override {
+            nwnInstallDir = "${nwnInstallDir}";
+            winePrefix = "${winePrefixDir}/nwnexplorer";
+          })
+        ];
 
       home.activation.nwnDocumentsLayout = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
         nwn_data_dir=${lib.escapeShellArg nwnDataDir}

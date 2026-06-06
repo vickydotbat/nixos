@@ -56,8 +56,10 @@ in
         fusermount3.enable = lib.mkForce false;
         pkexec.setuid = lib.mkForce false;
         newgrp.setuid = lib.mkForce false;
-        newgidmap.setuid = lib.mkForce false;
-        newuidmap.setuid = lib.mkForce false;
+        # Rootless Podman needs these helpers to write uid/gid maps. Keep them
+        # only when the host has declared that container substrate.
+        newgidmap.setuid = lib.mkForce config.theorem.nixos.virtualisation.podman.enable;
+        newuidmap.setuid = lib.mkForce config.theorem.nixos.virtualisation.podman.enable;
         # `mount` Needed for `fileSystems.options`
         # mount.enable = lib.mkForce false;
         # Optional: if you disable mount, disable umount as well

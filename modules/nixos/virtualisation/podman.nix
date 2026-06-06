@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   repository,
   selectedUsers,
   ...
@@ -21,6 +22,18 @@ let
   # gates it with the `podman` group, so grant that key only to repository
   # stewards unless a host deliberately widens access elsewhere.
   podmanSocketUsers = lib.attrNames (lib.filterAttrs isRepositoryUser selectedUsers);
+
+  podmanRootlessUsers = lib.filterAttrs isRepositoryUser selectedUsers;
+
+  mkSubUidRange = user: {
+    startUid = 100000 + ((user.uid - 1000) * 65536);
+    count = 65536;
+  };
+
+  mkSubGidRange = user: {
+    startGid = 100000 + ((user.uid - 1000) * 65536);
+    count = 65536;
+  };
 in
 {
   options.theorem.nixos.virtualisation.podman = {
@@ -59,6 +72,8 @@ in
   };
 
   config = lib.mkIf cfg.enable {
+    security.shadow.enable = lib.mkDefault true;
+
     virtualisation = {
       containers.enable = true;
       podman = {
@@ -67,13 +82,23 @@ in
         dockerCompat = cfg.dockerCompat.enable;
         dockerSocket.enable = cfg.dockerSocket.enable;
         defaultNetwork.settings.dns_enabled = cfg.composeDns.enable;
+        extraPackages = lib.mkIf cfg.composeDns.enable [
+          pkgs.podman-compose
+        ];
       };
     };
 
-    users.users = lib.mkIf cfg.dockerSocket.enable (
-      lib.genAttrs podmanSocketUsers (_: {
-        extraGroups = lib.mkAfter [ "podman" ];
-      })
-    );
+    users.users = lib.mkMerge [
+      (lib.mapAttrs (_: user: {
+        subUidRanges = lib.mkDefault [ (mkSubUidRange user) ];
+        subGidRanges = lib.mkDefault [ (mkSubGidRange user) ];
+      }) podmanRootlessUsers)
+
+      (lib.mkIf cfg.dockerSocket.enable (
+        lib.genAttrs podmanSocketUsers (_: {
+          extraGroups = lib.mkAfter [ "podman" ];
+        })
+      ))
+    ];
   };
 }

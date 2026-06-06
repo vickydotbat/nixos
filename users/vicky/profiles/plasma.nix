@@ -94,6 +94,7 @@ in
     panels = [
       {
         location = "top";
+        height = 38;
         widgets = [
           {
             kickoff = {
@@ -116,6 +117,7 @@ in
               behavior = {
                 sortingMethod = "byDesktop";
                 showTasks.onlyInCurrentDesktop = false;
+                grouping.method = "none";
               };
             };
           }
