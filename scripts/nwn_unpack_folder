@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+dest="${1:-$PWD}"
+
+# Resolve the directory to an absolute path
+target_dir="$(realpath "$dest" 2>/dev/null || readlink -f "$dest" 2>/dev/null)"
+
+# Verify that the directory exists
+if [[ ! -d "$target_dir" ]]; then
+  echo "Directory '$dest' does not exist."
+  exit 1
+fi
+
+echo "Processing directory: $target_dir"
+
+# Extensions to target
+extensions=("hak" "mod" "erf")
+
+for ext in "${extensions[@]}"; do
+  echo "Looking for *.$ext files..."
+
+  found_any=false
+
+  for filepath in "$target_dir"/*."$ext"; do
+    [[ -e "$filepath" ]] || continue
+    found_any=true
+
+    filename="$(basename "$filepath")"
+    name_no_ext="${filename%.*}"
+
+    echo "----------------------------------------"
+    echo "Found file: $filename"
+    echo "Creating folder: $name_no_ext"
+
+    mkdir -vp "$target_dir/$name_no_ext"
+    mv -v "$filepath" "$target_dir/$name_no_ext/"
+
+    echo "Moved $filename into $name_no_ext/"
+    echo "Running: nwn_erf -x -f \"$filename\" in $name_no_ext/"
+
+    (
+      cd "$target_dir/$name_no_ext"
+        nwn_erf --add-restypes png:2110 -x -f "$filename"
+
+      echo "Extraction complete, moving original file back to base directory..."
+      mv -v "$filename" "$target_dir/"
+    )
+
+    echo "Done with $filename"
+  done
+
+  if [[ "$found_any" == false ]]; then
+    echo "No *.$ext files found."
+  fi
+done
+
+echo "All files processed!"

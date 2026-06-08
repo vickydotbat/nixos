@@ -25,7 +25,7 @@ stdenvNoCC.mkDerivation {
         mkdir -p $out/bin
         mkdir -p $out/share/applications
 
-        cat > $out/bin/nwtoolset <<'EOF'
+        cat > $out/bin/nwn_toolset <<'EOF'
     #!${runtimeShell}
     set -euo pipefail
 
@@ -70,7 +70,7 @@ stdenvNoCC.mkDerivation {
     exec ${wine}/bin/wine "$exe" "$@"
     EOF
 
-        chmod +x $out/bin/nwtoolset
+        chmod +x $out/bin/nwn_toolset
 
         cat > $out/share/applications/nwtoolset.desktop <<EOF
     [Desktop Entry]
@@ -78,7 +78,7 @@ stdenvNoCC.mkDerivation {
     Name=Aurora Toolset
     GenericName=Neverwinter Nights Toolset
     Comment=Create content for Neverwinter Nights
-    Exec=$out/bin/nwtoolset
+    Exec=$out/bin/nwn_toolset
     Icon=applications-development
     Terminal=false
     Categories=Development;

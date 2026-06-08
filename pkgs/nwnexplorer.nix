@@ -52,7 +52,7 @@ stdenvNoCC.mkDerivation rec {
 
         mkdir -p $out/bin
 
-        cat > $out/bin/nwnexplorer <<EOF
+        cat > $out/bin/nwn_explorer <<EOF
     #!${runtimeShell}
     set -euo pipefail
 
@@ -116,7 +116,7 @@ stdenvNoCC.mkDerivation rec {
     exec ${wine}/bin/wine "\$exe" "\$@"
     EOF
 
-        chmod +x $out/bin/nwnexplorer
+        chmod +x $out/bin/nwn_explorer
 
         mkdir -p $out/share/applications
 
@@ -126,7 +126,7 @@ stdenvNoCC.mkDerivation rec {
     Name=NWN Explorer
     GenericName=Neverwinter Nights Resource Browser
     Comment=Browse and extract Neverwinter Nights resources
-    Exec=$out/bin/nwnexplorer
+    Exec=$out/bin/nwn_explorer
     Icon=applications-utilities
     Terminal=false
     Categories=Development;

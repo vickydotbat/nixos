@@ -204,6 +204,10 @@
           nwtoolset = inputs.self.packages.${system}.nwtoolset;
         };
 
+        nwtoolset-plasma-boundary = import ./checks/nwtoolset-plasma-boundary.nix {
+          inherit inputs pkgs;
+        };
+
         btrfs-rollback-boundary = import ./checks/btrfs-rollback-boundary.nix {
           inherit inputs pkgs;
         };

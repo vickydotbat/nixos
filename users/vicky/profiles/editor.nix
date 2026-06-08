@@ -74,6 +74,7 @@ in
         ms-vscode.cpptools
         ms-vscode.cmake-tools
         esbenp.prettier-vscode
+        ms-vscode-remote.remote-ssh
 
         # QOL
         usernamehw.errorlens
