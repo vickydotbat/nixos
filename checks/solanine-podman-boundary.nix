@@ -24,6 +24,10 @@ let
     in
     user.subUidRanges == [ (expectedRangeForUid user.uid) ]
     && user.subGidRanges == [ (expectedGroupRangeForUid user.uid) ];
+
+  wrapperIsPrivileged =
+    wrapper:
+    (wrapper.setuid or false) || (wrapper.setgid or false) || ((wrapper.capabilities or "") != "");
 in
 assert config.theorem.nixos.virtualisation.podman.enable;
 assert config.theorem.nixos.security.run0-sudo.enable;
@@ -31,8 +35,10 @@ assert config.virtualisation.podman.enable;
 assert config.security.shadow.enable;
 assert hasExpectedRanges "admin";
 assert hasExpectedRanges "vicky";
-assert config.security.wrappers.newuidmap.setuid;
-assert config.security.wrappers.newgidmap.setuid;
+assert config.security.wrappers.newuidmap.enable;
+assert config.security.wrappers.newgidmap.enable;
+assert wrapperIsPrivileged config.security.wrappers.newuidmap;
+assert wrapperIsPrivileged config.security.wrappers.newgidmap;
 assert lib.elem pkgs.podman-compose config.virtualisation.podman.extraPackages;
 assert !(lib.elem "podman" (config.users.users.admin.extraGroups or [ ]));
 assert !(lib.elem "podman" (config.users.users.vicky.extraGroups or [ ]));

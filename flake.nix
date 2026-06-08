@@ -5,16 +5,20 @@
     extra-substituters = [
       "https://nix-community.cachix.org"
       "https://codex-cli.cachix.org"
+      "https://ryoppippi.cachix.org"
     ];
     extra-trusted-public-keys = [
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
       "codex-cli.cachix.org-1:1Br3H1hHoRYG22n//cGKJOk3cQXgYobUel6O8DgSing="
+      "ryoppippi.cachix.org-1:b2LbtWNvJeL/qb1B6TYOMK+apaCps4SCbzlPRfSQIms="
     ];
   };
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    nixpkgs-stable.url = "github:NixOS/nixpkgs/nixos-26.05";
+    # nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    # nixpkgs-stable.url = "github:NixOS/nixpkgs/nixos-26.05";
+    nixpkgs.url = "git+https://github.com/NixOS/nixpkgs?ref=nixos-unstable&shallow=1";
+    nixpkgs-stable.url = "git+https://github.com/NixOS/nixpkgs?ref=nixos-26.05&shallow=1";
 
     impermanence = {
       url = "github:nix-community/impermanence";
@@ -256,10 +260,16 @@
               pkgs.codex
             ];
           };
+          claude = pkgs.mkShell {
+            packages = [
+              pkgs.claude-code
+            ];
+          };
         in
         {
-          default = codex;
+          default = claude;
           codex = codex;
+          claude = claude;
         };
 
       overlays.default =

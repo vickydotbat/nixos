@@ -24,6 +24,7 @@ let
   configuredNhFlake = if hasOsConfig then osConfig.programs.nh.flake or null else null;
   defaultNixosFlake = if configuredNhFlake != null then configuredNhFlake else repository.path;
   defaultNhElevationOption = lib.optionalString run0Enabled "-e run0 ";
+  defaultNhArgs = " --accept-flake-config --use-substitutes";
 
   defaultElevationCommand =
     if run0Enabled then
@@ -172,11 +173,11 @@ in
         shellAliases =
           cfg.aliases
           // lib.optionalAttrs cfg.nixosAliases.enable {
-            ns = "nh os ${defaultNhElevationOption}switch ${cfg.nixosAliases.flake}";
-            nb = "nh os ${defaultNhElevationOption}boot ${cfg.nixosAliases.flake}";
-            nt = "nh os ${defaultNhElevationOption}test ${cfg.nixosAliases.flake}";
-            nd = "nh os ${defaultNhElevationOption}build ${cfg.nixosAliases.flake}";
-            nr = "nh os ${defaultNhElevationOption}build ${cfg.nixosAliases.flake}";
+            ns = "nh os ${defaultNhElevationOption}switch ${cfg.nixosAliases.flake} ${defaultNhArgs}";
+            nb = "nh os ${defaultNhElevationOption}boot ${cfg.nixosAliases.flake} ${defaultNhArgs}";
+            nt = "nh os ${defaultNhElevationOption}test ${cfg.nixosAliases.flake} ${defaultNhArgs}";
+            nd = "nh os ${defaultNhElevationOption}build ${cfg.nixosAliases.flake} ${defaultNhArgs}";
+            nr = "nh os ${defaultNhElevationOption}build ${cfg.nixosAliases.flake} ${defaultNhArgs}";
           }
           // cfg.extraAliases;
 
