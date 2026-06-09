@@ -330,27 +330,27 @@ in
         enable = true;
 
         associations.added = {
-          "text/html" = firefox;
-          "text/xml" = firefox;
-          "application/xhtml+xml" = firefox;
-          "application/xml" = firefox;
+          "text/html" = lib.mkForce firefox;
+          "text/xml" = lib.mkForce firefox;
+          "application/xhtml+xml" = lib.mkForce firefox;
+          "application/xml" = lib.mkForce firefox;
 
-          "x-scheme-handler/http" = firefox;
-          "x-scheme-handler/https" = firefox;
-          "x-scheme-handler/about" = firefox;
-          "x-scheme-handler/unknown" = firefox;
+          "x-scheme-handler/http" = lib.mkForce firefox;
+          "x-scheme-handler/https" = lib.mkForce firefox;
+          "x-scheme-handler/about" = lib.mkForce firefox;
+          "x-scheme-handler/unknown" = lib.mkForce firefox;
         };
 
         defaultApplications = {
-          "text/html" = firefox;
-          "text/xml" = firefox;
-          "application/xhtml+xml" = firefox;
-          "application/xml" = firefox;
+          "text/html" = lib.mkForce firefox;
+          "text/xml" = lib.mkForce firefox;
+          "application/xhtml+xml" = lib.mkForce firefox;
+          "application/xml" = lib.mkForce firefox;
 
-          "x-scheme-handler/http" = firefox;
-          "x-scheme-handler/https" = firefox;
-          "x-scheme-handler/about" = firefox;
-          "x-scheme-handler/unknown" = firefox;
+          "x-scheme-handler/http" = lib.mkForce firefox;
+          "x-scheme-handler/https" = lib.mkForce firefox;
+          "x-scheme-handler/about" = lib.mkForce firefox;
+          "x-scheme-handler/unknown" = lib.mkForce firefox;
         };
       };
     })

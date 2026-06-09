@@ -457,11 +457,11 @@ in
     enable = true;
 
     defaultApplications = {
-      "inode/directory" = [ "org.kde.dolphin.desktop" ];
-      "application/pdf" = [ "org.kde.okular.desktop" ];
-      "image/png" = [ "org.kde.gwenview.desktop" ];
-      "image/jpeg" = [ "org.kde.gwenview.desktop" ];
-      "image/webp" = [ "org.kde.gwenview.desktop" ];
+      "inode/directory" = lib.mkForce [ "org.kde.dolphin.desktop" ];
+      "application/pdf" = lib.mkForce [ "org.kde.okular.desktop" ];
+      "image/png" = lib.mkForce [ "org.kde.gwenview.desktop" ];
+      "image/jpeg" = lib.mkForce [ "org.kde.gwenview.desktop" ];
+      "image/webp" = lib.mkForce [ "org.kde.gwenview.desktop" ];
     };
   };
 }
