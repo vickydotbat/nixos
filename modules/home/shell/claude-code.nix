@@ -28,8 +28,6 @@ let
 
   computedSettingsFile = json.generate "claude-settings.json" cfg.computedSettings;
 
-  initialConfigFile = json.generate "claude-settings-initial.json" cfg.initialConfig.settings;
-
   superpowersSkills = lib.mapAttrs (
     name: _type: lib.mkDefault (cfg.superpowers.source + "/${name}")
   ) (builtins.readDir cfg.superpowers.source);
@@ -80,8 +78,6 @@ let
       mainProgram = "claude";
     };
   };
-
-  renderTextOrPath = value: if builtins.isPath value then { source = value; } else { text = value; };
 
   renderSkill =
     name: value:
@@ -215,9 +211,11 @@ in
       type = lib.types.either lib.types.lines lib.types.path;
       default = "";
       description = ''
-        Global Claude context written to `~/.claude/CLAUDE.md`. Keep this short:
-        repository doctrine belongs in project `CLAUDE.md`, while this is the
-        operator's portable field note.
+        Operator context appended to `~/.claude/CLAUDE.md` after the module's
+        built-in documentation requirement. Keep this short: repository doctrine
+        belongs in project `CLAUDE.md`, while this is the operator's portable
+        field note. A path value is read at evaluation time so the module
+        requirement can always be prepended.
       '';
     };
 
@@ -261,9 +259,11 @@ in
         type = lib.types.bool;
         default = false;
         description = ''
-          Seed `~/.claude/settings.json` only when it does not already exist.
-          Useful when `manageSettings = false`; ignored when the declarative file
-          already exists.
+          Seed `~/.claude/settings.json` from `computedSettings` when the file
+          does not already exist. The intended companion to `manageSettings = false`:
+          the seed fires on each ephemeral boot (the file is absent) and produces
+          a writable regular file that Claude Code and `/config` can both edit.
+          On a persistent home the seed fires only once.
         '';
       };
 
@@ -271,9 +271,11 @@ in
         type = json.type;
         default = { };
         description = ''
-          Initial Claude settings written only when `~/.claude/settings.json` is
-          absent. Workflow policy, model choice, and permission posture are user
-          doctrine and should be set from user modules.
+          Extra settings merged into `computedSettings` before the seed. Because
+          the seed copies `computedSettings`, these values are present whether
+          `manageSettings` is true or false. Prefer `settings` for overrides that
+          should always be in effect; use this option only for seed-specific
+          addenda that do not belong in the managed file.
         '';
       };
     };
@@ -424,6 +426,7 @@ in
           };
         }
 
+        cfg.initialConfig.settings
         cfg.settings
       ];
 
@@ -437,9 +440,29 @@ in
           ".claude/settings.json".source = computedSettingsFile;
         })
 
-        (lib.mkIf (cfg.context != "") {
-          ".claude/CLAUDE.md" = renderTextOrPath cfg.context;
-        })
+        # Always write CLAUDE.md. The module-level requirement is non-negotiable
+        # and cannot be disabled by user context; the user's context is appended
+        # below it. Paths are read at eval time so the text can be prepended.
+        {
+          ".claude/CLAUDE.md".text =
+            let
+              userText =
+                if builtins.isPath cfg.context then builtins.readFile cfg.context
+                else cfg.context;
+            in
+            lib.concatStringsSep "\n" (
+              lib.filter (s: s != "") [
+                ''
+                  Before starting any work in a repository, you must read the
+                  project's AGENTS.md (or CLAUDE.md) and every skill or
+                  documentation file it references. Follow all instructions in
+                  those files before proceeding with any task. This is a
+                  requirement, not a suggestion.
+                ''
+                userText
+              ]
+            );
+        }
 
         skillFiles
       ];
@@ -451,7 +474,7 @@ in
 
           if [[ ! -e "$config_file" ]]; then
             $DRY_RUN_CMD ${pkgs.coreutils}/bin/install -d -m 0700 "$config_dir"
-            $DRY_RUN_CMD ${pkgs.coreutils}/bin/install -m 0600 ${lib.escapeShellArg initialConfigFile} "$config_file"
+            $DRY_RUN_CMD ${pkgs.coreutils}/bin/install -m 0600 ${lib.escapeShellArg computedSettingsFile} "$config_file"
           fi
         ''
       );
@@ -459,8 +482,11 @@ in
 
     (lib.optionalAttrs hasHomePersistence {
       home.persistence."/nix/persist" = lib.mkIf (cfg.enable && cfg.persistState) {
+        # Persist only user-state dirs that home.file never touches. Persisting
+        # the whole .claude dir collides with home.file managing settings.json,
+        # CLAUDE.md, and skills/ as symlinks inside that same directory.
         directories = [
-          ".claude"
+          ".claude/projects"
         ];
 
         files = [
