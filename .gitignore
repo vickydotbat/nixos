@@ -18,6 +18,7 @@
 !/pkgs/
 !/scripts/
 !/secrets/
+!/temp/
 !/users/
 
 # Keep everything inside selected root directories
@@ -29,6 +30,7 @@
 !/modules/**
 !/pkgs/**
 !/scripts/**
+!/temp/**
 !/secrets/**
 !/users/**
 

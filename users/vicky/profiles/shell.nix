@@ -61,24 +61,17 @@ in
 
     claude = {
       enable = true;
-      unrestricted = true;
-      superpowers.enable = true;
+      # unrestricted = true;
 
-      # manageSettings = false so settings.json is a writable regular file.
-      # initialConfig seeds it from computedSettings on each ephemeral boot,
-      # which means /config and direct edits work during a session.
-      manageSettings = false;
-      initialConfig.enable = true;
+      # settings = {
+      #   model = "sonnet";
+      #   viewMode = "focus";
+      # };
 
-      settings = {
-        model = "sonnet";
-        viewMode = "focus";
-      };
-
-      context = ''
-        Be extremely succinct. Sacrifice grammar for concision.
-        Keep README.md and documentation human readable.
-      '';
+      # context = ''
+      #   Be extremely succinct. Sacrifice grammar for concision.
+      #   Keep README.md and documentation human readable.
+      # '';
     };
 
     ghostty.enable = true;

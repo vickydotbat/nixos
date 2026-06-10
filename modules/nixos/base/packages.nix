@@ -33,6 +33,7 @@ in
       vim
       unzip
       zip
+      python3
     ];
   };
 }
