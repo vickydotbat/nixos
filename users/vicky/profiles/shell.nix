@@ -7,11 +7,7 @@
 let
   home = config.home.homeDirectory;
   trustedProjects = [
-    "${home}/Projects/westgate"
-    "${home}/Projects/westgate/module"
-    "${home}/Projects/westgate/toolkit"
-    "${home}/Projects/westgate/assets"
-    "${home}/Projects/westgate/devkit"
+    "${home}/Projects/westgate/repositories"
     "${home}/Obsidian/Echo-Reliquary"
   ];
 in
@@ -74,7 +70,8 @@ in
       # '';
     };
 
-    ghostty.enable = true;
+    # ghostty.enable = true;
+    alacritty.enable = true;
     git.enable = true;
     nix-index = {
       enable = true;
