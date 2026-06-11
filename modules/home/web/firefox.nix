@@ -327,8 +327,6 @@ in
       };
 
       xdg.mimeApps = {
-        enable = true;
-
         associations.added = {
           "text/html" = lib.mkForce firefox;
           "text/xml" = lib.mkForce firefox;

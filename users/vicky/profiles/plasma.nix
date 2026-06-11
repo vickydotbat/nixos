@@ -453,15 +453,11 @@ in
     ];
   };
 
-  xdg.mimeApps = {
-    enable = true;
-
-    defaultApplications = {
-      "inode/directory" = lib.mkForce [ "org.kde.dolphin.desktop" ];
-      "application/pdf" = lib.mkForce [ "org.kde.okular.desktop" ];
-      "image/png" = lib.mkForce [ "org.kde.gwenview.desktop" ];
-      "image/jpeg" = lib.mkForce [ "org.kde.gwenview.desktop" ];
-      "image/webp" = lib.mkForce [ "org.kde.gwenview.desktop" ];
-    };
+  xdg.mimeApps.defaultApplications = {
+    "inode/directory" = lib.mkForce [ "org.kde.dolphin.desktop" ];
+    "application/pdf" = lib.mkForce [ "org.kde.okular.desktop" ];
+    "image/png" = lib.mkForce [ "org.kde.gwenview.desktop" ];
+    "image/jpeg" = lib.mkForce [ "org.kde.gwenview.desktop" ];
+    "image/webp" = lib.mkForce [ "org.kde.gwenview.desktop" ];
   };
 }

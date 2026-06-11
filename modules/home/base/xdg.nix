@@ -56,7 +56,10 @@ in
 
       mimeApps = {
         enable = true;
+
       };
+      configFile."mimeapps.list".force = true;
+      dataFile."applications/mimeapps.list".force = true;
 
       autostart = {
         enable = true;
