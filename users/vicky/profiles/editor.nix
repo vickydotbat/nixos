@@ -95,6 +95,7 @@ in
         deadnix
         csharpier
         dotnet
+        fallow
       ];
       userSettings = {
         "workbench.startupEditor" = "none";

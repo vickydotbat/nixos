@@ -7,4 +7,5 @@
   neverwinter-nim = pkgs.callPackage ./neverwinter-nim.nix { };
   nwnexplorer = pkgs.callPackage ./nwnexplorer.nix { };
   nwtoolset = pkgs.callPackage ./nwtoolset.nix { };
+  fallow = pkgs.callPackage ./fallow.nix { };
 }
