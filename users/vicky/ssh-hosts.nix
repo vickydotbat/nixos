@@ -14,9 +14,12 @@
     };
 
     "ovh_sow" = {
-      User = "ubuntu";
-      Port = 2222;
       HostName = "51.254.142.98";
+      Port = 2222;
+      User = "sow-deploy";
+      IdentityFile = "~/.ssh/id_ed25519";
+      IdentitiesOnly = "yes";
+      StrictHostKeyChecking = "accept-new";
     };
 
     "git.westgate.pw" = {
