@@ -13,7 +13,7 @@
       IdentitiesOnly = true;
     };
 
-    "ovh_sow" = {
+    "ovh-main" = {
       HostName = "51.254.142.98";
       Port = 2222;
       User = "sow-deploy";
@@ -24,9 +24,12 @@
 
     "git.westgate.pw" = {
       HostName = "git.westgate.pw";
+      AddressFamily = "inet6";
       Port = 22;
       User = "git";
+      IdentityFile = "~/.ssh/id_ed25519";
       IdentitiesOnly = true;
+      ConnectTimeout = 8;
     };
   };
 }
