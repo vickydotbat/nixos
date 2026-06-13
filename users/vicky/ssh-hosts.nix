@@ -15,12 +15,13 @@
 
     "ovh_sow" = {
       User = "ubuntu";
+      Port = 2222;
       HostName = "51.254.142.98";
     };
 
-    "git-ssh.westgate.pw" = {
-      HostName = "git-ssh.westgate.pw";
-      Port = 2222;
+    "git.westgate.pw" = {
+      HostName = "git.westgate.pw";
+      Port = 22;
       User = "git";
       IdentitiesOnly = true;
     };
