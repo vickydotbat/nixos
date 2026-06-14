@@ -249,6 +249,11 @@
         module-default-boundary = import ./checks/module-default-boundary.nix {
           inherit inputs pkgs;
         };
+
+        gimp-custom-wrapper-boundary = import ./checks/gimp-custom-wrapper-boundary.nix {
+          inherit pkgs;
+          gimp3-custom = inputs.self.packages.${system}.gimp3-custom;
+        };
       };
 
       devShells.${system} =
