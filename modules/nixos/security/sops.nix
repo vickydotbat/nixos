@@ -40,7 +40,7 @@ in
 
     ageKeyGroup = lib.mkOption {
       type = lib.types.str;
-      default = "wheel";
+      default = "nixcfg";
       description = "Group allowed to read the persisted age identity file.";
     };
 
