@@ -92,6 +92,15 @@ in
       graphics.enable = true;
       flatpak.enable = false;
       jailmole.enable = true;
+      keyd = {
+        enable = true;
+        settings.deathadder = {
+          # Remap my first mouse button to middlemouse because it's failing
+          # Also a bit more ergonomic tbh
+          ids = [ "1532:0084:288cfcd8" ];
+          settings.main.f1 = "middlemouse";
+        };
+      };
     };
 
     gaming = {

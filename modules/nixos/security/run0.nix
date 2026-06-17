@@ -36,6 +36,7 @@ in
       # Run0 is the elevation path for this profile. Force the traditional
       # sudo service off even when the profile inherits a host that enables it.
       sudo.enable = lib.mkForce false;
+      run0.enable = lib.mkForce true;
 
       polkit.enable = true;
       run0 = {
