@@ -91,7 +91,7 @@ in
       appimage.enable = true;
       graphics.enable = true;
       flatpak.enable = false;
-      jailwolf.enable = true;
+      jailmole.enable = true;
     };
 
     gaming = {

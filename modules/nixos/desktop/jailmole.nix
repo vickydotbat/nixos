@@ -4,21 +4,21 @@
   pkgs,
   ...
 }:
-# `jailwolf` is a disposable LibreWolf launcher owned by the desktop theorem,
+# `jailmole` is a disposable Mullvad launcher owned by the desktop theorem,
 # not a general browser preference. Firejail follows this explicit app choice
 # and the profile denies ordinary browser, key, and password-manager state.
 let
-  cfg = config.theorem.nixos.desktop.jailwolf;
+  cfg = config.theorem.nixos.desktop.jailmole;
 
-  command = "librewolf-private";
+  command = "mullvad-private";
 
-  librewolfIcons = pkgs.runCommand "librewolf-icons" { } ''
-    mkdir -p $out/share/icons
-    cp -r ${pkgs.librewolf}/share/icons/hicolor $out/share/icons/
-  '';
+  # mullvadIcons = pkgs.runCommand "mullvad-icons" { } ''
+  #   mkdir -p $out/share/icons
+  #   cp -r ${pkgs.mullvad}/share/icons/hicolor $out/share/icons/
+  # '';
 
-  librewolfProfile = pkgs.writeText "librewolf-private.profile" ''
-    # Start from Firejail's Firefox profile. LibreWolf is Firefox-derived.
+  mullvadProfile = pkgs.writeText "mullvad-private.profile" ''
+    # Start from Firejail's Firefox profile. Mullvad is Firefox-derived.
     include ${pkgs.firejail}/etc/firejail/firefox.profile
 
     # Disposable browser state.
@@ -41,18 +41,18 @@ let
     blacklist ''${HOME}/.config/keepassxc
     blacklist ''${HOME}/.local/share/keyrings
     blacklist ''${HOME}/.mozilla
-    blacklist ''${HOME}/.librewolf
-    blacklist ''${HOME}/.cache/librewolf
-    blacklist ''${HOME}/.config/librewolf
-    blacklist ''${HOME}/.local/share/librewolf
+    blacklist ''${HOME}/.mullvad
+    blacklist ''${HOME}/.cache/mullvad
+    blacklist ''${HOME}/.config/mullvad
+    blacklist ''${HOME}/.local/share/mullvad
   '';
 
   desktopItem = pkgs.makeDesktopItem {
     name = command;
-    desktopName = "LibreWolf Private";
+    desktopName = "Mullvad Private";
     genericName = "Disposable Hardened Browser";
     exec = "/run/current-system/sw/bin/${command} %U";
-    icon = "librewolf";
+    icon = "mullvad-browser";
     terminal = false;
     categories = [
       "Network"
@@ -68,8 +68,8 @@ let
   };
 in
 {
-  options.theorem.nixos.desktop.jailwolf.enable = lib.mkEnableOption ''
-    Firejailed LibreWolf disposable browser. This stays an explicit desktop
+  options.theorem.nixos.desktop.jailmole.enable = lib.mkEnableOption ''
+    Firejailed Mullvad disposable browser. This stays an explicit desktop
     application choice; the Firejail substrate may follow it, but Firejail alone
     should not summon a browser onto a host.
   '';
@@ -77,14 +77,14 @@ in
   config = lib.mkIf cfg.enable {
     programs.firejail.wrappedBinaries = {
       ${command} = {
-        executable = "${lib.getBin pkgs.librewolf}/bin/librewolf";
-        profile = librewolfProfile;
+        executable = "${lib.getBin pkgs.mullvad-browser}/bin/mullvad-browser";
+        profile = mullvadProfile;
       };
     };
 
     environment.systemPackages = [
       desktopItem
-      librewolfIcons
+      # mullvadIcons
     ];
   };
 }

@@ -14,8 +14,8 @@ in
   options.theorem.nixos.security.firejail = {
     enable = lib.mkOption {
       type = lib.types.bool;
-      default = config.theorem.nixos.desktop.jailwolf.enable;
-      defaultText = lib.literalExpression "theorem.nixos.desktop.jailwolf.enable";
+      default = config.theorem.nixos.desktop.jailmole.enable;
+      defaultText = lib.literalExpression "theorem.nixos.desktop.jailmole.enable";
       description = ''
         Enable Firejail sandboxing when a Firejail-backed desktop theorem needs
         it. A future hardened system profile may also select this explicitly;

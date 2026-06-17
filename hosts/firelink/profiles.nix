@@ -72,7 +72,7 @@ in
       appimage.enable = true;
       graphics.enable = true;
       flatpak.enable = true;
-      jailwolf.enable = false;
+      jailmole.enable = false;
     };
 
     security = {

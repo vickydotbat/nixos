@@ -12,7 +12,7 @@ let
   desktopNeedsGraphics =
     config.theorem.nixos.desktop.plasma.enable
     || config.theorem.nixos.gaming.steam.enable
-    || config.theorem.nixos.desktop.jailwolf.enable;
+    || config.theorem.nixos.desktop.jailmole.enable;
 in
 {
   options.theorem.nixos.desktop.graphics.enable = lib.mkOption {
@@ -21,7 +21,7 @@ in
     defaultText = lib.literalExpression ''
       theorem.nixos.desktop.plasma.enable
       || theorem.nixos.gaming.steam.enable
-      || theorem.nixos.desktop.jailwolf.enable
+      || theorem.nixos.desktop.jailmole.enable
     '';
     description = "Enable desktop graphics support when a graphical system theorem needs it.";
   };
