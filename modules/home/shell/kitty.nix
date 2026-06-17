@@ -5,23 +5,23 @@
 }:
 # TODO: describe
 let
-  cfg = config.theorem.home.shell.alacritty;
+  cfg = config.theorem.home.shell.kitty;
 in
 {
-  options.theorem.home.shell.alacritty = {
-    enable = lib.mkEnableOption "alacritty terminal";
+  options.theorem.home.shell.kitty = {
+    enable = lib.mkEnableOption "kitty terminal";
   };
 
   config = lib.mkIf cfg.enable {
     home.sessionVariables.TERMINFO_DIRS = lib.mkForce (
       lib.concatStringsSep ":" [
-        "${config.programs.alacritty.package.terminfo}/share/terminfo"
+        "${config.programs.kitty.package.terminfo}/share/terminfo"
         "${config.home.profileDirectory}/share/terminfo"
         "/run/current-system/sw/share/terminfo"
       ]
     );
 
-    programs.alacritty = {
+    programs.kitty = {
       enable = true;
     };
   };

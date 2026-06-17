@@ -522,7 +522,7 @@ in
     };
 
     # ghostty.enable = true;
-    alacritty.enable = true;
+    kitty.enable = true;
     git.enable = true;
     nix-index = {
       enable = true;
