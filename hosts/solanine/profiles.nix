@@ -95,10 +95,20 @@ in
       keyd = {
         enable = true;
         settings.deathadder = {
-          # Remap my first mouse button to middlemouse because it's failing
-          # Also a bit more ergonomic tbh
-          ids = [ "1532:0084:288cfcd8" ];
-          settings.main.f1 = "middlemouse";
+          ids = [ "1532:0084:288cfcd8" ]; # Razer DeathAdder V2
+          settings.main = {
+            f1 = "middlemouse"; # Remap my first mouse button to middlemouse
+          };
+        };
+        settings.geekykb = {
+          # this geeky keyboard is weird because it has 3 entries in keyd
+          ids = [ "3532:c0c9:b80f2b4d" ]; # Geeky GK75 gaming keyboard
+          settings.main = {
+            capslock = "f24";
+            home = "f23";
+            end = "f22";
+            scrolllock = "f21";
+          };
         };
       };
     };
