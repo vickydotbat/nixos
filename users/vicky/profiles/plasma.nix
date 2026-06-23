@@ -378,8 +378,7 @@ in
       "ksmserverrc".General.loginMode = "emptySession";
 
       "ktrashrc".${trashPath} = {
-        # Keep Trash short-lived and size-bound so tmpfs-backed homes do not
-        # turn accidental deletes into quiet memory pressure.
+        # Keep Trash short-lived and size-bound.
         Days = 1;
         LimitReachedAction = 1;
         Percent = 5;

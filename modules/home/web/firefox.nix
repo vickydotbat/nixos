@@ -282,7 +282,7 @@ in
               -------------------
             */
 
-            # Disk cache lives under ~/.cache/mozilla, which is tmpfs for you.
+            # Disk cache lives under ~/.cache/mozilla.
             # Keep it enabled but bounded.
             "browser.cache.disk.enable" = true;
             "browser.cache.disk.smart_size.enabled" = false;
