@@ -87,13 +87,11 @@ in
   theorem.nixos.base.persistence = {
     storage = {
       manageFileSystems = false;
-      fsType = "btrfs";
       device = "/dev/mapper/cryptroot";
       inherit btrfsCompression;
     };
 
     root = {
-      mode = "btrfs";
       btrfsSubvolume = "@root";
       btrfsBlankSubvolume = "@root-blank";
       btrfsTopLevelSubvolume = "/";
