@@ -146,5 +146,6 @@ in
     btrfs-progs # FIXME: Make this available only when btrfs is enabled
     nvme-cli # FIXME: Make this available only on NVME systems
     smartmontools
+    nodejs
   ];
 }

@@ -22,6 +22,9 @@ let
   superpowersSkills = lib.mapAttrs (
     name: _type: lib.mkDefault (cfg.superpowers.source + "/${name}")
   ) (builtins.readDir cfg.superpowers.source);
+  ponytailSkills = lib.mapAttrs (name: _type: lib.mkDefault (cfg.ponytail.source + "/${name}")) (
+    builtins.readDir cfg.ponytail.source
+  );
 
   codexNightlyPackage = pkgs.stdenvNoCC.mkDerivation {
     pname = "codex-nightly";
@@ -179,6 +182,21 @@ in
       };
     };
 
+    ponytail = {
+      enable = lib.mkEnableOption "Ponytail Codex skills";
+
+      source = lib.mkOption {
+        type = lib.types.path;
+        default = inputs.ponytail + "/skills";
+        defaultText = lib.literalExpression ''inputs.ponytail + "/skills"'';
+        description = ''
+          Directory containing Ponytail skill folders. Defaults to the
+          pinned `ponytail` flake input so updates pass through `flake.lock`
+          instead of an unmanaged `git pull`.
+        '';
+      };
+    };
+
     skills = lib.mkOption {
       type = lib.types.attrsOf (lib.types.either lib.types.lines lib.types.path);
       default = { };
@@ -270,6 +288,7 @@ in
 
         skills = lib.mkMerge [
           (lib.mkIf cfg.superpowers.enable superpowersSkills)
+          (lib.mkIf cfg.ponytail.enable ponytailSkills)
           cfg.skills
         ];
       };

@@ -48,11 +48,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1781667738,
-        "narHash": "sha256-OxrwHpsWf+QGbos1LMDGAcv7sjBGshcw/43th6waeYI=",
+        "lastModified": 1781844424,
+        "narHash": "sha256-sWBr0D6eu6UhmtM87NOd4oOYilIclFXGDd/s7tVvO10=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "7664e05e2413d5e2b8c54a884eb8ea0f8a504fc2",
+        "rev": "c804fab681f03ec772390af4421bcc9bce80c1d9",
         "type": "github"
       },
       "original": {
@@ -181,11 +181,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1781699393,
-        "narHash": "sha256-xkxFfXxuQVUVjLuA5BriGGxv5kcHqwAsVHtNHVCiUKw=",
+        "lastModified": 1781849675,
+        "narHash": "sha256-/A8JXpL01U3TK69EGZGlcF8mgtt81UuTxOe3kY3lUe8=",
         "owner": "nix-community",
         "repo": "NUR",
-        "rev": "002f88817f1e96553b480365d0da5f17ba683927",
+        "rev": "020f5bb3c3eea76d1e23ce88f0a20964a9f2c1b7",
         "type": "github"
       },
       "original": {
@@ -217,6 +217,22 @@
         "type": "github"
       }
     },
+    "ponytail": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1781829422,
+        "narHash": "sha256-UB1q9sP/xJw/6nLV5EJDZHU3zHXRUaPMyEdPt7oFKU8=",
+        "owner": "DietrichGebert",
+        "repo": "ponytail",
+        "rev": "ff5d0936bee1f1267f4f4a7c34a2e6c796254f0b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "DietrichGebert",
+        "repo": "ponytail",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "disko": "disko",
@@ -229,6 +245,7 @@
         "nixpkgs-stable": "nixpkgs-stable",
         "nur": "nur",
         "plasma-manager": "plasma-manager",
+        "ponytail": "ponytail",
         "sops-nix": "sops-nix",
         "spicetify-nix": "spicetify-nix",
         "superpowers": "superpowers"
@@ -278,11 +295,11 @@
     "superpowers": {
       "flake": false,
       "locked": {
-        "lastModified": 1781674939,
-        "narHash": "sha256-D47uMC80wcIMNzW/rA7VUVGc4hzlmcZJMCrLyp2lbAY=",
+        "lastModified": 1781822662,
+        "narHash": "sha256-+lT2a/qq0SF4k0PgnEDKiuidVlZX2p0vEso4d/5T1os=",
         "owner": "obra",
         "repo": "superpowers",
-        "rev": "b62616fc12f6a007c6fd5118146821d748da0d33",
+        "rev": "896224c4b1879920ab573417e68fd51d2ccc9072",
         "type": "github"
       },
       "original": {
