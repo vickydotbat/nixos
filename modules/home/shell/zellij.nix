@@ -1,7 +1,6 @@
 {
   config,
   lib,
-  options,
   pkgs,
   ...
 }:
@@ -10,7 +9,6 @@
 # same chords instead of competing for them.
 let
   cfg = config.theorem.home.shell.zellij;
-  hasHomePersistence = options.home ? persistence;
 in
 {
   options.theorem.home.shell.zellij = {
@@ -143,16 +141,6 @@ in
           eval "$(${lib.getExe config.programs.zellij.package} setup --generate-auto-start bash)"
         fi
       '';
-    })
-    (lib.optionalAttrs hasHomePersistence {
-      home.persistence."/nix/persist" =
-        lib.mkIf (cfg.enable && config.theorem.home.base.persistence.enable)
-          {
-            directories = [
-              ".cache/zellij"
-              ".local/share/zellij"
-            ];
-          };
     })
   ];
 }

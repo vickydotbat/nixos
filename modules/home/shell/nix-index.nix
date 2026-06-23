@@ -1,7 +1,6 @@
 {
   config,
   lib,
-  options,
   pkgs,
   ...
 }:
@@ -10,7 +9,6 @@
 # repair shells, scripts, and editor-embedded terminals.
 let
   cfg = config.theorem.home.shell.nix-index;
-  hasHomePersistence = options.home ? persistence;
 in
 {
   options.theorem.home.shell.nix-index = {
@@ -91,15 +89,6 @@ in
           };
         };
       programs.nix-index-database.comma.enable = cfg.comma.enable;
-    })
-    (lib.optionalAttrs hasHomePersistence {
-      home.persistence."/nix/persist" =
-        lib.mkIf (cfg.enable && config.theorem.home.base.persistence.enable)
-          {
-            directories = [
-              ".cache/nix-index"
-            ];
-          };
     })
   ];
 }

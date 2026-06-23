@@ -1,7 +1,6 @@
 {
   config,
   lib,
-  options,
   osConfig ? null,
   pkgs,
   ...
@@ -12,7 +11,6 @@
 # selects it directly.
 let
   cfg = config.theorem.home.base.fonts;
-  hasHomePersistence = options.home ? persistence;
   graphicsEnabled =
     if osConfig == null then false else osConfig.theorem.nixos.desktop.graphics.enable or false;
 in
@@ -73,15 +71,6 @@ in
       fonts.fontconfig = lib.mkIf cfg.fontconfig.enable {
         enable = true;
       };
-    })
-    (lib.optionalAttrs hasHomePersistence {
-      home.persistence."/nix/persist" =
-        lib.mkIf (cfg.enable && cfg.fontconfig.enable && config.theorem.home.base.persistence.enable)
-          {
-            directories = [
-              ".cache/fontconfig"
-            ];
-          };
     })
   ];
 }

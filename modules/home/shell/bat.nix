@@ -1,7 +1,6 @@
 {
   config,
   lib,
-  options,
   pkgs,
   ...
 }:
@@ -10,7 +9,6 @@
 # shell theorem that will actually consume them.
 let
   cfg = config.theorem.home.shell.bat;
-  hasHomePersistence = options.home ? persistence;
 in
 {
   options.theorem.home.shell.bat = {
@@ -54,15 +52,6 @@ in
           bat = "bat --paging=never";
         };
       };
-    })
-    (lib.optionalAttrs hasHomePersistence {
-      home.persistence."/nix/persist" =
-        lib.mkIf (cfg.enable && config.theorem.home.base.persistence.enable)
-          {
-            directories = [
-              ".cache/bat"
-            ];
-          };
     })
   ];
 }
