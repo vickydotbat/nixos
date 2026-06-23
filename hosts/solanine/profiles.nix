@@ -64,7 +64,6 @@ in
         "vscode-extension-ms-vscode-cpptools"
         "vscode-extension-mhutchie-git-graph"
         "vscode-extension-ms-dotnettools-csharp"
-        "nwtoolset"
         "vscode-extension-ms-vscode-remote-remote-ssh"
         "claude-code"
       ];

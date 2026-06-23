@@ -11,10 +11,7 @@
 let
   cfg = config.theorem.home.gaming.nwn;
   hasHomePersistence = options.home ? persistence;
-  hasPlasmaManager = options.programs ? plasma;
-
   persistenceEnabled = (config.theorem.home.base.persistence.enable or false);
-  plasmaIntegrationEnabled = cfg.enable && (config.theorem.home.desktop.plasma.enable or false);
 
   # Default mechanism, kept in the reusable module; home/ may override it.
   nwnInstallDir = "${config.home.homeDirectory}/.local/share/Steam/steamapps/common/Neverwinter Nights";
@@ -24,10 +21,6 @@ let
   windowsDocumentsDir = "C:\\users\\${config.home.username}\\Documents\\Neverwinter Nights";
   nwnBlender = pkgs.blender-402-bin;
   nwnBlenderConfigVersion = lib.versions.majorMinor nwnBlender.version;
-  nwtoolset = pkgs.nwtoolset.override {
-    inherit nwnInstallDir;
-    winePrefix = "${winePrefixDir}/nwtoolset";
-  };
   nwnexplorer = pkgs.nwnexplorer.override {
     inherit nwnInstallDir;
     winePrefix = "${winePrefixDir}/nwnexplorer";
@@ -161,7 +154,6 @@ in
         nwnBlender
         pkgs.cleanmodels
         pkgs.neverwinter-nim
-        nwtoolset
         nwnexplorer
         nwn_unpack_folder
       ];
@@ -192,44 +184,6 @@ in
         $DRY_RUN_CMD ${pkgs.coreutils}/bin/install -m 0644 ${pkgs.writeText "nwn-data.ini" nwnDataIni} "$nwn_data_dir/nwn.ini"
         $DRY_RUN_CMD ${pkgs.coreutils}/bin/install -m 0644 ${pkgs.writeText "nwn.ini" nwnIni} "$nwn_documents_dir/nwn.ini"
       '';
-    })
-    (lib.mkIf plasmaIntegrationEnabled {
-      xdg.dataFile."applications/nwtoolset.desktop".text = ''
-        [Desktop Entry]
-        Type=Application
-        Name=Aurora Toolset
-        GenericName=Neverwinter Nights Toolset
-        Comment=Create content for Neverwinter Nights
-        Exec=${lib.getExe nwtoolset}
-        Icon=applications-development
-        Terminal=false
-        Categories=Development;
-        StartupWMClass=nwtoolset.exe
-      '';
-    })
-    (lib.optionalAttrs hasPlasmaManager {
-      programs.plasma.window-rules = lib.mkIf plasmaIntegrationEnabled [
-        {
-          description = "NWToolset Plasma window integration";
-          match = {
-            window-class = {
-              value = "nwtoolset.exe";
-              type = "exact";
-            };
-            window-types = [ "normal" ];
-          };
-          apply = {
-            skiptaskbar = {
-              value = false;
-              apply = "force";
-            };
-            skippager = {
-              value = false;
-              apply = "force";
-            };
-          };
-        }
-      ];
     })
     (lib.optionalAttrs hasHomePersistence {
       home.persistence."/nix/persist" = lib.mkIf (cfg.enable && persistenceEnabled) {
