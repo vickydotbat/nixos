@@ -61,6 +61,9 @@ in
       dedicatedServer.openFirewall = cfg.dedicatedServerOpenFirewall;
       localNetworkGameTransfers.openFirewall = cfg.localNetworkGameTransfersOpenFirewall;
       gamescopeSession.enable = cfg.gamescope.enable;
+      extraCompatPackages = with pkgs; [
+        proton-ge-bin
+      ];
     };
 
     programs.gamescope = lib.mkIf cfg.gamescope.enable {
