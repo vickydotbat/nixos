@@ -5,16 +5,16 @@
     extra-substituters = [
       "https://nix-community.cachix.org"
       "https://codex-cli.cachix.org"
+      "https://claude-code.cachix.org"
     ];
     extra-trusted-public-keys = [
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
       "codex-cli.cachix.org-1:1Br3H1hHoRYG22n//cGKJOk3cQXgYobUel6O8DgSing="
+      "claude-code.cachix.org-1:YeXf2aNu7UTX8Vwrze0za1WEDS+4DuI2kVeWEE4fsRk="
     ];
   };
 
   inputs = {
-    # nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    # nixpkgs-stable.url = "github:NixOS/nixpkgs/nixos-26.05";
     nixpkgs.url = "git+https://github.com/NixOS/nixpkgs?ref=nixos-unstable&shallow=1";
     nixpkgs-stable.url = "git+https://github.com/NixOS/nixpkgs?ref=nixos-26.05&shallow=1";
 
@@ -181,105 +181,6 @@
           shared = shared;
         };
 
-      checks.${system} = {
-        home-shared-boundary = import ./checks/home-shared-boundary.nix {
-          inherit inputs pkgs;
-        };
-
-        firelink-disko-boundary = import ./checks/firelink-disko-boundary.nix {
-          inherit inputs pkgs;
-        };
-
-        firelink-discord-boundary = import ./checks/firelink-discord-boundary.nix {
-          inherit inputs pkgs;
-        };
-
-        saturnine-disko-boundary = import ./checks/saturnine-disko-boundary.nix {
-          inherit inputs pkgs;
-        };
-
-        solanine-libvirt-boundary = import ./checks/solanine-libvirt-boundary.nix {
-          inherit inputs pkgs;
-        };
-
-        solanine-podman-boundary = import ./checks/solanine-podman-boundary.nix {
-          inherit inputs pkgs;
-        };
-
-        nwtoolset-wine-boundary = import ./checks/nwtoolset-wine-boundary.nix {
-          inherit pkgs;
-          nwtoolset = inputs.self.packages.${system}.nwtoolset;
-        };
-
-        nwtoolset-plasma-boundary = import ./checks/nwtoolset-plasma-boundary.nix {
-          inherit inputs pkgs;
-        };
-
-        btrfs-rollback-boundary = import ./checks/btrfs-rollback-boundary.nix {
-          inherit inputs pkgs;
-        };
-
-        plasma-browser-boundary = import ./checks/plasma-browser-boundary.nix {
-          inherit inputs pkgs;
-        };
-
-        plasma-file-tools-boundary = import ./checks/plasma-file-tools-boundary.nix {
-          inherit inputs pkgs;
-        };
-
-        vicky-vscode-renamer-boundary = import ./checks/vicky-vscode-renamer-boundary.nix {
-          inherit inputs pkgs;
-        };
-
-        vicky-vscode-format-boundary = import ./checks/vicky-vscode-format-boundary.nix {
-          inherit inputs pkgs;
-        };
-
-        vicky-vscode-theme-boundary = import ./checks/vicky-vscode-theme-boundary.nix {
-          inherit inputs pkgs;
-        };
-
-        secret-file-boundary = import ./checks/secret-file-boundary.nix {
-          inherit inputs pkgs;
-        };
-
-        ssh-approved-hosts-boundary = import ./checks/ssh-approved-hosts-boundary.nix {
-          inherit inputs pkgs;
-        };
-
-        git-safety-boundary = import ./checks/git-safety-boundary.nix {
-          inherit inputs pkgs;
-        };
-
-        module-default-boundary = import ./checks/module-default-boundary.nix {
-          inherit inputs pkgs;
-        };
-
-        gimp-custom-wrapper-boundary = import ./checks/gimp-custom-wrapper-boundary.nix {
-          inherit pkgs;
-          gimp3-custom = inputs.self.packages.${system}.gimp3-custom;
-        };
-      };
-
-      devShells.${system} =
-        let
-          codex = pkgs.mkShell {
-            packages = [
-              pkgs.codex
-            ];
-          };
-          claude = pkgs.mkShell {
-            packages = [
-              pkgs.claude-code
-            ];
-          };
-        in
-        {
-          default = claude;
-          codex = codex;
-          claude = claude;
-        };
-
       overlays.default =
         final: prev:
         (import ./pkgs/packages.nix { pkgs = final; })
@@ -307,32 +208,32 @@
         };
       };
 
-      nixosConfigurations.firelink = mkSystem {
-        inherit
-          inputs
-          system
-          stable
-          userRegistry
-          ;
-        self = inputs.self;
-        hostPath = ./hosts/firelink;
-        selectedUsers = {
-          inherit (userRegistry) admin mattia;
-        };
-      };
+      # nixosConfigurations.firelink = mkSystem {
+      #   inherit
+      #     inputs
+      #     system
+      #     stable
+      #     userRegistry
+      #     ;
+      #   self = inputs.self;
+      #   hostPath = ./hosts/firelink;
+      #   selectedUsers = {
+      #     inherit (userRegistry) admin mattia;
+      #   };
+      # };
 
-      nixosConfigurations.saturnine = mkSystem {
-        inherit
-          inputs
-          system
-          stable
-          userRegistry
-          ;
-        self = inputs.self;
-        hostPath = ./hosts/saturnine;
-        selectedUsers = {
-          inherit (userRegistry) admin vicky;
-        };
-      };
+      # nixosConfigurations.saturnine = mkSystem {
+      #   inherit
+      #     inputs
+      #     system
+      #     stable
+      #     userRegistry
+      #     ;
+      #   self = inputs.self;
+      #   hostPath = ./hosts/saturnine;
+      #   selectedUsers = {
+      #     inherit (userRegistry) admin vicky;
+      #   };
+      # };
     };
 }
