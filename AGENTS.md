@@ -8,6 +8,9 @@ work: rebuilds, flakes, modules, deployment, impermanence, LUKS remote unlock,
 monitoring, and the usual places where a tired operator can make one sharp
 mistake.
 
+Before you act, ALWAYS refer to [`./NEVER_DO_THIS.md`](./NEVER_DO_THIS.md) and
+follow it STRICTLY.
+
 ## Project Philosophy
 
 Treat [`docs/philosophy.md`](docs/philosophy.md) as the beating heart of this

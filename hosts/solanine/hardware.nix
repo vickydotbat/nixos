@@ -49,4 +49,6 @@
   # defaults are imported from nixos-hardware above; Solanine keeps only the
   # local facts and active display-crash mitigations here.
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
+
+  nixpkgs.config.rocmSupport = true; # TODO: Base this on the system, globally?
 }

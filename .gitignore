@@ -40,6 +40,7 @@
 !/flake.lock
 !/flake.nix
 !/README.md
+!/NEVER_DO_THIS.md
 
 # Keep this file
 !/.gitignore

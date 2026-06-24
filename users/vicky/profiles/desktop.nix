@@ -32,14 +32,8 @@ in
         shuffle
       ];
     };
-  };
-
-  programs.ghostty.settings = {
-    font-size = 11;
-    window-padding-x = 8;
-    window-padding-y = 8;
-    copy-on-select = "clipboard";
-    clipboard-read = "allow";
-    clipboard-write = "allow";
+    odysseus = {
+      enable = true;
+    };
   };
 }

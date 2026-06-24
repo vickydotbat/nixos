@@ -1,0 +1,1 @@
+for model in llama3.1:8b qwen3:8b qwen2.5-coder:7b gemma3:4b mxbai-embed-large nomic-embed-text; do ollama pull "$model"; done
