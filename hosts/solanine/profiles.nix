@@ -76,6 +76,7 @@ in
         enable = true;
         accounts = lib.mapAttrs mkAccount selectedUsers;
       };
+      zram.enable = true;
     };
 
     desktop = {

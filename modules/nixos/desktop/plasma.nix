@@ -37,6 +37,16 @@ in
         mechanism that can misreport browser state or silently do nothing.
       '';
     };
+
+    balooIndexing.enable = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = ''
+        Enable Baloo file-content indexing. Disabled by default because it's
+        a real memory hog.
+      '';
+
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -52,11 +62,18 @@ in
       plasma6.excludePackages = lib.optionals (!cfg.browserIntegration.enable) [
         pkgs.kdePackages.plasma-browser-integration
       ];
+
+      etc = lib.mkIf (!cfg.balooIndexing.enable) {
+        "xdg/baloofilerc".text = ''
+          [Basic Settings]
+          Indexing-Enabled=false
+        '';
+      };
     };
 
     services = {
       displayManager = {
-        sddm.enable = lib.mkForce false; # Not supported for 26.05
+        sddm.enable = lib.mkForce false;
         plasma-login-manager.enable = true;
       };
       desktopManager = {

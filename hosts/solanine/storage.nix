@@ -27,6 +27,7 @@
     {
       device = "/swap/swapfile";
       size = 16 * 1024;
+      priority = 10; # TODO: Default this with zram
     }
   ];
 }
