@@ -31,7 +31,10 @@ in
     codex = {
       enable = true;
       superpowers.enable = true;
-      ponytail.enable = true;
+      ponytail = {
+        enable = true;
+        level = "ultra";
+      };
       settings = {
         model = "gpt-5.5";
         model_reasoning_effort = "high";
@@ -91,6 +94,20 @@ in
         - New branches must start from up-to-date `main`, not from another feature branch.
         - Never create stacked branches unless explicitly asked.
         - Never re-use a branch that was merged to the remote and then deleted.
+
+        # Testing Rules
+
+        - Test behavior and public contracts, not implementation details.
+        - Tests must catch real regressions, not freeze harmless constants, wording, ordering, or refactors.
+        - Do not assert hardcoded internal values unless they are part of the intended public behavior.
+        - Avoid snapshots/golden outputs unless the exact output is a stable user-facing contract.
+        - Do not write tests merely to increase coverage.
+
+        # Minimalism Rule
+
+        - Use Ponytail-style restraint: try no-code, config-only, deletion-only, or minimal edits before adding new code.
+        - Prefer the smallest complete fix; do not add abstractions, helpers, dependencies, or files unless necessary.
+        - If expanding scope, explain why the smaller solution is insufficient.
 
         # Tools
 

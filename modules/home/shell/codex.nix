@@ -195,6 +195,19 @@ in
           instead of an unmanaged `git pull`.
         '';
       };
+
+      level = lib.mkOption {
+        type = lib.types.enum [
+          "lite"
+          "full"
+          "ultra"
+          "off"
+        ];
+        default = "full";
+        description = ''
+          Default Ponytail mode for new Codex sessions.
+        '';
+      };
     };
 
     skills = lib.mkOption {
@@ -304,6 +317,16 @@ in
           fi
         ''
       );
+
+      home.sessionVariables = lib.mkIf cfg.ponytail.enable {
+        PONYTAIL_DEFAULT_MODE = cfg.ponytail.level;
+      };
+
+      xdg.configFile."ponytail/config.json" = lib.mkIf cfg.ponytail.enable {
+        text = builtins.toJSON {
+          defaultMode = cfg.ponytail.level;
+        };
+      };
     })
     (lib.optionalAttrs hasHomePersistence {
       home.persistence."/nix/persist" = lib.mkIf (cfg.enable && cfg.persistState) {
