@@ -67,16 +67,40 @@ in
       context = ''
         # Environment
 
-        NixOS machine: avoid generic Linux/FHS assumptions; use dev shells or flakes for missing dependencies.
+        NixOS machine:
 
-        # HARD RULES
+        - Avoid generic Linux/FHS assumptions.
+        - Use dev shells or flakes for missing dependencies.
+        - Create dev shells or flakes for repositories that lack them.
 
-        Use repo/docs/knowledge-base evidence over guesses. Ask before critical decisions. Never commit or push anything to `main`. Use a fresh branch for your work. Never re-use a branch that was merged to the remote and then deleted. Never run destructive commands without permission. Never touch secrets or `.sops` data. Never track generated files unless explicitly expected. Document everything you do clearly and concisely. Do not create noisy documentation. Fix stale documentation when spotted.
+        # Hard Rules
+
+        - Ask before making decisions that affect scope, safety, data, or architecture.
+        - Prefer the simplest working solution.
+        - Do not touch unrelated code.
+        - Flag uncertainty instead of guessing.
+        - Do not run destructive commands unless explicitly asked.
+        - Do not touch secrets, credentials, keys, tokens, or `.sops` data.
+        - Never commit to `main`.
+        - Never force-push.
+
+        # Branching Rules
+
+        - Reuse the current feature branch unless asked to create a new one.
+        - Before creating a new branch, check the current branch.
+        - New branches must start from up-to-date `main`, not from another feature branch.
+        - Never create stacked branches unless explicitly asked.
+        - Never re-use a branch that was merged to the remote and then deleted.
 
         # Tools
 
-        `tea` is available in CLI. The API token to access Shadows Over Westgate repositories is located at @/home/vicky/Projects/westgate/repositories/migration/gitea-token
-        Do not print the token in plain text. It is a secret. You are encouraged to use it to push, commit, write issues, or and make PRs using this token when needed.
+        For Shadows Over Westgate Gitea repositories:
+
+        - `tea` is available in the CLI.
+        - Gitea API token path: `/home/vicky/Projects/westgate/repositories/migration/gitea-token`.
+        - The token is secret: use it only as an input to authenticated commands.
+        - Never print, cat, echo, copy, commit, or expose the token.
+        - Use `tea` for authenticated Gitea work such as pushing, committing, creating issues, and opening pull requests.
       '';
     };
 

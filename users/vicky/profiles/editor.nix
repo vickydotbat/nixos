@@ -69,8 +69,6 @@ in
         redhat.vscode-yaml
         mhutchie.git-graph
         waderyan.gitblame
-        ms-python.python
-        ms-python.vscode-pylance
         ms-vscode.cpptools
         ms-vscode.cmake-tools
         esbenp.prettier-vscode
@@ -86,6 +84,13 @@ in
         ms-dotnettools.csharp
         ms-dotnettools.vscode-dotnet-runtime
         csharpier.csharpier-vscode
+
+        # LUA
+        sumneko.lua
+
+        # Python
+        ms-python.python
+        ms-python.vscode-pylance
       ];
       extraPackages = with pkgs; [
         nixd
@@ -96,6 +101,8 @@ in
         csharpier
         dotnet
         fallow
+        lua
+        python3
       ];
       userSettings = {
         "workbench.startupEditor" = "none";
