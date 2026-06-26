@@ -71,7 +71,12 @@ in
 
         # HARD RULES
 
-        Use repo/docs/knowledge-base evidence over guesses. Ask before critical decisions. Never commit or push anything. Never run destructive commands without permission. Never touch secrets or `.sops` data. Never track generated files unless explicitly expected. Document everything you do clearly and concisely. Do not create noisy documentation.
+        Use repo/docs/knowledge-base evidence over guesses. Ask before critical decisions. Never commit or push anything to `main`. Use a fresh branch for your work. Never re-use a branch that was merged to the remote and then deleted. Never run destructive commands without permission. Never touch secrets or `.sops` data. Never track generated files unless explicitly expected. Document everything you do clearly and concisely. Do not create noisy documentation. Fix stale documentation when spotted.
+
+        # Tools
+
+        `tea` is available in CLI. The API token to access Shadows Over Westgate repositories is located at @/home/vicky/Projects/westgate/repositories/migration/gitea-token
+        Do not print the token in plain text. It is a secret. You are encouraged to use it to push, commit, write issues, or and make PRs using this token when needed.
       '';
     };
 

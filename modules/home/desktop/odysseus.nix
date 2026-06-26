@@ -9,7 +9,8 @@ let
   cfg = config.theorem.home.desktop.odysseus;
   hasHomePersistence = options.home ? persistence;
 
-  dataDir = "${config.home.homeDirectory}/${cfg.dataDirRelative}";
+  homeDir = "${config.home.homeDirectory}";
+  dataDir = "${homeDir}/${cfg.dataDirRelative}";
 in
 {
   options.theorem.home.desktop.odysseus = {
@@ -60,6 +61,8 @@ in
 
           volumes = [
             "${dataDir}:/app/data"
+            "${homeDir}/Obsidian:/workspace/obsidian"
+            "${homeDir}/Projects/odysseus-workspace/:/workspace/odysseus"
           ];
 
           environment = {
@@ -69,7 +72,9 @@ in
       };
 
       systemd.user.tmpfiles.rules = [
-        "d ${dataDir} 0700 ${config.home.username} users -"
+        # User tmpfiles has no authority to chown a rootless Podman volume after
+        # the container maps it to a subuid. Keep activation from failing there.
+        "d ${dataDir} 0700 - - -"
       ];
     })
 
