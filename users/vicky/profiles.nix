@@ -7,5 +7,6 @@
     ./profiles/gaming.nix
     ./profiles/shell.nix
     ./profiles/web.nix
+    ./profiles/packages.nix
   ];
 }
