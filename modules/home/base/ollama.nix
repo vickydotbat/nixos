@@ -62,7 +62,8 @@ in
         environmentVariables = {
           OLLAMA_MAX_LOADED_MODELS = "1";
           OLLAMA_NUM_PARALLEL = "1";
-          OLLAMA_KEEP_ALIVE = "1m";
+          OLLAMA_KEEP_ALIVE = "5m";
+          OLLAMA_CONTEXT_LENGTH = "8192";
         };
 
         host = cfg.host;

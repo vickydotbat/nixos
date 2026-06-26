@@ -103,6 +103,7 @@ in
         fallow
         lua
         python3
+        gopls
       ];
       userSettings = {
         "workbench.startupEditor" = "none";
