@@ -18,6 +18,8 @@ let
     "${home}/Projects/westgate/repositories/migration/sow-module"
     "${home}/Projects/westgate/repositories/migration/sow-nodebb"
     "${home}/Projects/westgate/repositories/migration/sow-nodebb-plugin-wiki"
+    "${home}/Projects/westgate/repositories/migration/sow-nodebb-plugin-support"
+    "${home}/Projects/westgate/repositories/migration/sow-mcp-server"
     "${home}/Projects/westgate/repositories/migration/sow-nodebb-theme"
     "${home}/Projects/westgate/repositories/migration/sow-platform"
     "${home}/Projects/westgate/repositories/migration/sow-tools"
