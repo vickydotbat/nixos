@@ -6,14 +6,14 @@
 }:
 
 let
-  cfg = config.theorem.home.desktop.odysseus;
+  cfg = config.theorem.home.agents.odysseus;
   hasHomePersistence = options.home ? persistence;
 
   homeDir = "${config.home.homeDirectory}";
   dataDir = "${homeDir}/${cfg.dataDirRelative}";
 in
 {
-  options.theorem.home.desktop.odysseus = {
+  options.theorem.home.agents.odysseus = {
     enable = lib.mkEnableOption "Odysseus AI workspace";
 
     port = lib.mkOption {
@@ -43,7 +43,7 @@ in
       assertions = [
         {
           assertion = !(lib.hasPrefix "/" cfg.dataDirRelative);
-          message = "theorem.home.desktop.odysseus.dataDirRelative must be home-relative, not absolute.";
+          message = "theorem.home.agents.odysseus.dataDirRelative must be home-relative, not absolute.";
         }
       ];
 

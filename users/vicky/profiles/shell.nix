@@ -37,6 +37,10 @@ in
         enable = true;
         level = "ultra";
       };
+      caveman = {
+        enable = true;
+        level = "full";
+      };
       settings = {
         model = "gpt-5.5";
         model_reasoning_effort = "high";

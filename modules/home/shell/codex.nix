@@ -25,6 +25,9 @@ let
   ponytailSkills = lib.mapAttrs (name: _type: lib.mkDefault (cfg.ponytail.source + "/${name}")) (
     builtins.readDir cfg.ponytail.source
   );
+  cavemanSkills = lib.mapAttrs (name: _type: lib.mkDefault (cfg.caveman.source + "/${name}")) (
+    builtins.readDir cfg.caveman.source
+  );
 
   codexNightlyPackage = pkgs.stdenvNoCC.mkDerivation {
     pname = "codex-nightly";
@@ -210,6 +213,37 @@ in
       };
     };
 
+    caveman = {
+      enable = lib.mkEnableOption "Caveman Codex skill";
+
+      source = lib.mkOption {
+        type = lib.types.path;
+        default = inputs.caveman + "/skills";
+        defaultText = lib.literalExpression ''inputs.caveman + "/skills"'';
+        description = ''
+          Directory containing Caveman skill folders. Defaults to the pinned
+          `caveman` flake input so updates pass through `flake.lock` instead
+          of an unmanaged `git pull`.
+        '';
+      };
+
+      level = lib.mkOption {
+        type = lib.types.enum [
+          "lite"
+          "full"
+          "ultra"
+          "wenyan-lite"
+          "wenyan-full"
+          "wenyan-ultra"
+          "off"
+        ];
+        default = "full";
+        description = ''
+          Default Caveman compression mode for new Codex sessions.
+        '';
+      };
+    };
+
     skills = lib.mkOption {
       type = lib.types.attrsOf (lib.types.either lib.types.lines lib.types.path);
       default = { };
@@ -302,6 +336,7 @@ in
         skills = lib.mkMerge [
           (lib.mkIf cfg.superpowers.enable superpowersSkills)
           (lib.mkIf cfg.ponytail.enable ponytailSkills)
+          (lib.mkIf cfg.caveman.enable cavemanSkills)
           cfg.skills
         ];
       };
@@ -318,13 +353,27 @@ in
         ''
       );
 
-      home.sessionVariables = lib.mkIf cfg.ponytail.enable {
-        PONYTAIL_DEFAULT_MODE = cfg.ponytail.level;
-      };
+      home.sessionVariables = lib.mkMerge [
+        (lib.mkIf cfg.ponytail.enable {
+          PONYTAIL_DEFAULT_MODE = cfg.ponytail.level;
+        })
 
-      xdg.configFile."ponytail/config.json" = lib.mkIf cfg.ponytail.enable {
-        text = builtins.toJSON {
-          defaultMode = cfg.ponytail.level;
+        (lib.mkIf cfg.caveman.enable {
+          CAVEMAN_DEFAULT_MODE = cfg.caveman.level;
+        })
+      ];
+
+      xdg.configFile = {
+        "ponytail/config.json" = lib.mkIf cfg.ponytail.enable {
+          text = builtins.toJSON {
+            defaultMode = cfg.ponytail.level;
+          };
+        };
+
+        "caveman/config.json" = lib.mkIf cfg.caveman.enable {
+          text = builtins.toJSON {
+            defaultMode = cfg.caveman.level;
+          };
         };
       };
     })

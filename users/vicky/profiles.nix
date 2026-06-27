@@ -8,5 +8,6 @@
     ./profiles/shell.nix
     ./profiles/web.nix
     ./profiles/packages.nix
+    ./profiles/agents.nix
   ];
 }

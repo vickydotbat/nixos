@@ -32,8 +32,5 @@ in
         shuffle
       ];
     };
-    odysseus = {
-      enable = true;
-    };
   };
 }

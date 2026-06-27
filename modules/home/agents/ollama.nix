@@ -7,7 +7,7 @@
 }:
 
 let
-  cfg = config.theorem.home.base.ollama;
+  cfg = config.theorem.home.agents.ollama;
   hasHomePersistence = options.home ? persistence;
 
   packageForAcceleration =
@@ -19,7 +19,7 @@ let
       pkgs.ollama;
 in
 {
-  options.theorem.home.base.ollama = {
+  options.theorem.home.agents.ollama = {
     enable = lib.mkEnableOption "Ollama";
 
     acceleration = lib.mkOption {

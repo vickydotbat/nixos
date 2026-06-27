@@ -57,6 +57,18 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    nur = {
+      url = "github:nix-community/NUR";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    nix-index-database = {
+      url = "github:nix-community/nix-index-database";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    # AI Skills
+
     superpowers = {
       url = "github:obra/superpowers";
       flake = false;
@@ -67,14 +79,9 @@
       flake = false;
     };
 
-    nur = {
-      url = "github:nix-community/NUR";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    nix-index-database = {
-      url = "github:nix-community/nix-index-database";
-      inputs.nixpkgs.follows = "nixpkgs";
+    caveman = {
+      url = "github:JuliusBrussee/caveman";
+      flake = false;
     };
   };
 
