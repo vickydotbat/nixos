@@ -196,6 +196,9 @@
             evertjunior = (prev.vscode-extensions.evertjunior or { }) // {
               mass-renamer = final.callPackage ./pkgs/vscode-extensions/evertjunior/mass-renamer.nix { };
             };
+            selfagency = (prev.vscode-extensions.selfagency or { }) // {
+              opilot = final.callPackage ./pkgs/vscode-extensions/selfagency/opilot.nix { };
+            };
           };
         };
 

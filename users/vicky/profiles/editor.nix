@@ -25,6 +25,7 @@ in
       ".nuget/packages"
       ".local/share/NuGet"
       ".config/NuGet"
+      ".continue" # Continue configuration
     ];
   };
 
@@ -91,6 +92,10 @@ in
         # Python
         ms-python.python
         ms-python.vscode-pylance
+
+        # AI
+        selfagency.opilot
+        continue.continue
       ];
       extraPackages = with pkgs; [
         nixd
@@ -100,7 +105,7 @@ in
         deadnix
         csharpier
         dotnet
-        fallow
+        # fallow
         lua
         python3
         gopls
@@ -388,6 +393,7 @@ in
           }
         ];
 
+        # Todo Tree
         "todo-tree.general.tags" = [
           "TODO"
           "FIXME"
@@ -399,6 +405,26 @@ in
         "todo-tree.regex.regex" = "(//|#|<!--|;|/\\*|^\\s*\\*)\\s*($TAGS)[: ]";
         "todo-tree.tree.showScanModeButton" = false;
         "todo-tree.tree.disableCompactFolders" = false;
+
+        # Error Lens
+        "errorLens.enabledDiagnosticLevels" = [
+          "error"
+          "warning"
+          "info"
+        ];
+        "errorLens.messageTemplate" = "$message";
+        "errorLens.followCursor" = "closestProblem";
+        "errorLens.gutterIconsEnabled" = true;
+        "errorLens.statusBarMessageEnabled" = true;
+        "errorLens.scrollbarHackEnabled" = true;
+
+        # Keep inline AI suggestions from becoming too noisy alongside diagnostics.
+        # "editor.inlineSuggest.enabled" = true;
+        # "editor.suggestSelection" = "first";
+        "editor.codeActionsOnSave" = {
+          "source.fixAll" = "explicit";
+          "source.organizeImports" = "explicit";
+        };
       };
     };
   };

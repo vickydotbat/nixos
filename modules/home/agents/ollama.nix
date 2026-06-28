@@ -59,12 +59,12 @@ in
         enable = true;
         package = packageForAcceleration;
 
-        environmentVariables = {
-          OLLAMA_MAX_LOADED_MODELS = "1";
-          OLLAMA_NUM_PARALLEL = "1";
-          OLLAMA_KEEP_ALIVE = "5m";
-          OLLAMA_CONTEXT_LENGTH = "8192";
-        };
+        # environmentVariables = {
+        #   OLLAMA_CONTEXT_LENGTH = "65536";
+        #   OLLAMA_KEEP_ALIVE = "60m";
+        #   OLLAMA_NUM_PARALLEL = "1";
+        #   OLLAMA_MAX_LOADED_MODELS = "2";
+        # };
 
         host = cfg.host;
         port = cfg.port;
