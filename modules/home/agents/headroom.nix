@@ -358,7 +358,7 @@ in
       })
 
       (lib.mkIf cfg.opencode.enable {
-        OPENCODE_CONFIG = "${config.xdg.configHome}/opencode/headroom.json";
+        OPENCODE_CONFIG = lib.mkDefault "${config.xdg.configHome}/opencode/headroom.json";
       })
     ];
 
@@ -370,7 +370,7 @@ in
       })
 
       (lib.mkIf cfg.opencode.enable {
-        OPENCODE_CONFIG = "${config.xdg.configHome}/opencode/headroom.json";
+        OPENCODE_CONFIG = lib.mkDefault "${config.xdg.configHome}/opencode/headroom.json";
       })
     ];
 
