@@ -11,5 +11,8 @@
     headroom = {
       enable = true;
     };
+    opencode = {
+      enable = true;
+    };
   };
 }
