@@ -72,7 +72,7 @@ in
 
       guardrails = {
         enable = true;
-        source = ./assets/agent-guardrails;
+        source = ../../../assets/agent-guardrails;
 
         # These are OpenCode-shaped skills, so I would keep these false by default.
         codex = false;
