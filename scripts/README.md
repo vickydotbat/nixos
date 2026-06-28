@@ -5,12 +5,17 @@ This directory holds small maintenance rites that are safer as repeatable comman
 ## Available Scripts
 
 - `update-password-hash` decrypts an encrypted plaintext password from a SOPS file, regenerates a yescrypt hash with `mkpasswd`, and writes the hash back into the encrypted file.
+- `opencode-watchdog` runs OpenCode or another command under a conservative
+  stream-corruption detector. On token soup or leaked tool/reasoning markup it
+  kills the child process, records the log path, and prints `SESSION CORRUPTED
+  / DO NOT COMMIT`.
 
 ## Usage
 
 ```bash
 scripts/update-password-hash vicky
 scripts/update-password-hash root secrets/hosts-solanine.yaml
+scripts/opencode-watchdog -- opencode
 ```
 
 Normal users default to `secrets/users-<name>.yaml`. Root is host-local, so

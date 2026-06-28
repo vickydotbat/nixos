@@ -31,6 +31,10 @@ let
     provider = {
       ${cfg.opencode.providerId} = opencodeProviderConfig;
     };
+
+    permission = cfg.opencode.permission;
+
+    agent = cfg.opencode.agents;
   }
   // lib.optionalAttrs (cfg.opencode.defaultModel != null) {
     model = "${cfg.opencode.providerId}/${cfg.opencode.defaultModel}";
@@ -211,6 +215,110 @@ in
 
           You usually do not need this unless you want clearer display names
           or explicit limits.
+        '';
+      };
+
+      permission = lib.mkOption {
+        type = jsonFormat.type;
+        default = {
+          read = "allow";
+          glob = "allow";
+          grep = "allow";
+          list = "allow";
+          edit = "ask";
+          task = "ask";
+          todowrite = "ask";
+          webfetch = "ask";
+          websearch = "ask";
+          external_directory = "ask";
+
+          ".sops/**" = "deny";
+          "**/.sops/**" = "deny";
+          "*.sops.*" = "deny";
+          "secrets/**" = "deny";
+          "/run/secrets/**" = "deny";
+          "/run/agenix/**" = "deny";
+          "~/.ssh/**" = "deny";
+          "~/.config/opencode/auth*" = "deny";
+
+          bash = {
+            "git status*" = "allow";
+            "git diff*" = "allow";
+            "git show*" = "allow";
+            "git log*" = "allow";
+            "git branch --show-current*" = "allow";
+            "rg *" = "allow";
+            "sed -n *" = "allow";
+            "ls *" = "allow";
+            "find *" = "allow";
+            "nix eval *" = "allow";
+            "nixfmt --check *" = "allow";
+            "nix flake check*" = "ask";
+            "nixos-rebuild *" = "ask";
+            "home-manager *" = "ask";
+            "mv *" = "ask";
+            "chmod *" = "ask";
+            "chown *" = "ask";
+            "git commit*" = "ask";
+            "git push*" = "deny";
+            "git reset --hard*" = "deny";
+            "git clean*" = "deny";
+            "rm -rf *" = "deny";
+            "rm -fr *" = "deny";
+            "sudo *" = "ask";
+            "run0 *" = "ask";
+            "* .sops/*" = "deny";
+            "* .sops/**" = "deny";
+            "* *.sops.*" = "deny";
+            "* secrets/*" = "deny";
+            "* /run/secrets/*" = "deny";
+            "* /run/agenix/*" = "deny";
+            "* ~/.ssh/*" = "deny";
+            "* ~/.config/opencode/auth*" = "deny";
+          };
+        };
+        description = ''
+          Global OpenCode permissions for the Headroom-generated config.
+
+          The default posture allows repository discovery, asks before edits or
+          heavier validation, denies destructive Git and shell operations, and
+          blocks common secret paths. Agent-specific permissions may be stricter.
+        '';
+      };
+
+      agents = lib.mkOption {
+        type = lib.types.attrsOf jsonFormat.type;
+        default = { };
+        example = lib.literalExpression ''
+          {
+            build = {
+              model = "ollama-cloud/qwen3-coder:480b-cloud";
+              temperature = 0.1;
+              steps = 12;
+            };
+
+            glm-worker = {
+              mode = "subagent";
+              model = "ollama-cloud/glm-5.2:cloud";
+              temperature = 0.1;
+              steps = 4;
+              permission = {
+                task = "deny";
+                edit = "ask";
+                bash = {
+                  "git commit*" = "deny";
+                  "git push*" = "deny";
+                };
+              };
+            };
+          }
+        '';
+        description = ''
+          OpenCode agent definitions written into the generated Headroom config.
+
+          Use this to keep reliable models in supervisor roles and unstable
+          local or GLM-style models in bounded worker roles with stricter
+          permissions.
         '';
       };
     };

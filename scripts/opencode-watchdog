@@ -1,0 +1,268 @@
+#!/usr/bin/env python3
+"""
+Run OpenCode under a conservative stream-corruption watchdog.
+
+The detector is deliberately boring: it only trips on strong token-soup,
+repeated raw tool/reasoning markup, or malformed tool-call retry storms. Normal
+compiler output, stack traces, and ANSI terminal control sequences should pass.
+"""
+
+from __future__ import annotations
+
+import argparse
+import datetime as _dt
+import os
+import pty
+import re
+import select
+import signal
+import subprocess
+import sys
+import termios
+import tty
+from dataclasses import dataclass
+from pathlib import Path
+
+
+ANSI_RE = re.compile(r"\x1b\[[0-?]*[ -/]*[@-~]")
+WORD_RE = re.compile(r"[A-Za-z]{3,}")
+TOKEN_RE = re.compile(r"[A-Za-z0-9_./:<>{}|\\-]{3,}")
+
+RAW_MARKUP_PATTERNS = [
+    re.compile(pattern, re.IGNORECASE)
+    for pattern in [
+        r"<\|[^|]{1,40}\|>",
+        r"</?(?:tool_call|tool_use|function_call|thinking|reasoning)[^>]*>",
+        r"\b(?:analysis|commentary|final)\s+to=",
+        r"\btool_call_id\b",
+        r"\braw(?:_| )?reasoning\b",
+    ]
+]
+
+RETRY_LOOP_PATTERNS = [
+    re.compile(pattern, re.IGNORECASE)
+    for pattern in [
+        r"invalid (?:json|tool call|function call)",
+        r"malformed (?:json|tool call|function call)",
+        r"failed to parse (?:json|tool call|function call)",
+        r"retrying (?:tool|function) call",
+    ]
+]
+
+
+@dataclass(frozen=True)
+class CorruptionVerdict:
+    corrupted: bool
+    reason: str = ""
+
+
+def strip_ansi(text: str) -> str:
+    return ANSI_RE.sub("", text)
+
+
+def _symbol_ratio(text: str) -> float:
+    visible = [ch for ch in text if not ch.isspace()]
+    if not visible:
+        return 0.0
+    symbolic = [ch for ch in visible if not ch.isalpha()]
+    return len(symbolic) / len(visible)
+
+
+def _alpha_ratio(text: str) -> float:
+    visible = [ch for ch in text if not ch.isspace()]
+    if not visible:
+        return 0.0
+    alpha = [ch for ch in visible if ch.isalpha()]
+    return len(alpha) / len(visible)
+
+
+def _repeated_token_reason(text: str) -> str | None:
+    tokens = TOKEN_RE.findall(text)
+    if len(tokens) < 60:
+        return None
+
+    runs = 1
+    previous = ""
+    for token in tokens:
+        normalized = token.lower()
+        if normalized == previous:
+            runs += 1
+            if runs >= 14 and not normalized.isdigit():
+                return f"repeated token run: {normalized[:40]}"
+        else:
+            previous = normalized
+            runs = 1
+
+    counts: dict[str, int] = {}
+    for token in tokens:
+        normalized = token.lower()
+        if normalized.isdigit() or len(normalized) < 4:
+            continue
+        counts[normalized] = counts.get(normalized, 0) + 1
+    if not counts:
+        return None
+    token, count = max(counts.items(), key=lambda item: item[1])
+    if count >= 24 and count / len(tokens) >= 0.28:
+        return f"dominant repeated token: {token[:40]}"
+    return None
+
+
+def detect_corruption(text: str) -> CorruptionVerdict:
+    sample = strip_ansi(text)[-5000:]
+
+    raw_hits = sum(len(pattern.findall(sample)) for pattern in RAW_MARKUP_PATTERNS)
+    retry_hits = sum(len(pattern.findall(sample)) for pattern in RETRY_LOOP_PATTERNS)
+    if len(sample) >= 120 and raw_hits >= 5:
+        return CorruptionVerdict(True, "raw reasoning/tool markup leaked repeatedly")
+    if len(sample) >= 120 and retry_hits >= 4:
+        return CorruptionVerdict(True, "malformed tool-call retry loop")
+
+    if len(sample) < 500:
+        return CorruptionVerdict(False)
+
+    repeated = _repeated_token_reason(sample)
+    if repeated:
+        return CorruptionVerdict(True, repeated)
+
+    words = WORD_RE.findall(sample)
+    symbol_ratio = _symbol_ratio(sample)
+    alpha_ratio = _alpha_ratio(sample)
+    if len(sample) >= 900 and symbol_ratio >= 0.72 and alpha_ratio <= 0.18 and len(words) < 45:
+        return CorruptionVerdict(True, "mostly non-language token soup")
+
+    replacement_count = sample.count("\ufffd")
+    if replacement_count >= 20 and replacement_count / len(sample) >= 0.03:
+        return CorruptionVerdict(True, "replacement-character stream corruption")
+
+    return CorruptionVerdict(False)
+
+
+def _state_dir() -> Path:
+    base = os.environ.get("XDG_STATE_HOME")
+    if base:
+        return Path(base)
+    return Path.home() / ".local" / "state"
+
+
+def _log_path() -> Path:
+    stamp = _dt.datetime.now().strftime("%Y%m%d-%H%M%S")
+    directory = _state_dir() / "opencode" / "watchdog"
+    directory.mkdir(parents=True, exist_ok=True)
+    return directory / f"session-{stamp}-{os.getpid()}.log"
+
+
+def _print_abort(reason: str, log_path: Path) -> None:
+    print("", file=sys.stderr)
+    print("SESSION CORRUPTED / DO NOT COMMIT", file=sys.stderr)
+    print(f"Reason: {reason}", file=sys.stderr)
+    print(f"Log: {log_path}", file=sys.stderr)
+    print("The OpenCode process was stopped. Inspect the log and git diff before continuing.", file=sys.stderr)
+    print("", file=sys.stderr)
+    subprocess.run(["git", "status", "--short"], check=False)
+
+
+def _terminate_process_group(process: subprocess.Popen[bytes]) -> None:
+    try:
+        os.killpg(process.pid, signal.SIGTERM)
+    except ProcessLookupError:
+        return
+    try:
+        process.wait(timeout=2)
+    except subprocess.TimeoutExpired:
+        try:
+            os.killpg(process.pid, signal.SIGKILL)
+        except ProcessLookupError:
+            pass
+        process.wait(timeout=2)
+
+
+def run_watchdog(command: list[str]) -> int:
+    if not command:
+        command = ["opencode"]
+
+    log_path = _log_path()
+    master_fd, slave_fd = pty.openpty()
+    process = subprocess.Popen(
+        command,
+        stdin=slave_fd,
+        stdout=slave_fd,
+        stderr=slave_fd,
+        start_new_session=True,
+        close_fds=True,
+    )
+    os.close(slave_fd)
+
+    old_termios = None
+    stdin_fd = sys.stdin.fileno()
+    if sys.stdin.isatty():
+        old_termios = termios.tcgetattr(stdin_fd)
+        tty.setraw(stdin_fd)
+
+    recent = ""
+    corrupted: CorruptionVerdict | None = None
+    try:
+        with log_path.open("ab") as log:
+            while True:
+                fds = [master_fd]
+                if sys.stdin.isatty():
+                    fds.append(stdin_fd)
+                readable, _, _ = select.select(fds, [], [], 0.1)
+
+                if stdin_fd in readable:
+                    data = os.read(stdin_fd, 4096)
+                    if data:
+                        os.write(master_fd, data)
+
+                if master_fd in readable:
+                    try:
+                        data = os.read(master_fd, 4096)
+                    except OSError:
+                        data = b""
+                    if data:
+                        os.write(sys.stdout.fileno(), data)
+                        log.write(data)
+                        log.flush()
+                        decoded = data.decode("utf-8", errors="replace")
+                        recent = (recent + decoded)[-7000:]
+                        verdict = detect_corruption(recent)
+                        if verdict.corrupted:
+                            corrupted = verdict
+                            _terminate_process_group(process)
+                            _print_abort(verdict.reason, log_path)
+                            return 88
+
+                if process.poll() is not None:
+                    while True:
+                        try:
+                            data = os.read(master_fd, 4096)
+                        except OSError:
+                            break
+                        if not data:
+                            break
+                        os.write(sys.stdout.fileno(), data)
+                        log.write(data)
+                    return process.returncode or 0
+    finally:
+        if old_termios is not None:
+            termios.tcsetattr(stdin_fd, termios.TCSADRAIN, old_termios)
+        os.close(master_fd)
+        if corrupted and process.poll() is None:
+            _terminate_process_group(process)
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description="Run OpenCode with stream-corruption detection.")
+    parser.add_argument(
+        "command",
+        nargs=argparse.REMAINDER,
+        help="Command to run. Use '-- opencode ...' to separate wrapper and child arguments.",
+    )
+    args = parser.parse_args(argv)
+    command = args.command
+    if command and command[0] == "--":
+        command = command[1:]
+    return run_watchdog(command)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
