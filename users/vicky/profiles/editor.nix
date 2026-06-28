@@ -94,7 +94,7 @@ in
         ms-python.vscode-pylance
 
         # AI
-        selfagency.opilot
+        # selfagency.opilot
         continue.continue
       ];
       extraPackages = with pkgs; [
