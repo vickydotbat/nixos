@@ -12,15 +12,27 @@ let
   hasHomePersistence = options.home ? persistence;
   persistenceEnabled = config.theorem.home.base.persistence.enable;
 
-  mkSkillLinks =
+  # Link every immediate child of a source directory into a target prefix.
+  # Directories are linked recursively; files are linked normally.
+  mkLinks =
     targetPrefix: source:
     lib.mapAttrs' (
-      name: _type:
-      lib.nameValuePair "${targetPrefix}/${name}" {
-        source = source + "/${name}";
-        recursive = true;
-      }
+      name: type:
+      lib.nameValuePair "${targetPrefix}/${name}" (
+        {
+          source = source + "/${name}";
+        }
+        // lib.optionalAttrs (type == "directory") {
+          recursive = true;
+        }
+      )
     ) (builtins.readDir source);
+
+  mkLinksIfExists =
+    targetPrefix: source:
+    lib.optionalAttrs (source != null && builtins.pathExists source) (mkLinks targetPrefix source);
+
+  mkSkillLinks = targetPrefix: source: mkLinksIfExists targetPrefix source;
 
   superpowersShared = lib.optionalAttrs cfg.superpowers.enable (
     mkSkillLinks ".agents/skills" cfg.superpowers.source
@@ -28,6 +40,10 @@ let
 
   ponytailShared = lib.optionalAttrs cfg.ponytail.enable (
     mkSkillLinks ".agents/skills" cfg.ponytail.source
+  );
+
+  guardrailsShared = lib.optionalAttrs (cfg.guardrails.enable && cfg.guardrails.shared) (
+    mkSkillLinks ".agents/skills" (cfg.guardrails.source + "/.opencode/skills")
   );
 
   superpowersCodex = lib.optionalAttrs (cfg.superpowers.enable && cfg.targets.codex) (
@@ -38,6 +54,10 @@ let
     mkSkillLinks ".codex/skills" cfg.ponytail.source
   );
 
+  guardrailsCodex = lib.optionalAttrs (
+    cfg.guardrails.enable && cfg.targets.codex && cfg.guardrails.codex
+  ) (mkSkillLinks ".codex/skills" (cfg.guardrails.source + "/.opencode/skills"));
+
   superpowersOpenCode = lib.optionalAttrs (cfg.superpowers.enable && cfg.targets.opencode) (
     mkSkillLinks ".config/opencode/skills" cfg.superpowers.source
   );
@@ -45,6 +65,26 @@ let
   ponytailOpenCode = lib.optionalAttrs (cfg.ponytail.enable && cfg.targets.opencode) (
     mkSkillLinks ".config/opencode/skills" cfg.ponytail.source
   );
+
+  guardrailsOpenCode = lib.optionalAttrs (cfg.guardrails.enable && cfg.targets.opencode) (
+    mkSkillLinks ".config/opencode/skills" (cfg.guardrails.source + "/.opencode/skills")
+  );
+
+  guardrailsOpenCodeCommands = lib.optionalAttrs (
+    cfg.guardrails.enable && cfg.targets.opencode && cfg.guardrails.commands
+  ) (mkLinksIfExists ".config/opencode/commands" (cfg.guardrails.source + "/.opencode/commands"));
+
+  guardrailsOpenCodeAgents =
+    lib.optionalAttrs
+      (
+        cfg.guardrails.enable
+        && cfg.targets.opencode
+        && cfg.guardrails.agentsMd
+        && builtins.pathExists (cfg.guardrails.source + "/AGENTS.md")
+      )
+      {
+        ".config/opencode/AGENTS.md".source = cfg.guardrails.source + "/AGENTS.md";
+      };
 
   superpowersClaude = lib.optionalAttrs (cfg.superpowers.enable && cfg.targets.claude) (
     mkSkillLinks ".claude/skills" cfg.superpowers.source
@@ -54,15 +94,27 @@ let
     mkSkillLinks ".claude/skills" cfg.ponytail.source
   );
 
+  guardrailsClaude = lib.optionalAttrs (
+    cfg.guardrails.enable && cfg.targets.claude && cfg.guardrails.claude
+  ) (mkSkillLinks ".claude/skills" (cfg.guardrails.source + "/.opencode/skills"));
+
   allSkillFiles =
     superpowersShared
     // ponytailShared
+    // guardrailsShared
     // superpowersCodex
     // ponytailCodex
+    // guardrailsCodex
     // superpowersOpenCode
     // ponytailOpenCode
+    // guardrailsOpenCode
     // superpowersClaude
-    // ponytailClaude;
+    // ponytailClaude
+    // guardrailsClaude;
+
+  allCommandFiles = guardrailsOpenCodeCommands;
+
+  allAgentFiles = guardrailsOpenCodeAgents;
 in
 {
   options.theorem.home.agents.skills = {
@@ -97,6 +149,58 @@ in
         default = config.theorem.home.agents.claude.enable or false;
         defaultText = lib.literalExpression "config.theorem.home.agents.claude.enable or false";
         description = "Install shared skills for Claude Code.";
+      };
+    };
+
+    guardrails = {
+      enable = lib.mkOption {
+        type = lib.types.bool;
+        default = true;
+        description = "Install local agent guardrail skills and OpenCode commands.";
+      };
+
+      source = lib.mkOption {
+        type = lib.types.path;
+        description = ''
+          Root directory containing AGENTS.md and .opencode/skills plus optionally
+          .opencode/commands.
+
+          Example layout:
+
+            AGENTS.md
+            .opencode/skills/context-discovery/SKILL.md
+            .opencode/commands/context-pass.md
+        '';
+      };
+
+      shared = lib.mkOption {
+        type = lib.types.bool;
+        default = true;
+        description = "Install guardrail skills into .agents/skills.";
+      };
+
+      codex = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+        description = "Also install guardrail skills into .codex/skills.";
+      };
+
+      claude = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+        description = "Also install guardrail skills into .claude/skills.";
+      };
+
+      commands = lib.mkOption {
+        type = lib.types.bool;
+        default = true;
+        description = "Install guardrail OpenCode commands into ~/.config/opencode/commands.";
+      };
+
+      agentsMd = lib.mkOption {
+        type = lib.types.bool;
+        default = true;
+        description = "Install guardrail AGENTS.md into ~/.config/opencode/AGENTS.md.";
       };
     };
 
@@ -146,6 +250,8 @@ in
     (lib.mkIf cfg.enable {
       home.file =
         allSkillFiles
+        // allCommandFiles
+        // allAgentFiles
         // lib.optionalAttrs cfg.ponytail.enable {
           ".config/ponytail/config.json".text = builtins.toJSON {
             defaultMode = cfg.ponytail.level;
@@ -162,6 +268,9 @@ in
         directories = [
           ".agents"
         ]
+        ++ lib.optional cfg.targets.codex ".codex"
+        ++ lib.optional cfg.targets.claude ".claude"
+        ++ lib.optional cfg.targets.opencode ".config/opencode"
         ++ lib.optional cfg.ponytail.enable ".config/ponytail";
       };
     })

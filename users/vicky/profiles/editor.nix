@@ -111,6 +111,15 @@ in
         gopls
       ];
       userSettings = {
+
+        "json.schemas" = [
+          {
+            "fileMatch" = [ "settings.json" ];
+            "url" =
+              "https://raw.githubusercontent.com/catppuccin/vscode/catppuccin-vsc-v3.19.0/packages/catppuccin-vsc/schemas/customUIColors.schema.json";
+          }
+        ];
+
         "workbench.startupEditor" = "none";
         "workbench.welcomePage.walkthroughs.openOnInstall" = false;
         "workbench.tips.enabled" = false;

@@ -3,19 +3,14 @@
   lib,
   options,
   pkgs,
-  repository ? {
-    path = "/nix/nixos";
-  },
   ...
 }:
 
 let
   cfg = config.theorem.home.agents.codex;
+
   hasHomePersistence = options.home ? persistence;
   persistenceEnabled = config.theorem.home.base.persistence.enable;
-
-  toml = pkgs.formats.toml { };
-  initialConfigFile = toml.generate "codex-config.toml" cfg.initialConfig.settings;
 
   codexNightlyPackage = pkgs.stdenvNoCC.mkDerivation {
     pname = "codex-nightly";
@@ -56,6 +51,7 @@ let
       homepage = "https://github.com/sadjow/codex-cli-nix";
       mainProgram = "codex";
     };
+
   };
 in
 {
@@ -99,168 +95,42 @@ in
       default = persistenceEnabled;
       defaultText = lib.literalExpression "theorem.home.base.persistence.enable";
       description = ''
-        Persist Codex state when Home persistence is active.
+        Persist the full `~/.codex` directory when Home persistence is active.
+
+        This module intentionally does not manage files inside `~/.codex`.
+        Skills, rules, commands, config files, and AGENTS.md should be managed
+        by a dedicated skills/config module or left as persistent mutable state.
       '';
     };
 
-    trustNixosConfiguration = lib.mkOption {
-      type = lib.types.bool;
-      default = true;
-      description = ''
-        Trust `repository.path` as a Codex project.
-      '';
-    };
-
-    settings = lib.mkOption {
-      type = toml.type;
-      default = { };
-      description = ''
-        Additional Codex settings written to `~/.codex/config.toml`.
-      '';
-    };
-
-    context = lib.mkOption {
-      type = lib.types.either lib.types.lines lib.types.path;
-      default = "";
-      description = ''
-        Global Codex context written to `~/.codex/AGENTS.md`.
-      '';
-    };
-
-    rules = lib.mkOption {
-      type = lib.types.attrsOf (lib.types.either lib.types.lines lib.types.path);
-      default = { };
-      description = ''
-        Codex rule files managed under `~/.codex/rules`.
-      '';
-    };
-
-    defaultRules.enable = lib.mkOption {
-      type = lib.types.bool;
-      default = true;
-      description = ''
-        Install a small default Codex command allow-list for low-risk inspection
-        and Nix validation commands.
-      '';
-    };
-
-    # Kept for Codex-only local skills. Shared skills such as Ponytail,
-    # Superpowers, and Claude-compatible skills should be installed by:
-    #
-    #   theorem.home.agents.skills
-    #
-    # This prevents Home Manager collisions between Codex, OpenCode, and Claude.
-    skills = lib.mkOption {
-      type = lib.types.attrsOf (lib.types.either lib.types.lines lib.types.path);
-      default = { };
-      description = ''
-        Additional Codex-only skills. Shared skills should be managed by
-        theorem.home.agents.skills.
-      '';
-    };
-
-    initialConfig = {
-      enable = lib.mkOption {
-        type = lib.types.bool;
-        default = false;
-        description = ''
-          Seed `~/.codex/config.toml` only when it does not already exist.
-        '';
-      };
-
-      settings = lib.mkOption {
-        type = toml.type;
-        default = { };
-        description = ''
-          Initial Codex settings written only when `~/.codex/config.toml` is
-          absent.
-        '';
-      };
-    };
   };
 
   config = lib.mkMerge [
     (lib.mkIf cfg.enable {
-      programs.codex = {
-        enable = true;
-        package = cfg.package;
+      assertions = [
+        {
+          assertion = !(config.programs.codex.enable or false);
+          message = ''
+            theorem.home.agents.codex is package-only and expects ~/.codex to be
+            persistent or managed elsewhere. Do not enable programs.codex at the
+            same time, because it may manage ~/.codex files and collide with
+            skill/config installation.
+          '';
+        }
+      ];
 
-        settings = lib.mkMerge [
-          {
-            approval_policy = lib.mkDefault "on-request";
-            sandbox_mode = lib.mkDefault "workspace-write";
-            web_search = lib.mkDefault "cached";
-            hide_agent_reasoning = lib.mkDefault true;
-
-            history.persistence = lib.mkDefault "none";
-
-            sandbox_workspace_write = {
-              network_access = lib.mkDefault false;
-              exclude_slash_tmp = lib.mkDefault true;
-              exclude_tmpdir_env_var = lib.mkDefault true;
-            };
-
-            shell_environment_policy."inherit" = lib.mkDefault "core";
-          }
-
-          (lib.mkIf cfg.trustNixosConfiguration {
-            projects.${repository.path}.trust_level = lib.mkDefault "trusted";
-          })
-
-          cfg.settings
-        ];
-
-        context = lib.mkMerge [
-          (lib.mkDefault ''
-            Prefer small, reviewable changes.
-            Do not run destructive commands unless explicitly asked.
-            For NixOS work, prefer `nix flake check`, targeted `nix eval`, and `nixos-rebuild dry-build` before switching.
-          '')
-
-          (lib.mkIf (cfg.context != "") cfg.context)
-        ];
-
-        rules = lib.mkMerge [
-          (lib.mkIf cfg.defaultRules.enable {
-            default = lib.mkDefault ''
-              prefix_rule(pattern = ["nix", "flake", "check"], decision = "allow")
-              prefix_rule(pattern = ["nix", "flake", "metadata"], decision = "allow")
-              prefix_rule(pattern = ["nix", "flake", "show"], decision = "allow")
-              prefix_rule(pattern = ["nix", "eval"], decision = "allow")
-              prefix_rule(pattern = ["nixfmt", "--check"], decision = "allow")
-              prefix_rule(pattern = ["git", "status"], decision = "allow")
-              prefix_rule(pattern = ["git", "diff"], decision = "allow")
-              prefix_rule(pattern = ["git", "log"], decision = "allow")
-              prefix_rule(pattern = ["git", "show"], decision = "allow")
-              prefix_rule(pattern = ["rg"], decision = "allow")
-            '';
-          })
-
-          cfg.rules
-        ];
-
-        skills = cfg.skills;
-      };
-
-      home.activation.codexInitialConfig = lib.mkIf cfg.initialConfig.enable (
-        lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-          config_dir=${lib.escapeShellArg "${config.home.homeDirectory}/.codex"}
-          config_file="$config_dir/config.toml"
-
-          if [[ ! -e "$config_file" ]]; then
-            $DRY_RUN_CMD ${pkgs.coreutils}/bin/install -d -m 0700 "$config_dir"
-            $DRY_RUN_CMD ${pkgs.coreutils}/bin/install -m 0600 ${lib.escapeShellArg initialConfigFile} "$config_file"
-          fi
-        ''
-      );
+      home.packages = [
+        cfg.package
+      ];
     })
 
-    (lib.optionalAttrs hasHomePersistence {
-      home.persistence."/nix/persist" = lib.mkIf (cfg.enable && cfg.persistState) {
-        directories = [
-          ".codex"
-        ];
-      };
-    })
+    # (lib.optionalAttrs hasHomePersistence {
+    #   home.persistence."/nix/persist" = lib.mkIf (cfg.enable && cfg.persistState) {
+    #     directories = [
+    #       ".codex"
+    #     ];
+    #   };
+    # })
+
   ];
 }

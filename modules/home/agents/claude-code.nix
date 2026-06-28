@@ -34,12 +34,12 @@ in
       home.packages = [ cfg.package ];
     })
 
-    (lib.optionalAttrs hasHomePersistence {
-      home.persistence."/nix/persist" = lib.mkIf (cfg.enable && cfg.persist) {
-        directories = [
-          ".claude"
-        ];
-      };
-    })
+    # (lib.optionalAttrs hasHomePersistence {
+    #   home.persistence."/nix/persist" = lib.mkIf (cfg.enable && cfg.persist) {
+    #     directories = [
+    #       ".claude"
+    #     ];
+    #   };
+    # })
   ];
 }
