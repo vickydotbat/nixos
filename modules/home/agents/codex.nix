@@ -123,14 +123,12 @@ in
         cfg.package
       ];
     })
-
-    # (lib.optionalAttrs hasHomePersistence {
-    #   home.persistence."/nix/persist" = lib.mkIf (cfg.enable && cfg.persistState) {
-    #     directories = [
-    #       ".codex"
-    #     ];
-    #   };
-    # })
-
+    (lib.optionalAttrs hasHomePersistence {
+      home.persistence."/nix/persist" = lib.mkIf (cfg.enable && cfg.persistState) {
+        directories = [
+          ".codex"
+        ];
+      };
+    })
   ];
 }

@@ -1,10 +1,13 @@
 ---
 description: Identify and read relevant repository context before implementation
+agent: context-scout
+subtask: true
 ---
 
 Load the `context-discovery` skill.
 
 Do not edit files.
+Do not continue into planning or implementation.
 
 Perform a right-sized context pass for the requested task:
 

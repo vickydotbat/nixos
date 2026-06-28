@@ -49,6 +49,41 @@ public APIs, commands, protocols, configuration, async/concurrency, shared
 state, data, persistence, caching, security, deployment, CI, build tooling,
 dependencies, generated files, or unfamiliar code.
 
+## Packet Discipline
+
+Large implementation plans must be executed one bounded packet at a time. A
+packet touches the smallest practical set of files, has a clear verification
+command or manual verification note, and stops after its own summary.
+
+- Do not continue from task 1 into task 2 in the same long-running
+  implementation flow unless the command explicitly asks for it.
+- Do not carry an entire large implementation plan through many edits in one
+  context. Coordinate, then execute one packet.
+- If a packet expands beyond its approved scope, split it and stop.
+- Do not perform additional context discovery after the context report is
+  complete unless a specific blocker appears.
+- Do not seek perfect certainty before writing a bounded plan.
+- If uncertainty blocks implementation, list it as an open question instead of
+  reasoning indefinitely.
+- If context is too large, stop and request a smaller packet.
+
+OpenCode commands should prefer child/subtask contexts for discovery and review
+when available. The main build agent remains the supervisor and executor; it
+should not become the memory vault for every plan branch.
+
+## Meltdown Guard
+
+If output becomes incoherent, repetitive, corrupted, unrelated, or
+token-soup-like, stop immediately. Do not edit further.
+
+Report only:
+
+- last successful action
+- files touched
+- current `git diff --stat`
+- checks not run
+- safest next step
+
 ## Discovery Sources
 
 Before editing non-trivial work, inspect the relevant subset of:

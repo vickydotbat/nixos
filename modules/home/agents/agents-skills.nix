@@ -74,7 +74,11 @@ let
     cfg.guardrails.enable && cfg.targets.opencode && cfg.guardrails.commands
   ) (mkLinksIfExists ".config/opencode/commands" (cfg.guardrails.source + "/.opencode/commands"));
 
-  guardrailsOpenCodeAgents =
+  guardrailsOpenCodeAgentDefinitions = lib.optionalAttrs (
+    cfg.guardrails.enable && cfg.targets.opencode && cfg.guardrails.agents
+  ) (mkLinksIfExists ".config/opencode/agents" (cfg.guardrails.source + "/.opencode/agents"));
+
+  guardrailsOpenCodeAgentsMd =
     lib.optionalAttrs
       (
         cfg.guardrails.enable
@@ -114,7 +118,7 @@ let
 
   allCommandFiles = guardrailsOpenCodeCommands;
 
-  allAgentFiles = guardrailsOpenCodeAgents;
+  allAgentFiles = guardrailsOpenCodeAgentDefinitions // guardrailsOpenCodeAgentsMd;
 in
 {
   options.theorem.home.agents.skills = {
@@ -163,13 +167,14 @@ in
         type = lib.types.path;
         description = ''
           Root directory containing AGENTS.md and .opencode/skills plus optionally
-          .opencode/commands.
+          .opencode/commands and .opencode/agents.
 
           Example layout:
 
             AGENTS.md
             .opencode/skills/context-discovery/SKILL.md
             .opencode/commands/context-pass.md
+            .opencode/agents/context-scout.md
         '';
       };
 
@@ -195,6 +200,12 @@ in
         type = lib.types.bool;
         default = true;
         description = "Install guardrail OpenCode commands into ~/.config/opencode/commands.";
+      };
+
+      agents = lib.mkOption {
+        type = lib.types.bool;
+        default = true;
+        description = "Install guardrail OpenCode agents into ~/.config/opencode/agents.";
       };
 
       agentsMd = lib.mkOption {
@@ -268,9 +279,6 @@ in
         directories = [
           ".agents"
         ]
-        ++ lib.optional cfg.targets.codex ".codex"
-        ++ lib.optional cfg.targets.claude ".claude"
-        ++ lib.optional cfg.targets.opencode ".config/opencode"
         ++ lib.optional cfg.ponytail.enable ".config/ponytail";
       };
     })
