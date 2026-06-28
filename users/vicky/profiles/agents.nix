@@ -1,30 +1,13 @@
 {
-  config,
-  repository,
   lib,
   ...
 }:
 let
-  home = config.home.homeDirectory;
-  trustedProjects = [
-    "${home}/Obsidian/Echo-Reliquary"
-    "${home}/Projects/westgate/repositories"
-    "${home}/Projects/westgate/repositories/migration"
-    "${home}/Projects/westgate/repositories/migration/sow-assets-manifest"
-    "${home}/Projects/westgate/repositories/migration/sow-codebase"
-    "${home}/Projects/westgate/repositories/migration/sow-depot"
-    "${home}/Projects/westgate/repositories/migration/sow-depot-proxy"
-    "${home}/Projects/westgate/repositories/migration/sow-docs"
-    "${home}/Projects/westgate/repositories/migration/sow-module"
-    "${home}/Projects/westgate/repositories/migration/sow-nodebb"
-    "${home}/Projects/westgate/repositories/migration/sow-nodebb-plugin-wiki"
-    "${home}/Projects/westgate/repositories/migration/sow-nodebb-plugin-support"
-    "${home}/Projects/westgate/repositories/migration/sow-mcp-server"
-    "${home}/Projects/westgate/repositories/migration/sow-nodebb-theme"
-    "${home}/Projects/westgate/repositories/migration/sow-platform"
-    "${home}/Projects/westgate/repositories/migration/sow-tools"
-    "${home}/Projects/westgate/repositories/migration/sow-topdata"
-  ];
+  accountSecretsFile = ../../../secrets/users-vicky.yaml;
+  hasHeadroomEnvSecret =
+    builtins.pathExists accountSecretsFile
+    && lib.hasInfix "headroom-env:" (builtins.readFile accountSecretsFile);
+
   opencodeCloudProvider = "ollama-cloud";
   opencodeCloudModelIds = [
     # GLM
@@ -319,8 +302,6 @@ in
       port = 8787;
       mode = "token";
 
-      environmentFile = "/run/user/1000/secrets/headroom-env";
-
       opencode = {
         enable = true;
 
@@ -336,6 +317,9 @@ in
         ollamaCloudModels = opencodeCloudModels;
         agents = opencodeSafeAgents;
       };
+    }
+    // lib.optionalAttrs hasHeadroomEnvSecret {
+      environmentFile = "/run/secrets/headroom-vicky-env";
     };
 
     skills = {

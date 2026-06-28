@@ -15,6 +15,12 @@ let
     user: key:
     builtins.pathExists user.ssh.sopsFile && lib.hasInfix key (builtins.readFile user.ssh.sopsFile);
 
+  userHasAccountSecretKey =
+    user: key:
+    (user.secrets.sopsFile or null) != null
+    && builtins.pathExists user.secrets.sopsFile
+    && lib.hasInfix key (builtins.readFile user.secrets.sopsFile);
+
   usersWithPasswordSecrets = lib.filterAttrs (_: user: user.passwordHashSecret != null) selectedUsers;
 
   usersWithSshSecrets = lib.filterAttrs (
@@ -33,10 +39,11 @@ let
   ) userRegistry;
 
   usersWithFirefoxBackupIdentities = lib.filterAttrs (
-    _: user:
-    (user.secrets.sopsFile or null) != null
-    && builtins.pathExists user.secrets.sopsFile
-    && lib.hasInfix "firefox-backup-age-identity:" (builtins.readFile user.secrets.sopsFile)
+    _: user: userHasAccountSecretKey user "firefox-backup-age-identity:"
+  ) selectedUsers;
+
+  usersWithHeadroomEnvSecrets = lib.filterAttrs (
+    _: user: userHasAccountSecretKey user "headroom-env:"
   ) selectedUsers;
 
   mkPasswordSecret = _: user: {
@@ -53,6 +60,18 @@ let
       sopsFile = user.secrets.sopsFile;
       key = "firefox-backup-age-identity";
       path = "/run/secrets/firefox-backup-${user.username}-age-identity";
+      owner = user.username;
+      group = "users";
+      mode = "0400";
+    };
+  };
+
+  mkHeadroomEnvSecret = _: user: {
+    name = "headroom/${user.username}/env";
+    value = {
+      sopsFile = user.secrets.sopsFile;
+      key = "headroom-env";
+      path = "/run/secrets/headroom-${user.username}-env";
       owner = user.username;
       group = "users";
       mode = "0400";
@@ -99,6 +118,7 @@ in
     // builtins.listToAttrs (
       lib.mapAttrsToList mkFirefoxBackupIdentitySecret usersWithFirefoxBackupIdentities
     )
+    // builtins.listToAttrs (lib.mapAttrsToList mkHeadroomEnvSecret usersWithHeadroomEnvSecrets)
     //
       lib.optionalAttrs (config.theorem.nixos.base.ssh.enable && hasHostSecretKey "ssh_host_ed25519_key:")
         {
