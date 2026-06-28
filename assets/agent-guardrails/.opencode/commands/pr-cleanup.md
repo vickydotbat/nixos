@@ -21,13 +21,14 @@ Check for:
 
 - scope creep
 - unrelated files
-- stale names/folders after responsibility changes
+- stale names, folders, comments, or docs after responsibility changes
 - missing docs/tests
 - brittle tests
 - unsafe async/concurrency
 - local mechanisms duplicating canonical infrastructure
 - speculative safety code
 - production API added only for tests
+- broad formatting or generated-file noise
 - old workflows not verified
 - noisy generated/lockfile changes
 

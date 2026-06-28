@@ -49,7 +49,7 @@ If behavior is hard to test because it is engine-bound or infrastructure-bound, 
 
 - extracting a real pure rule that improves production design
 - testing through existing public behavior
-- using existing seams/fakes/test infrastructure
+- using existing test boundaries, fakes, or fixtures
 - accepting manual verification when automated testing would damage production design
 
 ## When Fixing Tests

@@ -1,14 +1,14 @@
 ---
 name: context-discovery
-description: Mandatory context pass before non-trivial code changes. Use when starting implementation, reviewing a diff, touching architecture, subsystem behavior, public APIs, concurrency, data, deployment, tests, or unfamiliar code. Forces the agent to find and read relevant repository documentation before editing.
+description: Right-sized context pass before non-trivial code changes. Use when starting implementation, reviewing a diff, touching architecture, subsystem behavior, public APIs, concurrency, data, deployment, tests, or unfamiliar code. Forces the agent to find and read relevant repository documentation before editing.
 compatibility: opencode
 ---
 
 # Context Discovery
 
-Do not start implementation until the relevant repository context is understood.
+Do not start non-trivial implementation until the relevant repository context is understood.
 
-This skill is mandatory before non-trivial edits, reviews, refactors, bug fixes, test changes, architecture changes, public behavior changes, or work in unfamiliar code.
+Use this skill before non-trivial edits, reviews, refactors, bug fixes, test changes, architecture changes, public behavior changes, or work in unfamiliar code.
 
 ## Context Sources
 
@@ -34,9 +34,9 @@ Depending on the task, search for terms such as:
 - `transaction`, `migration`, `consistency`, `idempotent`, `retry`, `cache`, `persistence`
 - `auth`, `permission`, `secret`, `token`, `credential`, `role`, `policy`
 
-## Required Report Before Editing
+## Context Note Before Editing
 
-Before making changes, report:
+Before making non-trivial changes, report:
 
 1. Files and docs read.
 2. Relevant constraints discovered.
@@ -46,8 +46,8 @@ Before making changes, report:
 6. Likely files to change.
 7. Uncertainty or missing context.
 
-Do not proceed if missing context could affect correctness, safety, architecture, data, concurrency, deployment, or public behavior.
+Do not proceed into an uncertain high-risk surface if missing context could affect correctness, safety, architecture, data, concurrency, deployment, or public behavior. Narrow the change or ask.
 
 ## Failure Mode This Prevents
 
-Weak agents often implement locally without noticing repository documentation, existing lifecycle/readiness flows, concurrency assumptions, or old workflows. This skill forces the agent to understand the system before changing it.
+Weak agents often implement locally without noticing repository documentation, existing lifecycle/readiness flows, concurrency assumptions, or old workflows. This skill gives the agent peripheral vision before changing the system.

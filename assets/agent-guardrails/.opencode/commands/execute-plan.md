@@ -11,9 +11,9 @@ Before editing, load `git-safety` and any relevant implementation skills:
 - `workflow-preservation`
 - `concurrency-async-safety`
 - `testing-discipline`
-- `csharp-hygiene`
+- `code-hygiene`
 - `dependency-discipline`
-- `nixos-environment`
+- `managed-environment`
 
 Rules:
 

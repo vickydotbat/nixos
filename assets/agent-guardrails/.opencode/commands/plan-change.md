@@ -9,9 +9,9 @@ Load any relevant skills:
 - `workflow-preservation`
 - `concurrency-async-safety`
 - `testing-discipline`
-- `csharp-hygiene`
+- `code-hygiene`
 - `dependency-discipline`
-- `nixos-environment`
+- `managed-environment`
 - `git-safety`
 
 Do not edit files.

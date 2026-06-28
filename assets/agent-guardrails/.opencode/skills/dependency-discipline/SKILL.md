@@ -25,11 +25,11 @@ Identify:
 ## Rules
 
 - Prefer standard library and existing dependencies.
-- Ask before adding runtime dependencies.
+- Ask before adding runtime dependencies unless the user explicitly requested that dependency change.
 - For dev-only dependencies, explain why existing tooling is insufficient.
 - Do not update lockfiles unless the task requires it or the package manager does so as part of the requested change.
 - Do not perform broad package upgrades unless explicitly asked.
-- Do not change dependency managers, build systems, or environment tooling without approval.
+- Do not change dependency managers, build systems, or environment tooling without approval unless that is the explicit task.
 - Do not add packages to work around missing local tooling before checking the repo's managed environment.
 
 ## Output

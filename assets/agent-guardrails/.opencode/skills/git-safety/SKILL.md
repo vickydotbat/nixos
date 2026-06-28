@@ -30,8 +30,8 @@ git log --oneline -5
 - Do not modify remotes unless explicitly asked.
 - Never force-push unless explicitly asked and the exact branch has been confirmed.
 - Never commit directly to `main`, `master`, or a protected release branch unless explicitly instructed.
-- Reuse the current feature branch only when it is clean and clearly related to the requested task.
-- If unrelated dirty changes exist, stop and ask.
+- Work on the current branch unless branch changes were requested.
+- If unrelated dirty changes exist, leave them alone and report them. Ask only if they overlap files you must edit or make the requested work ambiguous.
 - New branches should start from up-to-date `main` or the repository's configured base branch.
 - Do not create stacked branches unless explicitly asked.
 - Do not reuse a branch that was merged remotely and deleted unless explicitly asked.

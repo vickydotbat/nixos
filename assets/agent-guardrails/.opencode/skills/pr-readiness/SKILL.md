@@ -16,7 +16,7 @@ Load other relevant skills, especially:
 - `workflow-preservation`
 - `concurrency-async-safety`
 - `testing-discipline`
-- `csharp-hygiene` for C#/.NET repositories
+- `code-hygiene`
 - `git-safety`
 
 ## Inspect First
@@ -85,11 +85,10 @@ Report:
 1. Context read.
 2. Constraints found.
 3. What changed.
-4. What looks good.
-5. Concrete issues with file paths.
-6. Suggested fixes.
-7. Checks run or checks still needed.
-8. Remaining risks.
+4. Concrete issues with file paths.
+5. Suggested fixes.
+6. Checks run or checks still needed.
+7. Remaining risks.
 
 Do not edit during review unless explicitly asked.
 

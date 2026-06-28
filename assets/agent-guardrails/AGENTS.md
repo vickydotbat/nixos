@@ -1,8 +1,8 @@
 # Agent Instructions
 
-These instructions apply to AI coding agents working in this repository. They are intentionally generic and should be refined by project-specific documentation when available.
+These instructions apply to AI coding agents working in this repository. They are intentionally generic and should be refined by project-specific documentation, harness skills, or user instructions when available.
 
-Prefer repository-local instructions, existing documentation, package metadata, build files, CI configuration, and nearby code over assumptions. When instructions conflict, follow the more specific and safer instruction. If ambiguity affects scope, safety, data, architecture, deployment, concurrency, or public behavior, stop and ask.
+Prefer repository-local instructions, existing documentation, package metadata, build files, CI configuration, and nearby code over assumptions. When instructions conflict, follow the more specific and safer instruction. If ambiguity affects scope, safety, data, architecture, deployment, concurrency, or public behavior and cannot be resolved from context, ask before changing that surface.
 
 ## Core Contract
 
@@ -16,11 +16,11 @@ Before non-trivial implementation, prove that you understand the relevant system
 - what workflows already depend on the touched code
 - what concurrency, lifecycle, data, deployment, security, or public-contract assumptions apply
 
-If you cannot establish those facts from repository docs, nearby code, tests, and configuration, stop and ask before editing.
+If you cannot establish those facts from repository docs, nearby code, tests, and configuration, narrow the change to what is known safe or ask before editing the uncertain surface.
 
-## Mandatory Context Gate
+## Context Gate
 
-For any non-trivial task, do not edit until you have completed a context pass.
+For any non-trivial task, do not edit until you have completed a right-sized context pass.
 
 A task is non-trivial if it touches or may affect:
 
@@ -53,7 +53,7 @@ Search for task terms and architectural terms. Depending on the task, include te
 - `transaction`, `migration`, `consistency`, `idempotent`, `retry`, `cache`, `persistence`
 - `auth`, `permission`, `secret`, `token`, `credential`, `role`, `policy`
 
-Before editing, report:
+Before editing non-trivial work, leave a concise context note:
 
 - docs and files read
 - relevant constraints discovered
@@ -62,18 +62,18 @@ Before editing, report:
 - likely files to change
 - uncertainty or missing context
 
-Do not proceed if missing context could affect correctness, safety, architecture, data, concurrency, deployment, or public behavior.
+Do not proceed into an uncertain high-risk surface if missing context could affect correctness, safety, architecture, data, concurrency, deployment, or public behavior.
 
 ## Environment
 
-This machine may use NixOS or another managed development environment.
+This machine may use NixOS, containers, language-specific dev shells, or another managed development environment.
 
-- Avoid generic Linux and FHS assumptions.
+- Avoid generic OS, Linux, and FHS assumptions.
 - Do not assume globally installed tools are available.
 - Inspect the repository before choosing commands or dependencies.
 - Use existing dev shells, flakes, containers, task runners, or repo-provided tooling when available.
 - If dependencies are missing, prefer entering an existing managed environment over installing ad hoc tools.
-- Do not add a new flake, dev shell, container, dependency, service, or module unless necessary for the requested task.
+- Do not add a new flake, dev shell, container, dependency, service, or environment module unless necessary for the requested task.
 
 Look for:
 
@@ -114,7 +114,7 @@ Rules:
 - Domain data and rules belong in domain areas.
 - Adapters and integration code belong in adapter/integration areas.
 - Pipeline stages belong with the pipeline feature that owns them.
-- If a class stops being responsible for what its name or folder says, rename or move it in the same change.
+- If a type, module, service, command, or file stops being responsible for what its name or folder says, rename or move it in the same change when that is within scope.
 - Do not leave converted code in its old location just because that is where it started.
 - Do not create a new local mechanism when an existing service-level or framework-level mechanism already exists.
 - Do not add compatibility shims, fallbacks, duplicate settings, or lifecycle workarounds without a current verified requirement.
@@ -158,9 +158,9 @@ If a collection is built once during startup and is never mutated afterward, do 
 
 Promote repeated magic literals to a named constant near the top of the class or module when doing so improves clarity without broadening scope.
 
-## Approval Required
+## Approval and Escalation
 
-Ask before making decisions that affect:
+Ask before making decisions that the user did not request and that would materially affect:
 
 - scope
 - architecture
@@ -170,12 +170,14 @@ Ask before making decisions that affect:
 - deployment
 - public behavior
 - public APIs or contracts
-- dependency choices
+- runtime dependency choices
 - irreversible operations
 - large rewrites
-- deleting files
+- deleting non-generated files
 - generated or vendored code
 - remotes, branches, PRs, releases, or CI configuration
+
+When the requested task clearly requires one of these surfaces, proceed narrowly and make the risk visible. Ask only when the next step would exceed the request, discard user work, expose secrets, change durable state, or choose between materially different designs.
 
 ## Hard Safety Rules
 
@@ -210,8 +212,8 @@ git log --oneline -5
 
 Rules:
 
-- Reuse the current feature branch only when it is clean and clearly related to the requested task.
-- If unrelated dirty changes exist, stop and ask.
+- Work on the current branch unless branch changes were requested.
+- If unrelated dirty changes exist, leave them alone and report them. Ask only if they overlap files you must edit or make the requested work ambiguous.
 - Before creating a new branch, check the current branch.
 - New branches should start from up-to-date `main` or the repository's configured base branch, not from another feature branch.
 - Do not create stacked branches unless explicitly asked.
@@ -262,45 +264,42 @@ When touching concurrent code, verify:
 - ordering assumptions are documented or tested
 - tests do not rely on timing unless unavoidable
 
-## C# and .NET Hygiene
+## Code Hygiene
 
-Apply these rules when working in C#/.NET repositories.
+Apply these rules in any language.
 
-File and type layout:
+Local style:
 
-- Use one public top-level type per file.
-- Interfaces always get their own file named after the interface, such as `IFooService.cs`.
-- Public records, classes, enums, and structs get their own files.
-- Do not put public interfaces, records, classes, enums, or structs at the bottom of service files.
-- If a helper type is used by exactly one class, make it private/nested and put it at the bottom of that class.
-- If another file needs the helper type, it is no longer private and must move to its own file.
+- Follow nearby files and repository conventions before importing outside preferences.
+- Keep public API surface small and intentional.
+- Keep helpers private or local until there is a real second caller or clear simplification.
+- Keep formatting changes limited to touched code unless formatting is the requested task.
 
 Responsibility and placement:
 
-- Keep type placement honest: domain records in domain folders, adapters in adapter folders, and pipeline stages inside the pipeline feature folder that owns them.
-- Do not leave converted stages in their old service folder.
-- If a refactor changes what a service is responsible for, rename or move the service so the name still tells the truth.
+- Keep placement honest: domain rules in domain areas, adapters at integration boundaries, commands/handlers/jobs with the subsystem that owns them.
+- Do not leave converted code in an old folder just because that is where it started.
+- If a refactor changes responsibility, update names, paths, comments, and docs that would otherwise lie.
 
 Async and lifecycle:
 
-- Never use sync-over-async in server paths: no `.Result`, `.Wait()`, or `.GetAwaiter().GetResult()`.
-- Prefer async all the way through existing async call chains.
-- Respect cancellation tokens, readiness services, startup/shutdown flows, and existing lifecycle infrastructure.
-- Reuse existing lifecycle/readiness infrastructure instead of building local migration/readiness fallbacks.
+- Preserve existing async, lifecycle, startup, shutdown, readiness, cancellation, ownership, and error-observation patterns.
+- Do not add local lifecycle/readiness/retry/cache mechanisms when canonical infrastructure exists.
+- Avoid blocking async or event-driven paths; language-specific blocking APIs are examples of the broader failure mode.
 
 Testing and API shape:
 
 - Do not add production methods, constructors, switches, or visibility solely for tests.
 - Tests should use real public behavior.
-- If behavior is too engine-bound to test directly, extract a real pure rule or accept manual verification for that path.
+- If behavior is too infrastructure-bound to test directly, use an existing test boundary, extract a real pure rule, or document manual verification.
 
 Speculation and literals:
 
 - Avoid speculative safety code.
-- Do not add locks around immutable startup data.
 - Do not duplicate canonical IDs in settings unless required by current behavior.
 - Do not add future-proofing without a current requirement.
-- Promote repeated magic literals to a named `const` near the top of the class.
+- Do not add locks, retries, fallbacks, caches, or abstraction layers without a current failure mode or simplification.
+- Promote repeated magic literals to named constants when doing so improves clarity without broadening scope.
 
 ## Testing Rules
 
@@ -420,9 +419,9 @@ Do not make changes during review unless explicitly asked. If asked to fix issue
 - Do not inspect extra files, read caches, call unrelated tools, prepare pushes, open PRs, or run extra verification unless explicitly asked.
 - If more verification is needed, say exactly what remains and stop.
 
-## Final Response Format
+## Final Response
 
-End coding tasks with:
+End coding tasks with the useful repair ledger, sized to the change:
 
 - context read
 - constraints found
@@ -430,8 +429,4 @@ End coding tasks with:
 - checks run
 - remaining risks or follow-ups
 
-If checks were not run, say so and explain why.
-
-If no files were changed, say so.
-
-If blocked, explain the blocker, what was inspected, and the safest next step.
+For small tasks, a short prose summary is enough. If checks were not run, say so and explain why. If no files were changed, say so. If blocked, explain the blocker, what was inspected, and the safest next step.
