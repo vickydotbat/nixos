@@ -2,7 +2,7 @@
 description: Review code changes for hygiene, responsibility, async safety, tests, and scope control
 ---
 
-Load these skills:
+Load `context-discovery`, then choose the smallest relevant set of review skills:
 
 - `context-discovery`
 - `code-hygiene`
@@ -27,4 +27,5 @@ Review code changes for:
 - repeated magic literals that should be constants
 - old workflows affected but not verified
 
-Report concrete findings with file paths and suggested fixes.
+Report concrete findings with file paths and suggested fixes. Keep context
+summary compact; do not reproduce docs or large diffs.

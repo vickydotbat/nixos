@@ -3,7 +3,7 @@ description: Build a minimal implementation plan after reading repository contex
 ---
 
 Load `context-discovery` first.
-Load any relevant skills:
+Choose the smallest relevant set of skills:
 
 - `architecture-responsibility`
 - `workflow-preservation`
@@ -18,13 +18,10 @@ Do not edit files.
 
 Produce a plan that includes:
 
-1. Context read.
-2. Constraints found.
-3. Canonical infrastructure to reuse.
-4. Affected existing workflows.
-5. Minimal files likely to change.
-6. Proposed steps.
-7. Tests/checks to run.
-8. Risks and questions.
+1. Compact awareness packet.
+2. Minimal files likely to change.
+3. Proposed steps.
+4. Tests/checks to run.
+5. Risks and questions.
 
 Stop after the plan.

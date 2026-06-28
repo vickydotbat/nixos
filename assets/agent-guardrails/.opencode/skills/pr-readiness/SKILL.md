@@ -10,7 +10,7 @@ A PR-readiness pass is a review and cleanup workflow, not an excuse to broaden s
 
 Before reviewing, load and apply `context-discovery`.
 
-Load other relevant skills, especially:
+Load only the other skills relevant to the diff:
 
 - `architecture-responsibility`
 - `workflow-preservation`
@@ -57,7 +57,7 @@ Check whether the change conflicts with:
 - scope creep
 - unrelated files
 - stale names or folders after responsibility changes
-- public types placed in the wrong files
+- public APIs, types, modules, or files placed in the wrong owner
 - local mechanisms that duplicate canonical infrastructure
 - speculative safety code, locks, configuration, retries, or future-proofing
 - unsafe async/concurrency changes
@@ -82,13 +82,12 @@ Check whether the change conflicts with:
 
 Report:
 
-1. Context read.
-2. Constraints found.
-3. What changed.
-4. Concrete issues with file paths.
-5. Suggested fixes.
-6. Checks run or checks still needed.
-7. Remaining risks.
+1. Compact awareness packet.
+2. What changed.
+3. Concrete issues with file paths.
+4. Suggested fixes.
+5. Checks run or checks still needed.
+6. Remaining risks.
 
 Do not edit during review unless explicitly asked.
 

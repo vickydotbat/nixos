@@ -10,6 +10,9 @@ Do not start non-trivial implementation until the relevant repository context is
 
 Use this skill before non-trivial edits, reviews, refactors, bug fixes, test changes, architecture changes, public behavior changes, or work in unfamiliar code.
 
+Use enough context to avoid local, misleading edits. Do not load unrelated docs
+or paste long excerpts into the conversation.
+
 ## Context Sources
 
 Before editing, identify and read relevant sources:
@@ -34,17 +37,18 @@ Depending on the task, search for terms such as:
 - `transaction`, `migration`, `consistency`, `idempotent`, `retry`, `cache`, `persistence`
 - `auth`, `permission`, `secret`, `token`, `credential`, `role`, `policy`
 
-## Context Note Before Editing
+## Awareness Packet Before Editing
 
-Before making non-trivial changes, report:
+Before making non-trivial changes, report a compact packet:
 
-1. Files and docs read.
-2. Relevant constraints discovered.
-3. Existing patterns that should be followed.
-4. Canonical infrastructure or services that should be reused.
-5. Workflows that may be affected.
-6. Likely files to change.
-7. Uncertainty or missing context.
+1. `Context`: files, docs, tests, and configuration read.
+2. `Constraints`: local rules, public contracts, and safety boundaries found.
+3. `Canonical`: existing mechanisms, services, helpers, or patterns to reuse.
+4. `Impact`: old workflows or shared paths that may be affected.
+5. `Plan`: minimal files and steps likely needed.
+6. `Unknowns`: missing context, if it changes risk or scope.
+
+Keep the packet short. Name evidence; do not reproduce it.
 
 Do not proceed into an uncertain high-risk surface if missing context could affect correctness, safety, architecture, data, concurrency, deployment, or public behavior. Narrow the change or ask.
 

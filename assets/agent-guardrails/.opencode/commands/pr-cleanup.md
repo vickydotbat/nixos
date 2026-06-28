@@ -16,6 +16,7 @@ git diff --name-only
 ```
 
 Then perform a PR-readiness pass against repository context.
+Keep the context summary compact.
 
 Check for:
 
@@ -36,7 +37,7 @@ If making fixes, keep them narrow.
 
 Report:
 
-- context read
+- compact awareness packet
 - issues found
 - fixes made
 - checks run

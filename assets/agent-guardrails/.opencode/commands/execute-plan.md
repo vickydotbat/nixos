@@ -4,7 +4,7 @@ description: Execute an approved plan narrowly and report verification
 
 Use only the approved plan.
 
-Before editing, load `git-safety` and any relevant implementation skills:
+Before editing, load `git-safety` and choose the smallest relevant set of implementation skills:
 
 - `context-discovery`
 - `architecture-responsibility`
@@ -28,4 +28,4 @@ After changes:
 
 1. Inspect final diff.
 2. Run the most relevant checks.
-3. Report context read, constraints found, what changed, checks run, and remaining risks.
+3. Report the compact awareness packet, what changed, checks run, and remaining risks.
