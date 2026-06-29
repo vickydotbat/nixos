@@ -10,6 +10,10 @@ Load `context-discovery`, then choose the smallest relevant set of review skills
 - `architecture-responsibility`
 - `testing-discipline`
 - `workflow-preservation`
+- `artifact-boundary-discipline` only when generated files, artifacts, release
+  pins, deploy config, or CI publish gates are touched
+- `secret-authority-discipline` only when secrets, auth, tokens, `.env`, SOPS,
+  provider config, or runtime secret paths are touched
 
 Do not edit files.
 

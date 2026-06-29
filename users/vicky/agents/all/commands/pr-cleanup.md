@@ -3,6 +3,8 @@ description: Prepare a branch for PR without broadening scope
 ---
 
 Load `pr-readiness` first.
+Load `artifact-boundary-discipline` or `secret-authority-discipline` only when
+the branch touches those surfaces.
 
 Do not broaden scope.
 

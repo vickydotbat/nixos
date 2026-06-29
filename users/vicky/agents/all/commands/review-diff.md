@@ -2,8 +2,9 @@
 description: Review current diff against repository context without editing
 ---
 
-Load `pr-readiness`, then any other skills needed by the diff. Do not load
-every skill by default.
+Load `pr-readiness`, then any other skills needed by the diff. Include
+`artifact-boundary-discipline` or `secret-authority-discipline` only when the
+diff touches those surfaces. Do not load every skill by default.
 
 Do not edit files.
 

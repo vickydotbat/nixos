@@ -5,6 +5,8 @@ subtask: true
 ---
 
 Load `pr-readiness`, then only the other skills needed by the packet diff.
+Include `artifact-boundary-discipline` or `secret-authority-discipline` only
+when the packet touches those surfaces.
 
 Do not edit files.
 Do not review unrelated repository areas.

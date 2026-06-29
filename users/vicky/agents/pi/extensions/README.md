@@ -9,5 +9,11 @@ must own any expensive or stateful setup after activation has finished.
 
 ## Current State
 
-No active Pi extension is declared in this tree yet. Add one only when its
-failure modes are clear and it can be reviewed like ordinary source code.
+- `workspace-tools.ts` adds read-only workspace mapping and verification
+  suggestion tools.
+- `secret-tripwire.ts` classifies secret-looking paths without opening file
+  contents.
+
+These extensions are advisory only. They may inspect repository metadata and
+changed path names, but they must not install tools, mutate repositories, run
+checks automatically, read secret values, or manage Pi runtime state.
