@@ -210,6 +210,26 @@
         "type": "github"
       }
     },
+    "pi-flake": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1782302267,
+        "narHash": "sha256-lPvThvgbPrWzlFbp56QqH6QnAoNL+mDbu1pUEulNWkk=",
+        "owner": "ChauDucToan",
+        "repo": "pi-flake",
+        "rev": "5a64b4c95169ddcbd7c3ad131d7376f11a9540dc",
+        "type": "github"
+      },
+      "original": {
+        "owner": "ChauDucToan",
+        "repo": "pi-flake",
+        "type": "github"
+      }
+    },
     "plasma-manager": {
       "inputs": {
         "home-manager": [
@@ -261,6 +281,7 @@
         "nixpkgs": "nixpkgs",
         "nixpkgs-stable": "nixpkgs-stable",
         "nur": "nur",
+        "pi-flake": "pi-flake",
         "plasma-manager": "plasma-manager",
         "ponytail": "ponytail",
         "sops-nix": "sops-nix",

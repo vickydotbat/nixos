@@ -352,6 +352,17 @@ in
       };
     };
 
+    pi = {
+      enable = true;
+      seedConfig = true;
+
+      ollama = {
+        enable = true;
+        defaultModel = "qwen3-coder:480b-cloud";
+        models = opencodeCloudModelIds;
+      };
+    };
+
     codex = {
       enable = true;
     };

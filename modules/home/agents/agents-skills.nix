@@ -43,7 +43,7 @@ let
   );
 
   guardrailsShared = lib.optionalAttrs (cfg.guardrails.enable && cfg.guardrails.shared) (
-    mkSkillLinks ".agents/skills" (cfg.guardrails.source + "/.opencode/skills")
+    mkSkillLinks ".agents/skills" (cfg.guardrails.source + "/skills")
   );
 
   superpowersCodex = lib.optionalAttrs (cfg.superpowers.enable && cfg.targets.codex) (
@@ -56,7 +56,7 @@ let
 
   guardrailsCodex = lib.optionalAttrs (
     cfg.guardrails.enable && cfg.targets.codex && cfg.guardrails.codex
-  ) (mkSkillLinks ".codex/skills" (cfg.guardrails.source + "/.opencode/skills"));
+  ) (mkSkillLinks ".codex/skills" (cfg.guardrails.source + "/skills"));
 
   superpowersOpenCode = lib.optionalAttrs (cfg.superpowers.enable && cfg.targets.opencode) (
     mkSkillLinks ".config/opencode/skills" cfg.superpowers.source
@@ -67,16 +67,16 @@ let
   );
 
   guardrailsOpenCode = lib.optionalAttrs (cfg.guardrails.enable && cfg.targets.opencode) (
-    mkSkillLinks ".config/opencode/skills" (cfg.guardrails.source + "/.opencode/skills")
+    mkSkillLinks ".config/opencode/skills" (cfg.guardrails.source + "/skills")
   );
 
   guardrailsOpenCodeCommands = lib.optionalAttrs (
     cfg.guardrails.enable && cfg.targets.opencode && cfg.guardrails.commands
-  ) (mkLinksIfExists ".config/opencode/commands" (cfg.guardrails.source + "/.opencode/commands"));
+  ) (mkLinksIfExists ".config/opencode/commands" (cfg.guardrails.source + "/commands"));
 
   guardrailsOpenCodeAgentDefinitions = lib.optionalAttrs (
     cfg.guardrails.enable && cfg.targets.opencode && cfg.guardrails.agents
-  ) (mkLinksIfExists ".config/opencode/agents" (cfg.guardrails.source + "/.opencode/agents"));
+  ) (mkLinksIfExists ".config/opencode/agents" (cfg.guardrails.source + "/agents"));
 
   guardrailsOpenCodeAgentsMd =
     lib.optionalAttrs
@@ -100,7 +100,7 @@ let
 
   guardrailsClaude = lib.optionalAttrs (
     cfg.guardrails.enable && cfg.targets.claude && cfg.guardrails.claude
-  ) (mkSkillLinks ".claude/skills" (cfg.guardrails.source + "/.opencode/skills"));
+  ) (mkSkillLinks ".claude/skills" (cfg.guardrails.source + "/skills"));
 
   allSkillFiles =
     superpowersShared

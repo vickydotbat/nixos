@@ -67,6 +67,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Agents
+
+    pi-flake = {
+      url = "github:ChauDucToan/pi-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # AI Skills
 
     superpowers = {

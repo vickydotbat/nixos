@@ -1,5 +1,6 @@
 {
   pkgs,
+  config,
   ...
 }:
 let
@@ -17,6 +18,8 @@ let
     pkgs.dotnetCorePackages.sdk_10_0
     pkgs.dotnetCorePackages.aspnetcore_10_0
   ];
+
+  extensionsDir = "${config.home.homeDirectory}/.vscode/extensions";
 in
 {
   home.persistence."/nix/persist" = {
@@ -117,6 +120,14 @@ in
             "fileMatch" = [ "settings.json" ];
             "url" =
               "https://raw.githubusercontent.com/catppuccin/vscode/catppuccin-vsc-v3.19.0/packages/catppuccin-vsc/schemas/customUIColors.schema.json";
+          }
+        ];
+
+        "yaml.schemas" = [
+          {
+            "file://${extensionsDir}/Continue.continue/config-yaml-schema.json" = [
+              ".continue/**/*.yaml"
+            ];
           }
         ];
 
