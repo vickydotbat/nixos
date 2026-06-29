@@ -1,5 +1,8 @@
 {
+  config,
+  inputs,
   lib,
+  options,
   ...
 }:
 let
@@ -7,6 +10,202 @@ let
   hasHeadroomEnvSecret =
     builtins.pathExists accountSecretsFile
     && lib.hasInfix "headroom-env:" (builtins.readFile accountSecretsFile);
+  hasHomePersistence = options.home ? persistence;
+  persistenceEnabled = config.theorem.home.base.persistence.enable;
+  homeDir = config.home.homeDirectory;
+
+  skills = {
+    persist = persistenceEnabled;
+
+    targets = {
+      codex = config.theorem.home.agents.codex.enable or false;
+      opencode = config.theorem.home.agents.opencode.enable or false;
+      claude = config.theorem.home.agents.claude.enable or false;
+    };
+
+    local = {
+      enable = true;
+      source = ../agents;
+
+      # `all` is the harness-neutral kit. Harness directories below this source
+      # are installed only into the tool that owns that configuration surface.
+      globalSkills = true;
+      globalCommands = true;
+      codex = true;
+      opencode = true;
+      claude = true;
+    };
+
+    superpowers = {
+      enable = true;
+      source = inputs.superpowers + "/skills";
+    };
+
+    ponytail = {
+      enable = true;
+      source = inputs.ponytail + "/skills";
+      level = "full";
+    };
+
+    pi = {
+      enable = config.theorem.home.agents.pi.enable or false;
+      source = ../agents/pi;
+
+      agentInstructions = true;
+      extensions = true;
+      skills = true;
+    };
+  };
+
+  # Link every immediate child of a source directory into a target prefix.
+  # Directories are linked recursively; files are linked normally.
+  mkLinks =
+    targetPrefix: source:
+    lib.mapAttrs' (
+      name: type:
+      lib.nameValuePair "${targetPrefix}/${name}" (
+        {
+          source = source + "/${name}";
+        }
+        // lib.optionalAttrs (type == "directory") {
+          recursive = true;
+        }
+      )
+    ) (builtins.readDir source);
+
+  mkLinksIfExists =
+    targetPrefix: source:
+    lib.optionalAttrs (source != null && builtins.pathExists source) (mkLinks targetPrefix source);
+
+  mkSkillLinks = targetPrefix: source: mkLinksIfExists targetPrefix source;
+
+  superpowersShared = lib.optionalAttrs skills.superpowers.enable (
+    mkSkillLinks ".agents/skills" skills.superpowers.source
+  );
+
+  ponytailShared = lib.optionalAttrs skills.ponytail.enable (
+    mkSkillLinks ".agents/skills" skills.ponytail.source
+  );
+
+  superpowersCodex = lib.optionalAttrs (skills.superpowers.enable && skills.targets.codex) (
+    mkSkillLinks ".codex/skills" skills.superpowers.source
+  );
+
+  ponytailCodex = lib.optionalAttrs (skills.ponytail.enable && skills.targets.codex) (
+    mkSkillLinks ".codex/skills" skills.ponytail.source
+  );
+
+  superpowersOpenCode = lib.optionalAttrs (skills.superpowers.enable && skills.targets.opencode) (
+    mkSkillLinks ".config/opencode/skills" skills.superpowers.source
+  );
+
+  ponytailOpenCode = lib.optionalAttrs (skills.ponytail.enable && skills.targets.opencode) (
+    mkSkillLinks ".config/opencode/skills" skills.ponytail.source
+  );
+
+  superpowersClaude = lib.optionalAttrs (skills.superpowers.enable && skills.targets.claude) (
+    mkSkillLinks ".claude/skills" skills.superpowers.source
+  );
+
+  ponytailClaude = lib.optionalAttrs (skills.ponytail.enable && skills.targets.claude) (
+    mkSkillLinks ".claude/skills" skills.ponytail.source
+  );
+
+  localGlobalSkills = lib.optionalAttrs (skills.local.enable && skills.local.globalSkills) (
+    mkSkillLinks ".agents/skills" (skills.local.source + "/all/skills")
+  );
+
+  localGlobalCommands = lib.optionalAttrs (skills.local.enable && skills.local.globalCommands) (
+    mkLinksIfExists ".agents/commands" (skills.local.source + "/all/commands")
+  );
+
+  localCodexConfig = lib.optionalAttrs (
+    skills.local.enable && skills.targets.codex && skills.local.codex
+  ) (mkLinksIfExists ".codex" (skills.local.source + "/codex"));
+
+  localOpenCodeConfig = lib.optionalAttrs (
+    skills.local.enable && skills.targets.opencode && skills.local.opencode
+  ) (mkLinksIfExists ".config/opencode" (skills.local.source + "/opencode"));
+
+  localClaudeConfig = lib.optionalAttrs (
+    skills.local.enable && skills.targets.claude && skills.local.claude
+  ) (mkLinksIfExists ".claude" (skills.local.source + "/claude"));
+
+  allSkillFiles =
+    superpowersShared
+    // ponytailShared
+    // superpowersCodex
+    // ponytailCodex
+    // superpowersOpenCode
+    // ponytailOpenCode
+    // superpowersClaude
+    // ponytailClaude
+    // localGlobalSkills
+    // localGlobalCommands
+    // localCodexConfig
+    // localOpenCodeConfig
+    // localClaudeConfig;
+
+  mkSeedRulesIfExists =
+    targetPrefix: source:
+    lib.optionals (source != null && builtins.pathExists source) (
+      lib.mapAttrsToList (
+        name: type:
+        "C ${homeDir}/${targetPrefix}/${name} ${
+          if type == "directory" then "0700" else "0600"
+        } - - - ${source + "/${name}"}"
+      ) (builtins.readDir source)
+    );
+
+  localSeedDirectories = lib.optionals skills.local.enable (
+    [
+      "d ${homeDir}/.agents 0700 - - -"
+      "d ${homeDir}/.agents/skills 0700 - - -"
+      "d ${homeDir}/.agents/commands 0700 - - -"
+    ]
+    ++ lib.optionals (skills.targets.codex && skills.local.codex) [
+      "d ${homeDir}/.codex 0700 - - -"
+      "d ${homeDir}/.codex/skills 0700 - - -"
+    ]
+    ++ lib.optionals (skills.targets.opencode && skills.local.opencode) [
+      "d ${homeDir}/.config 0700 - - -"
+      "d ${homeDir}/.config/opencode 0700 - - -"
+      "d ${homeDir}/.config/opencode/agents 0700 - - -"
+      "d ${homeDir}/.config/opencode/commands 0700 - - -"
+      "d ${homeDir}/.config/opencode/skills 0700 - - -"
+    ]
+    ++ lib.optionals (skills.targets.claude && skills.local.claude) [
+      "d ${homeDir}/.claude 0700 - - -"
+      "d ${homeDir}/.claude/skills 0700 - - -"
+    ]
+  );
+
+  piSeedDirectories = lib.optionals skills.pi.enable ([
+    "d ${homeDir}/.agents 0700 - - -"
+    "d ${homeDir}/.agents/skills 0700 - - -"
+    "d ${homeDir}/.pi 0700 - - -"
+    "d ${homeDir}/.pi/agent 0700 - - -"
+    "d ${homeDir}/.pi/agent/extensions 0700 - - -"
+  ]);
+
+  piAgentInstructionSeedRules = lib.optionals (skills.pi.enable && skills.pi.agentInstructions) (
+    mkSeedRulesIfExists ".pi/agent" (skills.pi.source + "/agent")
+  );
+
+  piExtensionSeedRules = lib.optionals (skills.pi.enable && skills.pi.extensions) (
+    mkSeedRulesIfExists ".pi/agent/extensions" (skills.pi.source + "/extensions")
+  );
+
+  piSkillSeedRules = lib.optionals (skills.pi.enable && skills.pi.skills) (
+    mkSeedRulesIfExists ".agents/skills" (skills.pi.source + "/skills")
+  );
+
+  allSeedRules =
+    localSeedDirectories
+    ++ piSeedDirectories
+    ++ piAgentInstructionSeedRules
+    ++ piExtensionSeedRules
+    ++ piSkillSeedRules;
 
   opencodeCloudProvider = "ollama-cloud";
   opencodeCloudModelIds = [
@@ -284,91 +483,99 @@ let
     };
   };
 in
-{
-  theorem.home.agents = {
-    ollama = {
-      enable = true;
-      acceleration = "rocm";
-      host = "0.0.0.0";
-    };
-    odysseus = {
-      enable = true;
-    };
+lib.mkMerge [
+  {
+    theorem.home.agents = {
+      ollama = {
+        enable = true;
+        acceleration = "rocm";
+        host = "0.0.0.0";
+      };
+      odysseus = {
+        enable = true;
+      };
 
-    headroom = {
-      enable = true;
+      headroom = {
+        enable = true;
 
-      host = "127.0.0.1";
-      port = 8787;
-      mode = "token";
+        host = "127.0.0.1";
+        port = 8787;
+        mode = "token";
+
+        opencode = {
+          enable = true;
+
+          # Built-in OpenCode / Models.dev provider ID.
+          providerId = "ollama-cloud";
+
+          # Only these appear in OpenCode's model picker.
+          ollamaCloudModelIds = opencodeCloudModelIds;
+
+          defaultModel = "qwen3-coder:480b-cloud";
+          smallModel = "gpt-oss:20b-cloud";
+
+          ollamaCloudModels = opencodeCloudModels;
+          agents = opencodeSafeAgents;
+        };
+      }
+      // lib.optionalAttrs hasHeadroomEnvSecret {
+        environmentFile = "/run/secrets/headroom-vicky-env";
+      };
 
       opencode = {
         enable = true;
-
-        # Built-in OpenCode / Models.dev provider ID.
-        providerId = "ollama-cloud";
-
-        # Only these appear in OpenCode's model picker.
-        ollamaCloudModelIds = opencodeCloudModelIds;
-
-        defaultModel = "qwen3-coder:480b-cloud";
-        smallModel = "gpt-oss:20b-cloud";
-
-        ollamaCloudModels = opencodeCloudModels;
-        agents = opencodeSafeAgents;
+        safeConfig = {
+          enable = true;
+          providerId = opencodeCloudProvider;
+          modelIds = opencodeCloudModelIds;
+          defaultModel = "qwen3-coder:480b-cloud";
+          smallModel = "gpt-oss:20b-cloud";
+          models = opencodeCloudModels;
+          agents = opencodeSafeAgents;
+        };
       };
-    }
-    // lib.optionalAttrs hasHeadroomEnvSecret {
-      environmentFile = "/run/secrets/headroom-vicky-env";
-    };
 
-    skills = {
-      enable = true;
-
-      guardrails = {
+      pi = {
         enable = true;
-        source = ../../../assets/agent-guardrails;
+        seedConfig = true;
 
-        # These are OpenCode-shaped skills, so I would keep these false by default.
-        codex = false;
-        claude = false;
-
-        shared = true;
-        commands = true;
-        agentsMd = true;
+        ollama = {
+          enable = true;
+          defaultModel = "qwen3-coder:480b-cloud";
+          models = opencodeCloudModelIds;
+        };
       };
-    };
 
-    opencode = {
-      enable = true;
-      safeConfig = {
+      codex = {
         enable = true;
-        providerId = opencodeCloudProvider;
-        modelIds = opencodeCloudModelIds;
-        defaultModel = "qwen3-coder:480b-cloud";
-        smallModel = "gpt-oss:20b-cloud";
-        models = opencodeCloudModels;
-        agents = opencodeSafeAgents;
       };
-    };
 
-    pi = {
-      enable = true;
-      seedConfig = true;
-
-      ollama = {
+      claude = {
         enable = true;
-        defaultModel = "qwen3-coder:480b-cloud";
-        models = opencodeCloudModelIds;
       };
     };
 
-    codex = {
-      enable = true;
-    };
+    home.file =
+      allSkillFiles
+      // lib.optionalAttrs skills.ponytail.enable {
+        ".config/ponytail/config.json".text = builtins.toJSON {
+          defaultMode = skills.ponytail.level;
+        };
+      };
 
-    claude = {
-      enable = true;
+    systemd.user.tmpfiles.rules = allSeedRules;
+
+    home.sessionVariables = lib.mkIf skills.ponytail.enable {
+      PONYTAIL_DEFAULT_MODE = skills.ponytail.level;
     };
-  };
-}
+  }
+
+  (lib.optionalAttrs hasHomePersistence {
+    home.persistence."/nix/persist" = lib.mkIf skills.persist {
+      directories = [
+        ".agents"
+      ]
+      ++ lib.optional skills.ponytail.enable ".config/ponytail";
+    };
+  })
+]
