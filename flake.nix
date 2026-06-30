@@ -6,11 +6,13 @@
       "https://nix-community.cachix.org"
       "https://codex-cli.cachix.org"
       "https://claude-code.cachix.org"
+      "https://pi.cachix.org"
     ];
     extra-trusted-public-keys = [
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
       "codex-cli.cachix.org-1:1Br3H1hHoRYG22n//cGKJOk3cQXgYobUel6O8DgSing="
       "claude-code.cachix.org-1:YeXf2aNu7UTX8Vwrze0za1WEDS+4DuI2kVeWEE4fsRk="
+      "pi.cachix.org-1:lGeoGJaZ5ZDabuRzkcD5EBTNnDM4HJ1vqeOxlWk1Flk="
     ];
   };
 
@@ -69,26 +71,9 @@
 
     # Agents
 
-    pi-flake = {
-      url = "github:ChauDucToan/pi-flake";
+    pi = {
+      url = "github:lukasl-dev/pi.nix";
       inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    # AI Skills
-
-    superpowers = {
-      url = "github:obra/superpowers";
-      flake = false;
-    };
-
-    ponytail = {
-      url = "github:DietrichGebert/ponytail";
-      flake = false;
-    };
-
-    caveman = {
-      url = "github:JuliusBrussee/caveman";
-      flake = false;
     };
   };
 
@@ -186,6 +171,7 @@
             imports = [
               inputs.nix-index-database.homeModules.nix-index
               inputs.spicetify-nix.homeManagerModules.spicetify
+              inputs.pi.homeModules.default
               (inputs.import-tree ./modules/home)
             ];
           };
@@ -202,9 +188,6 @@
           vscode-extensions = prev.vscode-extensions // {
             evertjunior = (prev.vscode-extensions.evertjunior or { }) // {
               mass-renamer = final.callPackage ./pkgs/vscode-extensions/evertjunior/mass-renamer.nix { };
-            };
-            selfagency = (prev.vscode-extensions.selfagency or { }) // {
-              opilot = final.callPackage ./pkgs/vscode-extensions/selfagency/opilot.nix { };
             };
           };
         };

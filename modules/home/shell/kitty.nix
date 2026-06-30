@@ -1,9 +1,10 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }:
-# TODO: describe
+
 let
   cfg = config.theorem.home.shell.kitty;
 in
@@ -23,6 +24,12 @@ in
 
     programs.kitty = {
       enable = true;
+
+      font = {
+        name = "Hack Nerd Font";
+        size = 11;
+        package = pkgs.nerd-fonts.hack;
+      };
     };
   };
 }

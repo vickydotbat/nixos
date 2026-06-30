@@ -1,8 +1,7 @@
 {
   theorem.home.shell = {
+    enable = true;
     bat.enable = true;
-
-    # ghostty.enable = true;
     kitty.enable = true;
     git.enable = true;
     nix-index = {
@@ -26,8 +25,10 @@
         "--colors=line:style:bold"
       ];
     };
-    shell.enable = true;
     starship.enable = true;
-    zellij.enable = false;
+
+    extraAliases = {
+      pi-update = "nix-shell -p nodejs 'python3.withPackages (ps: [ ps.pyyaml ])' --run 'pi update --extensions'";
+    };
   };
 }

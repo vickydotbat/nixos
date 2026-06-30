@@ -15,7 +15,7 @@
 # keep personal shorthand out of the reusable layer. NixOS repair aliases only
 # appear when Home Manager is evaluated with an `osConfig`.
 let
-  cfg = config.theorem.home.shell.shell;
+  cfg = config.theorem.home.shell;
   hasHomePersistence = options.home ? persistence;
   hasOsConfig = osConfig != null;
   nhEnabled = hasOsConfig && (osConfig.programs.nh.enable or false);
@@ -50,7 +50,7 @@ let
   };
 in
 {
-  options.theorem.home.shell.shell = {
+  options.theorem.home.shell = {
     enable = lib.mkOption {
       type = lib.types.bool;
       default = true;

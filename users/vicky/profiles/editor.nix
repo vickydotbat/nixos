@@ -1,6 +1,6 @@
 {
   pkgs,
-  config,
+  # config,
   ...
 }:
 let
@@ -19,7 +19,7 @@ let
     pkgs.dotnetCorePackages.aspnetcore_10_0
   ];
 
-  extensionsDir = "${config.home.homeDirectory}/.vscode/extensions";
+  # extensionsDir = "${config.home.homeDirectory}/.vscode/extensions";
 in
 {
   home.persistence."/nix/persist" = {
@@ -107,30 +107,15 @@ in
         statix
         deadnix
         csharpier
+        csharp-ls
         dotnet
+        omnisharp-roslyn
         # fallow
         lua
         python3
         gopls
       ];
       userSettings = {
-
-        "json.schemas" = [
-          {
-            "fileMatch" = [ "settings.json" ];
-            "url" =
-              "https://raw.githubusercontent.com/catppuccin/vscode/catppuccin-vsc-v3.19.0/packages/catppuccin-vsc/schemas/customUIColors.schema.json";
-          }
-        ];
-
-        "yaml.schemas" = [
-          {
-            "file://${extensionsDir}/Continue.continue/config-yaml-schema.json" = [
-              ".continue/**/*.yaml"
-            ];
-          }
-        ];
-
         "workbench.startupEditor" = "none";
         "workbench.welcomePage.walkthroughs.openOnInstall" = false;
         "workbench.tips.enabled" = false;
