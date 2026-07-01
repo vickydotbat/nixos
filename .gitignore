@@ -232,3 +232,5 @@ build/
 TODO.local*
 NOTES.local*
 *.local.md
+# Local Pi runtime state
+.atl/
