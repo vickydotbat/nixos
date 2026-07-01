@@ -115,6 +115,68 @@ in
       };
 
       home.packages = cfg.extraPackages;
+
+      # The upstream VS Code desktop file from nixpkgs omits mimeType, so
+      # Dolphin and other XDG-compliant file managers never list VS Code in
+      # "Open With". Override it with a complete desktop entry that declares
+      # the text and code MIME types VS Code can handle. The user-scoped file
+      # in ~/.local/share/applications/ takes precedence over the package
+      # desktop file in the Home Manager profile path.
+      xdg.desktopEntries.code = {
+        name = "Visual Studio Code";
+        genericName = "Text Editor";
+        comment = "Code Editing. Redefined.";
+        exec = "code %F";
+        icon = "vscode";
+        categories = [
+          "Utility"
+          "TextEditor"
+          "Development"
+          "IDE"
+        ];
+        startupNotify = true;
+        type = "Application";
+
+        # Recognized keys not exposed as dedicated options by Home Manager
+        # are written via settings (mapped to makeDesktopItem extraConfig).
+        # See: https://specifications.freedesktop.org/desktop-entry/latest/recognized-keys.html
+        settings = {
+          StartupWMClass = "Code";
+          Keywords = "vscode;";
+        };
+        mimeType = [
+          "text/plain"
+          "text/css"
+          "text/html"
+          "text/javascript"
+          "text/markdown"
+          "text/x-c"
+          "text/x-c++"
+          "text/x-csrc"
+          "text/x-chdr"
+          "text/x-c++src"
+          "text/x-c++hdr"
+          "text/x-java"
+          "text/x-python"
+          "text/x-ruby"
+          "text/x-rust"
+          "text/x-shellscript"
+          "text/x-makefile"
+          "text/x-nix"
+          "text/xml"
+          "application/json"
+          "application/javascript"
+          "application/x-yaml"
+          "application/yaml"
+          "application/xml"
+          "application/x-shellscript"
+        ];
+        actions.new-empty-window = {
+          name = "New Empty Window";
+          exec = "code --new-window %F";
+          icon = "vscode";
+        };
+      };
     })
     (lib.optionalAttrs hasHomePersistence {
       home.persistence."/nix/persist" = lib.mkIf (cfg.enable && cfg.persistState) {

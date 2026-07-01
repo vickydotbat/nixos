@@ -19,7 +19,7 @@ let
     pkgs.dotnetCorePackages.aspnetcore_10_0
   ];
 
-  # extensionsDir = "${config.home.homeDirectory}/.vscode/extensions";
+  continueSchemaUri = builtins.unsafeDiscardStringContext "file://${pkgs.vscode-extensions.continue.continue}/share/vscode/extensions/Continue.continue/config-yaml-schema.json";
 in
 {
   home.persistence."/nix/persist" = {
@@ -108,8 +108,8 @@ in
         deadnix
         csharpier
         csharp-ls
+        python314Packages.jedi-language-server
         dotnet
-        omnisharp-roslyn
         # fallow
         lua
         python3
@@ -341,6 +341,11 @@ in
 
         "yaml.format.enable" = true;
         "yaml.validate" = true;
+        "yaml.schemas" = {
+          "${continueSchemaUri}" = [
+            ".continue/**/*.yaml"
+          ];
+        };
 
         "evenBetterToml.formatter.allowedBlankLines" = 2;
 
@@ -369,8 +374,13 @@ in
         "[javascriptreact]" = prettierTwoSpaceFormatter;
         "[typescript]" = prettierTwoSpaceFormatter;
         "[typescriptreact]" = prettierTwoSpaceFormatter;
-        "[json]" = prettierTwoSpaceFormatter;
-        "[jsonc]" = prettierTwoSpaceFormatter;
+        "[json]" = {
+          "editor.defaultFormatter" = "vscode.json-language-features";
+        };
+
+        "[jsonc]" = {
+          "editor.defaultFormatter" = "vscode.json-language-features";
+        };
         "[html]" = prettierTwoSpaceFormatter;
         "[css]" = prettierTwoSpaceFormatter;
         "[scss]" = prettierTwoSpaceFormatter;
@@ -386,10 +396,8 @@ in
 
         # DotNet
         "[csharp]"."editor.defaultFormatter" = "csharpier.csharpier-vscode";
-        "dotnet.dotnetPath" = "${dotnet}/bin/dotnet";
-        "omnisharp.dotNetCliPaths" = [
-          "${dotnet}/bin/dotnet"
-        ];
+        "dotnet.server.useOmnisharp" = false;
+
         "dotnetAcquisitionExtension.sharedExistingDotnetPath" = "${dotnet}/bin/dotnet";
         "dotnetAcquisitionExtension.existingDotnetPath" = [
           {
@@ -432,5 +440,14 @@ in
         };
       };
     };
+  };
+
+  # Make VS Code the session-level editor for CLI tools (git commit, git rebase,
+  # etc.). The -w flag blocks until the file is closed; -r reuses the existing
+  # window. This mirrors the EDITOR/VISUAL already set inside VS Code's own
+  # integrated terminal above.
+  home.sessionVariables = {
+    EDITOR = "code -rw";
+    VISUAL = "code -rw";
   };
 }

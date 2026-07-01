@@ -273,7 +273,7 @@ in
 
     configFile = {
       "baloorc" = {
-        "Basic Settings".Indexing-Enabled = true;
+        "Basic Settings".Indexing-Enabled = false;
 
         General = {
           "only basic indexing" = true;
@@ -307,7 +307,8 @@ in
         };
 
         KDE = {
-          AutomaticLookAndFeel = true;
+          AutomaticLookAndFeel = false;
+          LookAndFeelPackage = "org.kde.breezedark.desktop";
           contrast = 4;
           frameContrast = 0.2;
         };
@@ -458,5 +459,25 @@ in
     "image/png" = lib.mkForce [ "org.kde.gwenview.desktop" ];
     "image/jpeg" = lib.mkForce [ "org.kde.gwenview.desktop" ];
     "image/webp" = lib.mkForce [ "org.kde.gwenview.desktop" ];
+
+    # Default editor: VS Code replaces Kate for text and code files.
+    "text/plain" = lib.mkForce [ "code.desktop" ];
+    "text/markdown" = lib.mkForce [ "code.desktop" ];
+    "text/css" = lib.mkForce [ "code.desktop" ];
+    "text/javascript" = lib.mkForce [ "code.desktop" ];
+    "text/x-c" = lib.mkForce [ "code.desktop" ];
+    "text/x-c++" = lib.mkForce [ "code.desktop" ];
+    "text/x-python" = lib.mkForce [ "code.desktop" ];
+    "text/x-rust" = lib.mkForce [ "code.desktop" ];
+    "text/x-shellscript" = lib.mkForce [ "code.desktop" ];
+    "text/x-nix" = lib.mkForce [ "code.desktop" ];
+    "text/x-makefile" = lib.mkForce [ "code.desktop" ];
+    "text/x-java" = lib.mkForce [ "code.desktop" ];
+    "text/x-ruby" = lib.mkForce [ "code.desktop" ];
+    "application/json" = lib.mkForce [ "code.desktop" ];
+    "application/javascript" = lib.mkForce [ "code.desktop" ];
+    "application/x-yaml" = lib.mkForce [ "code.desktop" ];
+    "application/yaml" = lib.mkForce [ "code.desktop" ];
+    "application/x-shellscript" = lib.mkForce [ "code.desktop" ];
   };
 }
