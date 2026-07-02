@@ -25,6 +25,10 @@ let
     inherit nwnInstallDir;
     winePrefix = "${winePrefixDir}/nwnexplorer";
   };
+  nwtoolset = pkgs.nwtoolset.override {
+    inherit nwnInstallDir;
+    winePrefix = "${winePrefixDir}/nwtoolset";
+  };
 
   nwnDataAliasesBeforeHome = [
     "CRASHREPORT"
@@ -155,6 +159,7 @@ in
         pkgs.cleanmodels
         pkgs.neverwinter-nim
         nwnexplorer
+        nwtoolset
         nwn_unpack_folder
       ];
 

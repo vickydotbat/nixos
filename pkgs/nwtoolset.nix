@@ -10,7 +10,11 @@
 }:
 
 let
+  escapeHereDoc = lib.replaceStrings [ "$" "`" "\\" ] [ "\\$" "\\`" "\\\\" ];
+
   wine = wineWow64Packages.staging;
+  runtimeNwnInstallDir = escapeHereDoc nwnInstallDir;
+  runtimeWinePrefix = escapeHereDoc winePrefix;
 in
 stdenvNoCC.mkDerivation {
   pname = "nwtoolset";
@@ -25,49 +29,50 @@ stdenvNoCC.mkDerivation {
         mkdir -p $out/bin
         mkdir -p $out/share/applications
 
-        cat > $out/bin/nwn_toolset <<'EOF'
+        cat > $out/bin/nwn_toolset <<EOF
     #!${runtimeShell}
     set -euo pipefail
 
-    export WINEPREFIX="${winePrefix}"
+    export WINEPREFIX="\''${WINEPREFIX:-${runtimeWinePrefix}}"
     export WINEDEBUG="-all"
+    export WINEDLLOVERRIDES="mscoree,mshtml="
 
-    exe="${nwnInstallDir}/bin/win32/nwtoolset.exe"
+    exe="${runtimeNwnInstallDir}/bin/win32/nwtoolset.exe"
 
-    state_dir="''${XDG_STATE_HOME:-$HOME/.local/state}/nwtoolset"
-    log_file="$state_dir/wine.log"
+    state_dir="\''${XDG_STATE_HOME:-\$HOME/.local/state}/nwtoolset"
+    log_file="\$state_dir/wine.log"
 
-    ${coreutils}/bin/mkdir -p "$state_dir"
-    exec >>"$log_file" 2>&1
+    ${coreutils}/bin/mkdir -p "\$state_dir"
+    exec >>"\$log_file" 2>&1
 
     echo
-    echo "=== launching nwtoolset at $("${coreutils}/bin/date") ==="
-    echo "WINEPREFIX=$WINEPREFIX"
-    echo "exe=$exe"
+    echo "=== launching nwtoolset at \$(${coreutils}/bin/date) ==="
+    echo "WINEPREFIX=\$WINEPREFIX"
+    echo "exe=\$exe"
 
-    if [ ! -f "$exe" ]; then
+    if [ ! -f "\$exe" ]; then
       echo "Could not find nwtoolset.exe:"
-      echo "  $exe"
+      echo "  \$exe"
       exit 1
     fi
 
-    prefix_parent="$(${coreutils}/bin/dirname "$WINEPREFIX")"
-    lock_file="$prefix_parent/.nwtoolset-wineprefix.lock"
+    prefix_parent="\$(${coreutils}/bin/dirname "\$WINEPREFIX")"
+    lock_file="\$prefix_parent/.nwtoolset-wineprefix.lock"
 
-    ${coreutils}/bin/mkdir -p "$prefix_parent"
+    ${coreutils}/bin/mkdir -p "\$prefix_parent"
 
     (
       ${util-linux}/bin/flock 9
 
-      if [ ! -f "$WINEPREFIX/system.reg" ]; then
+      if [ ! -f "\$WINEPREFIX/system.reg" ]; then
         echo "Initializing Wine prefix..."
 
         ${wine}/bin/wineboot -u
       fi
-    ) 9>"$lock_file"
+    ) 9>"\$lock_file"
 
     echo "Starting NWToolset..."
-    exec ${wine}/bin/wine "$exe" "$@"
+    exec ${wine}/bin/wine "\$exe" "\$@"
     EOF
 
         chmod +x $out/bin/nwn_toolset
@@ -91,6 +96,6 @@ stdenvNoCC.mkDerivation {
     description = "Wine launcher for the Neverwinter Nights Aurora Toolset";
     license = lib.licenses.unfree;
     platforms = lib.platforms.linux;
-    mainProgram = "nwtoolset";
+    mainProgram = "nwn_toolset";
   };
 }
