@@ -8,6 +8,7 @@
 
     # opencode.enable = true;
     pi.enable = true;
+    omp.enable = true;
     codex.enable = true;
     claude.enable = true;
   };
