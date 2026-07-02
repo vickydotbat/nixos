@@ -66,6 +66,7 @@ in
         "vscode-extension-ms-dotnettools-csharp"
         "vscode-extension-ms-vscode-remote-remote-ssh"
         "claude-code"
+        "nwtoolset"
       ];
       packages.enable = true;
       persistence.enable = true;

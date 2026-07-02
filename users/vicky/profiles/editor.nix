@@ -374,8 +374,13 @@ in
         "[javascriptreact]" = prettierTwoSpaceFormatter;
         "[typescript]" = prettierTwoSpaceFormatter;
         "[typescriptreact]" = prettierTwoSpaceFormatter;
+        # Use Prettier (not vscode.json-language-features) so local JSON output
+        # matches CI, which formats *.json/*.jsonc with Prettier driven by each
+        # repo's .editorconfig (topdata -> 4-space, codebase -> 2-space default).
+        # The vscode JSON formatter's style differs from Prettier even at the
+        # same width, which was the source of the constant reformatting churn.
         "[json]" = {
-          "editor.defaultFormatter" = "vscode.json-language-features";
+          "editor.defaultFormatter" = "esbenp.prettier-vscode";
           "editor.quickSuggestions" = {
             other = true;
             comments = false;
@@ -384,7 +389,7 @@ in
         };
 
         "[jsonc]" = {
-          "editor.defaultFormatter" = "vscode.json-language-features";
+          "editor.defaultFormatter" = "esbenp.prettier-vscode";
           "editor.quickSuggestions" = {
             other = true;
             comments = false;
