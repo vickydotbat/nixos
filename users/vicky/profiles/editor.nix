@@ -376,10 +376,20 @@ in
         "[typescriptreact]" = prettierTwoSpaceFormatter;
         "[json]" = {
           "editor.defaultFormatter" = "vscode.json-language-features";
+          "editor.quickSuggestions" = {
+            other = true;
+            comments = false;
+            strings = true;
+          };
         };
 
         "[jsonc]" = {
           "editor.defaultFormatter" = "vscode.json-language-features";
+          "editor.quickSuggestions" = {
+            other = true;
+            comments = false;
+            strings = true;
+          };
         };
         "[html]" = prettierTwoSpaceFormatter;
         "[css]" = prettierTwoSpaceFormatter;
