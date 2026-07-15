@@ -1,6 +1,7 @@
 { pkgs }:
 
 {
+  aurora-hak-explorer = pkgs.callPackage ./aurora-hak-explorer.nix { };
   blender-402-bin = pkgs.callPackage ./blender-402-bin.nix { };
   cleanmodels = pkgs.callPackage ./cleanmodels.nix { };
   gimp3-custom = pkgs.callPackage ./gimp3-custom.nix { };

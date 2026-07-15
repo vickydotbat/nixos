@@ -11,6 +11,10 @@
 let
   cfg = config.theorem.home.editor.vscode;
   hasHomePersistence = options.home ? persistence;
+  jsonFormat = pkgs.formats.json { };
+  settingsPath = "${config.xdg.configHome}/Code/User/settings.json";
+  settingsSeedPath = "${config.xdg.configHome}/Code/User/settings.seed.json";
+  settingsSeed = jsonFormat.generate "vscode-user-settings-seed" cfg.userSettings;
 in
 {
   options.theorem.home.editor.vscode = {
@@ -107,10 +111,7 @@ in
         enable = true;
 
         profiles.default = {
-          enableExtensionUpdateCheck = false;
-          enableUpdateCheck = false;
           extensions = cfg.extensions;
-          userSettings = cfg.userSettings;
         };
       };
 
@@ -177,6 +178,24 @@ in
           icon = "vscode";
         };
       };
+
+      home.file.${settingsSeedPath}.source = settingsSeed;
+      home.activation.vscodeUserSettingsSeed = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+        settings=${lib.escapeShellArg settingsPath}
+        seed=${lib.escapeShellArg settingsSeedPath}
+
+        if [ ! -e "$settings" ]; then
+          run ${pkgs.coreutils}/bin/install -D -m 0644 "$seed" "$settings"
+        elif [ -L "$settings" ]; then
+          target="$(${pkgs.coreutils}/bin/readlink "$settings" || true)"
+          case "$target" in
+            /nix/store/*)
+              run ${pkgs.coreutils}/bin/rm "$settings"
+              run ${pkgs.coreutils}/bin/install -D -m 0644 "$seed" "$settings"
+              ;;
+          esac
+        fi
+      '';
     })
     (lib.optionalAttrs hasHomePersistence {
       home.persistence."/nix/persist" = lib.mkIf (cfg.enable && cfg.persistState) {

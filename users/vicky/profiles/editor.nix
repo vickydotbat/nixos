@@ -18,8 +18,6 @@ let
     pkgs.dotnetCorePackages.sdk_10_0
     pkgs.dotnetCorePackages.aspnetcore_10_0
   ];
-
-  continueSchemaUri = builtins.unsafeDiscardStringContext "file://${pkgs.vscode-extensions.continue.continue}/share/vscode/extensions/Continue.continue/config-yaml-schema.json";
 in
 {
   home.persistence."/nix/persist" = {
@@ -60,22 +58,36 @@ in
 
     vscode = {
       enable = true;
+      persistState = false;
       extensions = with pkgs.vscode-extensions; [
-        # Theming
+        # -- Theming --
         pkief.material-icon-theme
-        catppuccin.catppuccin-vsc # FIXME: There's an error in some windows: "Unable to load schema from 'https://raw.githubusercontent.com/catppuccin/vscode/catppuccin-vsc-v3.19.0/packages/catppuccin-vsc/schemas/customUIColors.schema.json': Location https://raw.githubusercontent.com/catppuccin/vscode/catppuccin-vsc-v3.19.0/packages/catppuccin-vsc/schemas/customUIColors.schema.json is untrusted."
+        catppuccin.catppuccin-vsc
+
+        # -- Language support --
+        # C# / .NET
+        ms-dotnettools.csharp
+        ms-dotnettools.vscode-dotnet-runtime
+        sumneko.lua
+        # Nix
+        jnoortheen.nix-ide
+        # Python
+        ms-python.python
+        ms-python.vscode-pylance
+
+        # -- Git --
+        mhutchie.git-graph
+        waderyan.gitblame
+
+        # -- Formatting --
+        esbenp.prettier-vscode
 
         # Core
-        jnoortheen.nix-ide
         mkhl.direnv
         editorconfig.editorconfig
         tamasfe.even-better-toml
         redhat.vscode-yaml
-        mhutchie.git-graph
-        waderyan.gitblame
-        ms-vscode.cpptools
         ms-vscode.cmake-tools
-        esbenp.prettier-vscode
         ms-vscode-remote.remote-ssh
 
         # QOL
@@ -83,22 +95,6 @@ in
         gruntfuggly.todo-tree
         streetsidesoftware.code-spell-checker
         evertjunior.mass-renamer
-
-        # C# / .NET
-        ms-dotnettools.csharp
-        ms-dotnettools.vscode-dotnet-runtime
-        csharpier.csharpier-vscode
-
-        # LUA
-        sumneko.lua
-
-        # Python
-        ms-python.python
-        ms-python.vscode-pylance
-
-        # AI
-        # selfagency.opilot
-        continue.continue
       ];
       extraPackages = with pkgs; [
         nixd
@@ -106,7 +102,7 @@ in
         prettier
         statix
         deadnix
-        csharpier
+        # csharpier
         csharp-ls
         python314Packages.jedi-language-server
         dotnet
@@ -116,6 +112,10 @@ in
         gopls
       ];
       userSettings = {
+
+        # Security
+        "task.allowAutomaticTasks" = "off";
+
         "workbench.startupEditor" = "none";
         "workbench.welcomePage.walkthroughs.openOnInstall" = false;
         "workbench.tips.enabled" = false;
@@ -252,10 +252,14 @@ in
         "git.useForcePushWithLease" = true;
 
         "git.closeDiffOnOperation" = true;
+        "scm.diffDecorations" = "gutter";
+        "scm.diffDecorationsGutterVisibility" = "always";
+        "scm.repositories.selectionMode" = "single";
         "diffEditor.experimental.showMoves" = true;
         "diffEditor.ignoreTrimWhitespace" = false;
         "diffEditor.diffAlgorithm" = "advanced";
-        "diffEditor.maxComputationTime" = 0;
+        "diffEditor.renderIndicators" = true;
+        "diffEditor.hideUnchangedRegions.enabled" = true;
 
         # Git Blame: keep it mostly out of the way
         "gitblame.statusBarMessageFormat" = "\${author.name}, \${time.ago}";
@@ -341,11 +345,7 @@ in
 
         "yaml.format.enable" = true;
         "yaml.validate" = true;
-        "yaml.schemas" = {
-          "${continueSchemaUri}" = [
-            ".continue/**/*.yaml"
-          ];
-        };
+        "yaml.format.proseWrap" = "always";
 
         "evenBetterToml.formatter.allowedBlankLines" = 2;
 
@@ -449,10 +449,9 @@ in
         # Keep inline AI suggestions from becoming too noisy alongside diagnostics.
         # "editor.inlineSuggest.enabled" = true;
         # "editor.suggestSelection" = "first";
-        "editor.codeActionsOnSave" = {
-          "source.fixAll" = "explicit";
-          "source.organizeImports" = "explicit";
-        };
+        # No editor.codeActionsOnSave: fixAll/organizeImports blocks every save
+        # on a round-trip to every active LSP (the "snag on save"). Run code
+        # actions explicitly when wanted instead.
       };
     };
   };

@@ -137,6 +137,21 @@ let
     "tempclient"
     "tlk"
   ];
+  # Neverblender runs its external decompiler with the working directory set to
+  # the compiler's own directory (a Windows permissions workaround). cleanmodels
+  # is SWI-Prolog and writes a last_dirs.pl state file into its cwd on startup,
+  # so pointing Neverblender straight at the read-only profile binary fails with
+  # "No permission to open source_sink `last_dirs.pl'". This wrapper steps into
+  # a writable directory first. The name must keep "cleanmodels" in it, or
+  # Neverblender will not recognize the compiler. Point the addon's Decompiler
+  # Path at this wrapper, not at cleanmodels itself.
+  cleanmodels-nvb = pkgs.writeShellApplication {
+    name = "cleanmodels-nvb";
+    text = ''
+      cd "''${TMPDIR:-/tmp}"
+      exec ${pkgs.cleanmodels}/bin/cleanmodels "$@"
+    '';
+  };
   nwn_unpack_folder = (
     pkgs.writeShellApplication {
       name = "nwn_unpack_folder";
@@ -155,8 +170,10 @@ in
   config = lib.mkMerge [
     (lib.mkIf cfg.enable {
       home.packages = [
+        pkgs.aurora-hak-explorer
         nwnBlender
         pkgs.cleanmodels
+        cleanmodels-nvb
         pkgs.neverwinter-nim
         nwnexplorer
         nwtoolset

@@ -24,7 +24,6 @@
 
     "git.westgate.pw" = {
       HostName = "git.westgate.pw";
-      AddressFamily = "inet6";
       Port = 22;
       User = "git";
       IdentityFile = "~/.ssh/id_ed25519";
