@@ -24,6 +24,7 @@ in
     keepassxc.enable = true;
     obsidian.enable = true;
     plasma.enable = true;
+    vlc.enable = true;
     spicetify = {
       enable = true;
       enabledExtensions = with spicePkgs.extensions; [
