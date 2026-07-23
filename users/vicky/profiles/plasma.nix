@@ -450,6 +450,9 @@ in
       ".local/share/kwalletd"
       ".local/share/baloo"
       ".config/kdeconnect"
+      # Survive impermanent boots so Dolphin doesn't re-thumbnail large TGA/DDS
+      # content folders from scratch every reboot.
+      ".cache/thumbnails"
     ];
   };
 
