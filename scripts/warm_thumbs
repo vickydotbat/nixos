@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# Pre-generate freedesktop thumbnails so Dolphin/Gwenview show them instantly.
+# NWN edit trees carry .tga textures that KDE cannot preview on its own; this
+# walks a directory and writes each thumbnail into the shared cache
+# under the exact hash+attributes Dolphin looks up, so previews appear the next
+# time the folder is opened. Re-running is cheap: existing thumbnails are kept.
+# ponytail: uses imagemagick + md5sum instead of KDE's CLI-less kioworker.
+set -euo pipefail
+dir="${1:?usage: warm_thumbs <dir> [size]}"
+size="${2:-256}"                       # 128=normal, 256=large, 512=x-large
+case "$size" in 128) sub=normal;; 512) sub=x-large;; *) sub=large;; esac
+out="$HOME/.cache/thumbnails/$sub"; mkdir -p "$out"
+
+find "$dir" -type f -iname '*.tga' -print0 |
+while IFS= read -r -d '' f; do
+  uri="file://$(python3 -c 'import sys,urllib.parse;print(urllib.parse.quote(sys.argv[1]))' "$f")"
+  hash=$(printf '%s' "$uri" | md5sum | cut -d' ' -f1)
+  png="$out/$hash.png"
+  [ -f "$png" ] && continue
+  mtime=$(stat -c %Y "$f")
+  magick "$f" -thumbnail "${size}x${size}>" \
+    -set 'Thumb::URI' "$uri" -set 'Thumb::MTime' "$mtime" \
+    "PNG32:$png" 2>/dev/null && echo "ok  $f" || echo "FAIL $f"
+done

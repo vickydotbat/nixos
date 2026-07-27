@@ -163,6 +163,23 @@ let
       text = builtins.readFile ../../../scripts/nwn_unpack_folder;
     }
   );
+  # Dolphin has no built-in previews for the .tga/.dds textures that fill an
+  # NWN edit tree. This wrapper warms the freedesktop thumbnail cache so those
+  # previews appear on the next folder open: `warm_thumbs <dir> [size]`.
+  warm_thumbs = (
+    pkgs.writeShellApplication {
+      name = "warm_thumbs";
+
+      runtimeInputs = [
+        pkgs.imagemagick
+        pkgs.python3
+        pkgs.coreutils
+        pkgs.findutils
+      ];
+
+      text = builtins.readFile ../../../scripts/warm_thumbs;
+    }
+  );
 in
 {
   options.theorem.home.gaming.nwn.enable = lib.mkEnableOption "Neverwinter Nights tooling";
@@ -178,6 +195,7 @@ in
         nwnexplorer
         nwtoolset
         nwn_unpack_folder
+        warm_thumbs
       ];
 
       home.activation.nwnDocumentsLayout = lib.hm.dag.entryAfter [ "writeBoundary" ] ''

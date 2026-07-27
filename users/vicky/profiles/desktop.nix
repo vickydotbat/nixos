@@ -17,6 +17,7 @@ in
       enable = true;
       autostart.enable = true;
     };
+    ghidra.enable = true;
     gimp = {
       enable = true;
       package = pkgs.gimp3-custom;

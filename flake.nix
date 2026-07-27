@@ -75,6 +75,12 @@
       url = "github:lukasl-dev/pi.nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # Matt Pocock's agent skills; plain repo, no flake.
+    matt-skills = {
+      url = "github:mattpocock/skills";
+      flake = false;
+    };
   };
 
   outputs =

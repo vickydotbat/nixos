@@ -15,5 +15,7 @@
     omp.enable = true;
     codex.enable = true;
     claude.enable = true;
+    codegraph.enable = true;
+    mattSkills.enable = true;
   };
 }

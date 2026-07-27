@@ -22,6 +22,15 @@
       StrictHostKeyChecking = "accept-new";
     };
 
+    "netcup-game" = {
+      HostName = "152.53.92.154";
+      Port = 2222;
+      User = "sow-deploy";
+      IdentityFile = "~/.ssh/id_ed25519";
+      IdentitiesOnly = "yes";
+      StrictHostKeyChecking = "accept-new";
+    };
+
     "git.westgate.pw" = {
       HostName = "git.westgate.pw";
       Port = 22;
