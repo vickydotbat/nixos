@@ -290,10 +290,12 @@ in
         enable = true;
         enableBashIntegration = true;
 
-        changeDirWidgetCommand = "fd --type d --hidden --follow --exclude .git";
-        changeDirWidgetOptions = [
-          "--preview 'eza --tree --level=2 --color=always --icons=auto {} | head -200'"
-        ];
+        changeDirWidget = {
+          command = "fd --type d --hidden --follow --exclude .git";
+          options = [
+            "--preview 'eza --tree --level=2 --color=always --icons=auto {} | head -200'"
+          ];
+        };
 
         defaultCommand = "fd --type f --hidden --follow --exclude .git";
         defaultOptions = [
@@ -305,16 +307,15 @@ in
           "--bind=ctrl-u:preview-page-up,ctrl-d:preview-page-down"
         ];
 
-        fileWidgetCommand = "fd --type f --hidden --follow --exclude .git";
-        fileWidgetOptions = [
-          "--preview 'bat --style=numbers --color=always --line-range=:200 {}'"
-        ];
+        fileWidget = {
+          command = "fd --type f --hidden --follow --exclude .git";
+          options = [
+            "--preview 'bat --style=numbers --color=always --line-range=:200 {}'"
+          ];
+        };
 
-        # Remove this if Atuin owns history:
-        # historyWidgetOptions = [
-        #   "--sort"
-        #   "--exact"
-        # ];
+        # Atuin owns Ctrl-R; disable fzf's history widget.
+        historyWidget.command = "";
       };
 
       programs.zoxide = {

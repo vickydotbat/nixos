@@ -116,7 +116,12 @@ in
 
     gaming = {
       core.enable = true;
-      steam.enable = true;
+      steam = {
+        enable = true;
+        # The V Rising server is listed publicly, so Steam's server-browser
+        # query ports (27015-27030) need to be reachable too.
+        dedicatedServerOpenFirewall = true;
+      };
     };
 
     virtualisation = {

@@ -1,0 +1,363 @@
+{
+  config,
+  osConfig ? null,
+  lib,
+  options,
+  pkgs,
+  ...
+}:
+
+# V Rising dedicated server, run as a rootless Podman container.
+#
+# The game server is a Windows binary; the Didstopia image carries SteamCMD
+# plus Wine to run it on Linux. Nothing here is packaged in nixpkgs and the
+# image updates itself from Steam on restart, so a container is the honest
+# shape for it rather than a derivation.
+#
+# Two volumes, matching the upstream compose file:
+#   <dataDir>/saves -> /app/vrising      config + world saves (small, precious)
+#   <dataDir>/game  -> /steamcmd/vrising server install from Steam (~10 GB)
+#
+# Config lives in the saves volume as JSON. With defaultHostSettings /
+# defaultGameSettings left false, the settings JSON is written once and then
+# left alone, so hand edits survive restarts; the options below only seed it.
+# Flip them to true to make the env vars authoritative on every boot.
+
+let
+  cfg = config.theorem.home.gaming.vrising;
+  hasHomePersistence = options.home ? persistence;
+  persistenceEnabled = (config.theorem.home.base.persistence.enable or false);
+
+  podmanEnabled =
+    osConfig != null
+    && (osConfig.virtualisation.containers.enable or false)
+    && (osConfig.virtualisation.podman.enable or false);
+
+  dataDir = "${config.home.homeDirectory}/${cfg.dataDir}";
+
+  boolStr = b: if b then "true" else "false";
+
+  environment = {
+    V_RISING_SERVER_PERSISTENT_DATA_PATH = "/app/vrising";
+    V_RISING_SERVER_BRANCH = "public";
+    # 0 = update then start. Costs a Steam check per boot, keeps the server
+    # from sitting on a version the clients have already moved past.
+    V_RISING_SERVER_START_MODE = "0";
+    V_RISING_SERVER_UPDATE_MODE = "1";
+
+    V_RISING_SERVER_NAME = cfg.serverName;
+    V_RISING_SERVER_DESCRIPTION = cfg.description;
+    V_RISING_SERVER_SAVE_NAME = cfg.saveName;
+    V_RISING_SERVER_PASSWORD = cfg.password;
+    V_RISING_SERVER_GAME_PORT = toString cfg.gamePort;
+    V_RISING_SERVER_QUERY_PORT = toString cfg.queryPort;
+    V_RISING_SERVER_RCON_ENABLED = boolStr (cfg.rconPassword != "");
+    V_RISING_SERVER_RCON_PORT = toString cfg.rconPort;
+    V_RISING_SERVER_RCON_PASSWORD = cfg.rconPassword;
+    V_RISING_SERVER_MAX_CONNECTED_USERS = toString cfg.maxUsers;
+    V_RISING_SERVER_MAX_CONNECTED_ADMINS = toString cfg.maxAdmins;
+    V_RISING_SERVER_LIST_ON_MASTER_SERVER = boolStr cfg.public;
+    V_RISING_SERVER_LIST_ON_STEAM = boolStr cfg.public;
+    V_RISING_SERVER_LIST_ON_EOS = boolStr cfg.public;
+    V_RISING_SERVER_AUTO_SAVE_COUNT = toString cfg.autoSaveCount;
+    V_RISING_SERVER_AUTO_SAVE_INTERVAL = toString cfg.autoSaveInterval;
+    V_RISING_SERVER_GAME_SETTINGS_PRESET = cfg.preset;
+    V_RISING_SERVER_DEFAULT_HOST_SETTINGS = boolStr cfg.defaultHostSettings;
+    V_RISING_SERVER_DEFAULT_GAME_SETTINGS = boolStr cfg.defaultGameSettings;
+    # Unity registers one allocator per job worker and dies past 2048 of them
+    # ("0xc0000005" / wine stack overflow) on high-core hosts. Pinning the
+    # count keeps the server alive regardless of how many cores it sees.
+    V_RISING_SERVER_JOB_WORKER_COUNT = toString cfg.jobWorkerCount;
+    # Rootless Podman already maps container root to the host user.
+    PUID = "0";
+    PGID = "0";
+  }
+  // cfg.extraEnvironment;
+
+  envArgs = lib.concatMap (name: [
+    "-e"
+    "${name}=${environment.${name}}"
+  ]) (builtins.attrNames environment);
+
+  runArgs = [
+    "--rm"
+    "--replace"
+    "--name"
+    "vrising"
+    "-p"
+    "${toString cfg.gamePort}:${toString cfg.gamePort}/udp"
+    "-p"
+    "${toString cfg.queryPort}:${toString cfg.queryPort}/udp"
+  ]
+  ++ lib.optionals (cfg.rconPassword != "") [
+    "-p"
+    "${toString cfg.rconPort}:${toString cfg.rconPort}/tcp"
+  ]
+  ++ [
+    "-v"
+    "${dataDir}/saves:/app/vrising"
+    "-v"
+    "${dataDir}/game:/steamcmd/vrising"
+  ]
+  ++ envArgs
+  ++ [ cfg.image ];
+
+  # The run line goes through a script rather than straight into ExecStart:
+  # systemd's own quoting rules are not the shell's, and a server name with an
+  # apostrophe in it would otherwise be mangled or refused.
+  runner = pkgs.writeShellApplication {
+    name = "vrising-server-run";
+    text = ''
+      exec ${pkgs.podman}/bin/podman run ${lib.escapeShellArgs runArgs}
+    '';
+  };
+
+  # `vrising` for ad-hoc control: vrising logs -f, vrising restart, vrising rcon "..."
+  control = pkgs.writeShellApplication {
+    name = "vrising";
+    runtimeInputs = [
+      pkgs.systemd
+      pkgs.podman
+    ];
+    text = ''
+      case "''${1-status}" in
+        start|stop|restart|status)
+          exec systemctl --user "$1" vrising.service ;;
+        logs)
+          shift
+          exec journalctl --user -u vrising.service "$@" ;;
+        update)
+          # The container updates from Steam on start, so a restart is the update.
+          podman pull ${cfg.image}
+          exec systemctl --user restart vrising.service ;;
+        shell)
+          exec podman exec -it vrising /bin/bash ;;
+        rcon)
+          shift
+          exec podman exec -i vrising /app/rcon.sh "$@" ;;
+        *)
+          echo "usage: vrising {start|stop|restart|status|logs|update|shell|rcon <command>}" >&2
+          exit 64 ;;
+      esac
+    '';
+  };
+in
+{
+  options.theorem.home.gaming.vrising = {
+    enable = lib.mkEnableOption "V Rising dedicated server (rootless Podman)";
+
+    image = lib.mkOption {
+      type = lib.types.str;
+      default = "docker.io/didstopia/vrising-server:latest";
+      description = "Container image running the V Rising server under Wine.";
+    };
+
+    dataDir = lib.mkOption {
+      type = lib.types.str;
+      default = "Games/vrising";
+      description = ''
+        Directory under $HOME holding server state. `saves/` keeps the world
+        and settings JSON, `game/` keeps the Steam install (about 10 GB).
+      '';
+    };
+
+    autoStart = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = ''
+        Start the server on login. For a real 24/7 server the user also needs
+        lingering enabled at system level (`users.users.<name>.linger = true`),
+        or the service stops when the last session ends.
+      '';
+    };
+
+    serverName = lib.mkOption {
+      type = lib.types.str;
+      default = "V Rising Server";
+      description = "Name shown in the in-game server browser.";
+    };
+
+    description = lib.mkOption {
+      type = lib.types.str;
+      default = "";
+      description = "Server description shown in the browser.";
+    };
+
+    saveName = lib.mkOption {
+      type = lib.types.str;
+      default = "world1";
+      description = ''
+        World save name. It becomes the directory name under
+        `saves/Saves/v3/<saveName>`, which is also where an existing
+        single-player save must be copied to be adopted.
+      '';
+    };
+
+    password = lib.mkOption {
+      type = lib.types.str;
+      default = "";
+      description = ''
+        Server password, empty for none. This lands in the Nix store and is
+        world-readable, so treat it as a doorbell, not a secret.
+      '';
+    };
+
+    public = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = "List the server publicly (master server, Steam and EOS browsers).";
+    };
+
+    preset = lib.mkOption {
+      type = lib.types.str;
+      default = "StandardPvE";
+      example = "";
+      description = ''
+        Game settings preset: StandardPvE, StandardPvP, Hardcore, Duo, Solo
+        and similar. Set to "" to use the editable ServerGameSettings.json
+        instead; while a preset is set the server ignores that file.
+      '';
+    };
+
+    maxUsers = lib.mkOption {
+      type = lib.types.int;
+      default = 8;
+      description = "Maximum connected players.";
+    };
+
+    maxAdmins = lib.mkOption {
+      type = lib.types.int;
+      default = 2;
+      description = "Maximum connected admins, on top of the player slots.";
+    };
+
+    gamePort = lib.mkOption {
+      type = lib.types.port;
+      default = 9876;
+      description = "UDP game port.";
+    };
+
+    queryPort = lib.mkOption {
+      type = lib.types.port;
+      default = 9877;
+      description = "UDP Steam query port. Must stay gamePort + 1.";
+    };
+
+    rconPort = lib.mkOption {
+      type = lib.types.port;
+      default = 9878;
+      description = "TCP RCON port, published only when rconPassword is set.";
+    };
+
+    rconPassword = lib.mkOption {
+      type = lib.types.str;
+      default = "";
+      description = ''
+        RCON password. Empty disables RCON and leaves its port unpublished,
+        which is the right default for a port you do not want on the internet.
+      '';
+    };
+
+    autoSaveCount = lib.mkOption {
+      type = lib.types.int;
+      default = 10;
+      description = "Number of autosaves kept before the oldest is dropped.";
+    };
+
+    autoSaveInterval = lib.mkOption {
+      type = lib.types.int;
+      default = 120;
+      description = "Seconds between autosaves.";
+    };
+
+    jobWorkerCount = lib.mkOption {
+      type = lib.types.int;
+      default = 8;
+      description = ''
+        Unity job worker threads. Keep it well under the core count on big
+        CPUs; auto-detection there trips the ">2048 Allocators registered"
+        crash.
+      '';
+    };
+
+    defaultHostSettings = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = "Rewrite ServerHostSettings.json from these options on every start.";
+    };
+
+    defaultGameSettings = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = "Rewrite ServerGameSettings.json from these options on every start.";
+    };
+
+    extraEnvironment = lib.mkOption {
+      type = lib.types.attrsOf lib.types.str;
+      default = { };
+      example = {
+        V_RISING_SERVER_GAME_SETTINGS_OVERRIDES = ''{"CastleDecayRateModifier": 0.5}'';
+      };
+      description = "Extra V_RISING_SERVER_* variables, merged last.";
+    };
+
+    persist = lib.mkOption {
+      type = lib.types.bool;
+      default = persistenceEnabled;
+      defaultText = lib.literalExpression "theorem.home.base.persistence.enable";
+      description = "Persist the data directory when home.persistence is available.";
+    };
+  };
+
+  config = lib.mkMerge [
+    (lib.mkIf (cfg.enable && podmanEnabled) {
+      assertions = [
+        {
+          assertion = cfg.queryPort == cfg.gamePort + 1;
+          message = "theorem.home.gaming.vrising: queryPort must be gamePort + 1; the game client derives it.";
+        }
+      ];
+
+      services.podman.enable = true;
+      home.packages = [ control ];
+
+      # Directories only - the container itself never starts from activation.
+      home.activation.vrisingDataDirs = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+        $DRY_RUN_CMD ${pkgs.coreutils}/bin/mkdir -p ${lib.escapeShellArg "${dataDir}/saves"} ${lib.escapeShellArg "${dataDir}/game"}
+      '';
+
+      systemd.user.services.vrising = {
+        Unit = {
+          Description = "V Rising dedicated server (Podman)";
+          After = [ "network-online.target" ];
+          Wants = [ "network-online.target" ];
+          # Home Manager's sd-switch would otherwise restart this unit during
+          # activation, and a restart here means a 60s podman stop plus a
+          # multi-minute Wine boot - long enough to hang the rebuild and leave
+          # a stale activation lock (see NEVER_DO_THIS.md). keep-old leaves a
+          # running server alone; pick the new config up with
+          # `vrising restart` when the world is empty.
+          X-SwitchMethod = "keep-old";
+        };
+        Service = {
+          # Steam download plus the first Wine boot are slow; a short start
+          # timeout would kill the server before it ever finishes installing.
+          TimeoutStartSec = "30min";
+          TimeoutStopSec = "120";
+          Restart = "always";
+          RestartSec = "10";
+          ExecStart = lib.getExe runner;
+          ExecStop = "${pkgs.podman}/bin/podman stop --time 60 vrising";
+        };
+        Install = lib.mkIf cfg.autoStart { WantedBy = [ "default.target" ]; };
+      };
+    })
+    (lib.optionalAttrs hasHomePersistence {
+      home.persistence."/nix/persist" = lib.mkIf (cfg.enable && podmanEnabled && cfg.persist) {
+        # .local/share/containers (the image store) is persisted by
+        # modules/home/base/virtualization.nix; declaring it twice is an error.
+        directories = [ cfg.dataDir ];
+      };
+    })
+  ];
+}
