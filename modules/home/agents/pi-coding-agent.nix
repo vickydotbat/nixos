@@ -2,7 +2,6 @@
   config,
   lib,
   options,
-  pkgs,
   ...
 }:
 
@@ -20,7 +19,6 @@ in
       programs.pi.coding-agent = {
         enable = true;
       };
-      home.packages = [ pkgs.openspec ];
     })
 
     (lib.optionalAttrs hasHomePersistence {

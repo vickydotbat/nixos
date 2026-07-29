@@ -78,6 +78,17 @@ For code and documentation:
 - Explain why a mechanism exists, what it protects, and what breaks when it is mishandled.
 - Keep metaphors rare enough that they still have weight.
 
+## Git Workflow
+
+This repository is the operator's own system theorem, tended by one pair of
+hands. Commit directly to `main`. Do not open branches or pull requests for
+routine work, and do not ask permission for the commit itself.
+
+This overrides the usual never-commit-to-`main` habit, and it applies to this
+repository only. The other guardrails still hold: no force-push, no history
+rewrites, no destructive git commands, and unrelated working-tree changes are
+preserved or named before they are swept into a commit.
+
 ## NixOS Skill
 
 Any agent that understands this `AGENTS.md` convention should:
