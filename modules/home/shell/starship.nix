@@ -30,7 +30,9 @@ in
         enableBashIntegration = cfg.bashIntegration.enable;
         settings = {
           add_newline = false;
-          command_timeout = 1000;
+          # 1s is not enough for `git status` in /nix/nixos while something
+          # disk-heavy (Steam download, Wine boot) is running.
+          command_timeout = 2500;
           directory = {
             truncation_length = 4;
             truncate_to_repo = false;

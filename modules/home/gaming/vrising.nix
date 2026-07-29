@@ -40,9 +40,13 @@ let
   environment = {
     V_RISING_SERVER_PERSISTENT_DATA_PATH = "/app/vrising";
     V_RISING_SERVER_BRANCH = "public";
-    # 0 = update then start. Costs a Steam check per boot, keeps the server
-    # from sitting on a version the clients have already moved past.
-    V_RISING_SERVER_START_MODE = "0";
+    # 0 = validate against Steam then start, 2 = install once, then trust the
+    # local copy. Mode 0 re-verifies ~2 GB on every boot, which turns a restart
+    # into a ten-minute wait; mode 2 restarts in about a minute.
+    V_RISING_SERVER_START_MODE = if cfg.updateOnStart then "0" else "2";
+    # Independent of the above: the container keeps checking Steam in the
+    # background and pulls a new build when one lands, so mode 2 does not mean
+    # sitting on a version the clients have already moved past.
     V_RISING_SERVER_UPDATE_MODE = "1";
 
     V_RISING_SERVER_NAME = cfg.serverName;
@@ -79,11 +83,14 @@ let
     "${name}=${environment.${name}}"
   ]) (builtins.attrNames environment);
 
-  runArgs = [
-    "--rm"
-    "--replace"
-    "--name"
-    "vrising"
+  volumeArgs = [
+    "-v"
+    "${dataDir}/saves:/app/vrising"
+    "-v"
+    "${dataDir}/game:/steamcmd/vrising"
+  ];
+
+  portArgs = [
     "-p"
     "${toString cfg.gamePort}:${toString cfg.gamePort}/udp"
     "-p"
@@ -92,15 +99,35 @@ let
   ++ lib.optionals (cfg.rconPassword != "") [
     "-p"
     "${toString cfg.rconPort}:${toString cfg.rconPort}/tcp"
+  ];
+
+  serveArgs = [
+    "--rm"
+    "--replace"
+    "--name"
+    "vrising"
   ]
-  ++ [
-    "-v"
-    "${dataDir}/saves:/app/vrising"
-    "-v"
-    "${dataDir}/game:/steamcmd/vrising"
-  ]
+  ++ portArgs
+  ++ volumeArgs
   ++ envArgs
   ++ [ cfg.image ];
+
+  # Start mode 1 means "install or update, then exit": no ports, no world, just
+  # the Steam download. Runs while the server is stopped, so `vrising update`
+  # can force a real update even when the service itself skips update checks.
+  updateArgs = [
+    "--rm"
+    "--replace"
+    "--name"
+    "vrising-update"
+  ]
+  ++ volumeArgs
+  ++ envArgs
+  ++ [
+    "-e"
+    "V_RISING_SERVER_START_MODE=1"
+    cfg.image
+  ];
 
   # The run line goes through a script rather than straight into ExecStart:
   # systemd's own quoting rules are not the shell's, and a server name with an
@@ -108,7 +135,7 @@ let
   runner = pkgs.writeShellApplication {
     name = "vrising-server-run";
     text = ''
-      exec ${pkgs.podman}/bin/podman run ${lib.escapeShellArgs runArgs}
+      exec ${pkgs.podman}/bin/podman run ${lib.escapeShellArgs serveArgs}
     '';
   };
 
@@ -127,9 +154,18 @@ let
           shift
           exec journalctl --user -u vrising.service "$@" ;;
         update)
-          # The container updates from Steam on start, so a restart is the update.
+          # Stop first: SteamCMD must not rewrite the install under a running
+          # server. The update container exits on its own once Steam is done.
+          was_running=no
+          if systemctl --user is-active --quiet vrising.service; then
+            was_running=yes
+            systemctl --user stop vrising.service
+          fi
           podman pull ${cfg.image}
-          exec systemctl --user restart vrising.service ;;
+          podman run ${lib.escapeShellArgs updateArgs}
+          if [ "$was_running" = yes ]; then
+            systemctl --user start vrising.service
+          fi ;;
         shell)
           exec podman exec -it vrising /bin/bash ;;
         rcon)
@@ -158,6 +194,18 @@ in
       description = ''
         Directory under $HOME holding server state. `saves/` keeps the world
         and settings JSON, `game/` keeps the Steam install (about 10 GB).
+      '';
+    };
+
+    updateOnStart = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = ''
+        Verify the install against Steam on every start. Accurate, but it
+        re-checks about 2 GB each time and stretches a restart to ten minutes.
+        Left off, the server starts from the local copy in roughly a minute
+        and still picks up new builds from the background update check; run
+        `vrising update` to force one by hand.
       '';
     };
 
@@ -349,7 +397,15 @@ in
           ExecStart = lib.getExe runner;
           ExecStop = "${pkgs.podman}/bin/podman stop --time 60 vrising";
         };
-        Install = lib.mkIf cfg.autoStart { WantedBy = [ "default.target" ]; };
+      };
+
+      # Started by a timer, not WantedBy=default.target: as a wanted unit it
+      # pulls network-online.target into the session's startup job, and the
+      # login sits behind both that and podman's first seconds. The timer runs
+      # outside that job, so the desktop comes up immediately.
+      systemd.user.timers.vrising = lib.mkIf cfg.autoStart {
+        Timer.OnStartupSec = "30s";
+        Install.WantedBy = [ "timers.target" ];
       };
     })
     (lib.optionalAttrs hasHomePersistence {
