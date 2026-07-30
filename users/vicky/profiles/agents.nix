@@ -10,6 +10,9 @@
     # `comfyui`, browse to http://127.0.0.1:8188. First run pulls the image.
     comfyui.enable = false;
 
+    # Odysseus container image was pruned; keep it off explicitly.
+    odysseus.enable = false;
+
     # opencode.enable = true;
     pi.enable = true;
     omp.enable = false;
