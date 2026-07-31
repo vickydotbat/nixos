@@ -63,6 +63,8 @@ in
           "vscode-extension-ms-dotnettools-csharp"
           "vscode-extension-ms-vscode-remote-remote-ssh"
           "claude-code"
+          "unrar"
+          "nwtoolset"
         ];
       };
       packages.enable = true;

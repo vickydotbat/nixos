@@ -228,18 +228,18 @@
       #   };
       # };
 
-      # nixosConfigurations.saturnine = mkSystem {
-      #   inherit
-      #     inputs
-      #     system
-      #     stable
-      #     userRegistry
-      #     ;
-      #   self = inputs.self;
-      #   hostPath = ./hosts/saturnine;
-      #   selectedUsers = {
-      #     inherit (userRegistry) admin vicky;
-      #   };
-      # };
+      nixosConfigurations.saturnine = mkSystem {
+        inherit
+          inputs
+          system
+          stable
+          userRegistry
+          ;
+        self = inputs.self;
+        hostPath = ./hosts/saturnine;
+        selectedUsers = {
+          inherit (userRegistry) admin vicky;
+        };
+      };
     };
 }
