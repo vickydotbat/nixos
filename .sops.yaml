@@ -34,7 +34,12 @@ creation_rules:
       - age:
           - *solanine
           - *saturnine
+  # Every host that lists mattia in an account's `ssh.authorizedUsers` must be
+  # able to decrypt this file. sops-install-secrets is all-or-nothing: one
+  # undecryptable file leaves the host with no /run/secrets at all.
   - path_regex: secrets/users-mattia\.yaml$
     key_groups:
       - age:
           - *firelink
+          - *solanine
+          - *saturnine
