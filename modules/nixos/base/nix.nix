@@ -61,6 +61,12 @@ in
 
         connect-timeout = 10;
         fallback = true;
+
+        # Fetches over HTTP/2 die on this network with nghttp2 error -532,
+        # "violation in HTTP messaging rule", most reliably on large files from
+        # the VS Code marketplace CDN. HTTP/1.1 costs a little parallelism and
+        # downloads without complaint.
+        http2 = false;
       };
     };
 
