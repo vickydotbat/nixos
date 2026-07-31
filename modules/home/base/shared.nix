@@ -109,7 +109,13 @@ in
           ];
           # Unmount on stop, otherwise the mount point is left as a stale FUSE
           # endpoint that reports "Transport endpoint is not connected".
-          ExecStopPost = "-${pkgs.fuse}/bin/fusermount -u ${lib.escapeShellArg mountPoint}";
+          #
+          # sshfs is FUSE 3, so this must be `fusermount3`; the FUSE 2
+          # `fusermount` fails with "Operation not permitted" and leaves the
+          # mount behind. It has to be the setuid wrapper rather than the store
+          # path for the same reason: unmounting as a normal user needs it.
+          # `programs.fuse.enable` provides the wrapper.
+          ExecStopPost = "-/run/wrappers/bin/fusermount3 -u ${lib.escapeShellArg mountPoint}";
           # The peer is a laptop and is often simply off. Keep retrying quietly
           # rather than failing the unit for the rest of the session.
           Restart = "always";
