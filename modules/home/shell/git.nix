@@ -127,7 +127,12 @@ in
             core = {
               # speed up git in big repos, see `git help status`
               untrackedCache = lib.mkDefault true;
-              fsmonitor = lib.mkDefault true;
+
+              # `core.fsmonitor` stays off. Its daemon costs a multi-second
+              # cold scan on the first Git call in a repository after every
+              # boot, which stalls the shell prompt, and its socket under
+              # `.git` makes Nix refuse to evaluate a flake at that path.
+              # Repositories large enough to need it can opt in themselves.
             };
           }
           (lib.mkIf cfg.sshSigning.enable {
