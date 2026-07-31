@@ -38,10 +38,12 @@
   hardware.enableRedistributableFirmware = true;
 
   hardware.nvidia = {
-    # Keep the proprietary kernel modules until the exact GPU generation is
-    # confirmed. Turing-or-newer hardware may move to `true` after a boot test.
-    open = lib.mkDefault false;
+    # Confirmed on the machine: GA107M [GeForce RTX 3050 Ti Mobile]. Ampere is
+    # newer than Turing, so the open kernel modules are supported. Fall back to
+    # `false` if the display stack misbehaves after a driver bump.
+    open = lib.mkDefault true;
 
+    # Confirmed with `lspci`: Intel at 0000:00:02.0, NVIDIA at 0000:01:00.0.
     prime = {
       intelBusId = "PCI:0:2:0";
       nvidiaBusId = "PCI:1:0:0";
