@@ -62,7 +62,6 @@ in
       ${wifiSecretName} = {
         sopsFile = wifi.sopsFile;
         key = "home-wifi-env";
-        path = "/run/secrets/wifi-home-env";
         owner = "root";
         group = "root";
         mode = "0400";
