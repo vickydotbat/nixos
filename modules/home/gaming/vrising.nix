@@ -132,10 +132,22 @@ let
   # The run line goes through a script rather than straight into ExecStart:
   # systemd's own quoting rules are not the shell's, and a server name with an
   # apostrophe in it would otherwise be mangled or refused.
+  #
+  # The inhibitor holds only for as long as podman stays in the foreground, so
+  # the machine is free to sleep again the moment the server stops. `idle` is
+  # deliberately not inhibited: the screen should still blank and lock, it is
+  # only suspending that would cut the players off. A host running this needs
+  # `services.logind.settings.Login.LidSwitchIgnoreInhibited = false`, since
+  # logind ignores inhibitors for the lid by default.
   runner = pkgs.writeShellApplication {
     name = "vrising-server-run";
     text = ''
-      exec ${pkgs.podman}/bin/podman run ${lib.escapeShellArgs serveArgs}
+      exec ${pkgs.systemd}/bin/systemd-inhibit \
+        --what=sleep:handle-lid-switch \
+        --who="V Rising" \
+        --why="Dedicated server has players connected" \
+        --mode=block \
+        ${pkgs.podman}/bin/podman run ${lib.escapeShellArgs serveArgs}
     '';
   };
 

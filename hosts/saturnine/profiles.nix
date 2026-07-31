@@ -123,6 +123,12 @@ in
     };
   };
 
+  # This laptop hosts the V Rising server, which takes a systemd sleep and
+  # lid-switch inhibitor while it runs. logind ignores inhibitors for the lid
+  # unless told otherwise, so closing the lid would still suspend the machine
+  # and drop every connected player.
+  services.logind.settings.Login.LidSwitchIgnoreInhibited = false;
+
   environment.systemPackages = with pkgs; [
     btrfs-progs
     cryptsetup
