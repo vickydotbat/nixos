@@ -53,8 +53,17 @@ in
         su.enable = lib.mkForce false;
         sudoedit.enable = lib.mkForce false;
         sg.enable = lib.mkForce false;
+        # FUSE 2 stays off: nothing here still uses it, and its setuid helper
+        # carries the older privilege-escalation history of the two.
         fusermount.enable = lib.mkForce false;
-        fusermount3.enable = lib.mkForce false;
+        # FUSE 3 stays on. It is not an elevation path, so forcing it off did
+        # not route anything through run0; it only removed rootless FUSE from
+        # the host, breaking sshfs, AppImage and fuse-overlayfs. Unprivileged
+        # FUSE mounts are nosuid,nodev by kernel policy, and with
+        # `programs.fuse.userAllowOther` left false no other account can be
+        # lured into traversing one. What remains is a latency-controlled
+        # filesystem, useful only to an attacker who already runs code as this
+        # user - who has run0 and unprivileged user namespaces to hand anyway.
         pkexec.setuid = lib.mkForce false;
         newgrp.setuid = lib.mkForce false;
         # Rootless Podman needs these helpers. Do not force setuid/setgid here:
