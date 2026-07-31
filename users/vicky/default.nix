@@ -11,6 +11,8 @@ in
   avatar = ./avatar.png;
   extraGroups = [
     "nixcfg"
+    # Read the full system journal (kernel, GPU, other units) without run0.
+    "systemd-journal"
   ];
   passwordHashSecret = "users/${thisUser}/password-hash";
 

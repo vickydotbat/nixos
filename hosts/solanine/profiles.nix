@@ -138,7 +138,11 @@ in
 
     security = {
       firejail.enable = true;
-      hardening.enable = true;
+      hardening = {
+        enable = true;
+        # Keep coredumps so a kwin/Wayland session crash leaves a backtrace.
+        coredumps.disable = false;
+      };
       polkit.enable = true;
       run0-sudo.enable = true;
       diagnostics.enable = true;
