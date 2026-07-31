@@ -119,12 +119,9 @@ in
 
     gaming = {
       core.enable = true;
-      steam = {
-        enable = true;
-        # The V Rising server is listed publicly, so Steam's server-browser
-        # query ports (27015-27030) need to be reachable too.
-        dedicatedServerOpenFirewall = true;
-      };
+      # The V Rising server moved to saturnine, so this host is a plain Steam
+      # client again and needs no server-browser query ports open.
+      steam.enable = true;
     };
 
     virtualisation = {

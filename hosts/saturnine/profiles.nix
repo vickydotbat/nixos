@@ -40,8 +40,14 @@ in
         defaultLocale = "en_GB.UTF-8";
         supportedLocales = [
           "en_GB.UTF-8/UTF-8"
+          "en_US.UTF-8/UTF-8"
           "it_IT.UTF-8/UTF-8"
         ];
+        extraLocaleSettings = {
+          LC_MONETARY = "it_IT.UTF-8";
+          LC_PAPER = "it_IT.UTF-8";
+          LC_MEASUREMENT = "it_IT.UTF-8";
+        };
       };
       networking = {
         enable = true;
@@ -77,6 +83,7 @@ in
         enable = true;
         accounts = lib.mapAttrs mkAccount selectedUsers;
       };
+      zram.enable = true;
     };
 
     desktop = {
@@ -90,6 +97,16 @@ in
       graphics.enable = true;
       flatpak.enable = true;
       jailmole.enable = false;
+    };
+
+    gaming = {
+      core.enable = true;
+      steam = {
+        enable = true;
+        # This host now owns the V Rising world and lists it publicly, so
+        # Steam's server-browser query ports (27015-27030) must be reachable.
+        dedicatedServerOpenFirewall = true;
+      };
     };
 
     # Podman carries the V Rising dedicated server, whose Home Manager module
@@ -110,6 +127,8 @@ in
     btrfs-progs
     cryptsetup
     nvme-cli
+    unrar
+    p7zip
     smartmontools
   ];
 }
