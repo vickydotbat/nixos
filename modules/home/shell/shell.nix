@@ -23,7 +23,16 @@ let
   sudoEnabled = hasOsConfig && (osConfig.theorem.nixos.security.sudo.enable or false);
   configuredNhFlake = if hasOsConfig then osConfig.programs.nh.flake or null else null;
   defaultNixosFlake = if configuredNhFlake != null then configuredNhFlake else repository.path;
-  defaultNhElevationOption = lib.optionalString run0Enabled "-e run0 ";
+  # nh elevates once per privileged step (activation, then bootloader), so
+  # `-e run0` asks for a password two or three times per rebuild. Polkit's
+  # "remember this" cache cannot help: it is keyed on the asking process, and
+  # every run0 call is a new one. sudo hides the same pattern behind its
+  # per-terminal timestamp, which this profile does not have.
+  #
+  # Elevate once around the whole command instead and tell nh not to elevate
+  # again. One prompt, and no standing passwordless root.
+  nhElevationPrefix = lib.optionalString run0Enabled "run0 ";
+  defaultNhElevationOption = lib.optionalString run0Enabled "-e none ";
   defaultNhArgs = " --accept-flake-config --use-substitutes";
 
   defaultElevationCommand =
@@ -173,11 +182,12 @@ in
         shellAliases =
           cfg.aliases
           // lib.optionalAttrs cfg.nixosAliases.enable {
-            ns = "nh os ${defaultNhElevationOption}switch ${cfg.nixosAliases.flake} ${defaultNhArgs}";
-            nb = "nh os ${defaultNhElevationOption}boot ${cfg.nixosAliases.flake} ${defaultNhArgs}";
-            nt = "nh os ${defaultNhElevationOption}test ${cfg.nixosAliases.flake} ${defaultNhArgs}";
-            nd = "nh os ${defaultNhElevationOption}build ${cfg.nixosAliases.flake} ${defaultNhArgs}";
-            nr = "nh os ${defaultNhElevationOption}build ${cfg.nixosAliases.flake} ${defaultNhArgs}";
+            ns = "${nhElevationPrefix}nh os ${defaultNhElevationOption}switch ${cfg.nixosAliases.flake} ${defaultNhArgs}";
+            nb = "${nhElevationPrefix}nh os ${defaultNhElevationOption}boot ${cfg.nixosAliases.flake} ${defaultNhArgs}";
+            nt = "${nhElevationPrefix}nh os ${defaultNhElevationOption}test ${cfg.nixosAliases.flake} ${defaultNhArgs}";
+            # `build` writes nothing outside the store, so it stays unprivileged.
+            nd = "nh os -e none build ${cfg.nixosAliases.flake} ${defaultNhArgs}";
+            nr = "nh os -e none build ${cfg.nixosAliases.flake} ${defaultNhArgs}";
           }
           // cfg.extraAliases;
 
