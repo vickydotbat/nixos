@@ -19,6 +19,7 @@
     codex.enable = true;
     claude.enable = true;
     codegraph.enable = true;
+    herdr.enable = true;
     mattSkills.enable = true;
   };
 }
