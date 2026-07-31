@@ -25,9 +25,12 @@ in
 
   ssh = {
     enable = true;
+    # mattia has no key set up yet. Listing him pulls `secrets/users-mattia.yaml`
+    # into every host that logs vicky in, and sops-install-secrets is
+    # all-or-nothing: one file the host cannot decrypt leaves it with no
+    # /run/secrets at all. Add him back when his key exists on all hosts.
     authorizedUsers = [
       thisUser
-      "mattia"
     ];
     sopsFile = accountSecretsFile;
     privateKeySecret = "ssh/${thisUser}/id_ed25519";
