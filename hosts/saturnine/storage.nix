@@ -25,6 +25,21 @@ let
     allowDiscards = true;
     bypassWorkqueues = true;
   };
+
+  # Read by `disko` at format time only; disko passes `device` and `settings` to
+  # `boot.initrd.luks.devices`, never `passwordFile`, so nothing about this path
+  # reaches the built system. It exists in the installer's tmpfs and dies with
+  # it.
+  #
+  # Both volumes are formatted from the same file, which is what makes the
+  # single boot prompt reliable: systemd-ask-password caches the first answer
+  # and reuses it, and a byte-identical passphrase is required for that to work.
+  # Typing it twice by hand would not guarantee this.
+  #
+  # Populate during installation from the encrypted host file:
+  #   sops -d --extract '["luks"]["passphrase"]' secrets/hosts-saturnine.yaml \
+  #     > /tmp/luks-passphrase
+  luksPasswordFile = "/tmp/luks-passphrase";
 in
 {
   disko.devices.disk.main = {
@@ -55,6 +70,7 @@ in
           content = {
             type = "luks";
             name = "cryptroot";
+            passwordFile = luksPasswordFile;
             settings = luksSettings;
             content = {
               type = "btrfs";
@@ -110,6 +126,7 @@ in
         content = {
           type = "luks";
           name = "cryptpersist";
+          passwordFile = luksPasswordFile;
           settings = luksSettings;
           content = {
             type = "btrfs";
