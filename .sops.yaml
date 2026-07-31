@@ -3,6 +3,7 @@
 keys:
   - &solanine age16penp9h358n9nyk06lajtdtncks7tqd8ww4u0zuelmkzc9jfg5cszyq8em
   - &firelink age142lwvvtlu8v566ug6seyayesaf7dmreqjnpa5muwxg7cj9j8230qqq0px5
+  - &saturnine age102qnahcnmm4a8z28mj7fl70zd7c2lk9v4929kjqpn2h882eks42sw2dwxs
 
 creation_rules:
   - path_regex: secrets/hosts-solanine\.yaml$
@@ -13,15 +14,21 @@ creation_rules:
     key_groups:
       - age:
           - *firelink
+  - path_regex: secrets/hosts-saturnine\.yaml$
+    key_groups:
+      - age:
+          - *saturnine
   - path_regex: secrets/users-admin\.yaml$
     key_groups:
       - age:
           - *solanine
           - *firelink
+          - *saturnine
   - path_regex: secrets/users-vicky\.yaml$
     key_groups:
       - age:
           - *solanine
+          - *saturnine
   - path_regex: secrets/users-mattia\.yaml$
     key_groups:
       - age:

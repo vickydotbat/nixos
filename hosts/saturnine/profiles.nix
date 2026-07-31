@@ -89,6 +89,11 @@ in
       jailmole.enable = false;
     };
 
+    # Podman carries the V Rising dedicated server, whose Home Manager module
+    # refuses to start without it. Nothing else on this host needs containers
+    # yet, so `dockerCompat` and `composeDns` stay off.
+    virtualisation.podman.enable = true;
+
     security = {
       firejail.enable = false;
       hardening.enable = true;

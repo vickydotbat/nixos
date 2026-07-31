@@ -1,8 +1,24 @@
 {
+  osConfig ? null,
+  ...
+}:
+
+let
+  # The V Rising server is a single-machine role, not a hardware capability, so
+  # it is chosen by host identity rather than by a `theorem.nixos.*` flag. Only
+  # one host may own the world saves at a time; two hosts running the same
+  # `saveName` would be two divergent worlds, not a shared one.
+  # ponytail: a hostname literal beats a new NixOS option for a single role.
+  # Promote to `theorem.nixos.gaming.vrising.enable` if a second role-bearing
+  # service needs the same treatment.
+  vrisingHost = "saturnine";
+  isVrisingHost = osConfig != null && osConfig.networking.hostName == vrisingHost;
+in
+{
   theorem.home.gaming = {
     nwn.enable = true;
     vrising = {
-      enable = true;
+      enable = isVrisingHost;
       serverName = "VickyKillin's World";
       saveName = "world1";
       maxUsers = 8;
