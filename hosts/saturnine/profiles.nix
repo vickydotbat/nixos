@@ -101,7 +101,7 @@ in
       firejail.enable = false;
       hardening.enable = true;
       polkit.enable = true;
-      sudo.enable = true;
+      run0-sudo.enable = true;
       diagnostics.enable = true;
     };
   };
