@@ -5,7 +5,8 @@
   lib,
   makeDesktopItem,
   makeWrapper,
-  qt5,
+  libGL,
+  qt6,
   stdenv,
   swi-prolog,
   symlinkJoin,
@@ -69,19 +70,30 @@ let
       name = "cleanmodels-qt";
       owner = "plenarius";
       repo = "cleanmodels-qt";
-      rev = "v${version}";
-      hash = "sha256-pcvV1nrE16P821OIuC6P1p9PLQhGCOa+baGnMpdiZzo=";
+      # Pinned by commit, not by tag. Upstream force-moved `v1.0.0-rc4` onto a
+      # Qt6 rewrite and rewrote the branch history, which broke every host that
+      # had not already cached the old source. A commit cannot move.
+      rev = "33b63b7b68fe2af92b00e6e4d8016b8596c91e70";
+      hash = "sha256-kXd+bo3/17vlj1oFjt4JJi0BC1PCfaVlnMpTRPFS+WA=";
     };
 
     nativeBuildInputs = [
       cmake
-      qt5.wrapQtAppsHook
+      qt6.wrapQtAppsHook
       copyDesktopItems
     ];
 
     buildInputs = [
-      qt5.qtbase
+      libGL
+      qt6.qtbase
     ];
+
+    # Upstream leans on <QMatrix4x4> to drag in QQuaternion. Qt 6.11 stopped
+    # doing that, so the header needs the include spelled out. Drop this once
+    # upstream adds it.
+    postPatch = ''
+      sed -i '/#include <QMatrix4x4>/a #include <QQuaternion>' mdlanimationplayer.h
+    '';
 
     desktopItems = [
       (makeDesktopItem {
