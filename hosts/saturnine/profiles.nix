@@ -43,7 +43,10 @@ in
           "it_IT.UTF-8/UTF-8"
         ];
       };
-      networking.enable = true;
+      networking = {
+        enable = true;
+        homeWifi.ssid = "iliadbox-228BDF";
+      };
       nix = {
         enable = true;
         unfreePackageNames = [

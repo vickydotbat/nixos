@@ -18,6 +18,11 @@ creation_rules:
     key_groups:
       - age:
           - *saturnine
+  - path_regex: secrets/wifi-home\.yaml$
+    key_groups:
+      - age:
+          - *solanine
+          - *saturnine
   - path_regex: secrets/users-admin\.yaml$
     key_groups:
       - age:
