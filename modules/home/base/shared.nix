@@ -40,7 +40,11 @@ let
     "ServerAliveCountMax=3"
     "ConnectTimeout=10"
     # Without this a reconnect fails on any file handle opened before the drop.
-    "cache_timeout=60"
+    #
+    # Keep it short. This is a folder two people edit from two machines, so a
+    # stale size or mtime is worth more than the saved round trips: at 60s a
+    # file changed on the owner could keep looking unchanged here for a minute.
+    "cache_timeout=5"
   ];
 in
 {
@@ -78,7 +82,12 @@ in
   config = lib.mkIf cfg.enable (lib.mkMerge [
     # The owner just keeps a directory. Nothing mounts, nothing can hang.
     (lib.mkIf isOwner {
-      home.file."${cfg.directory}/.keep".text = "";
+      # ponytail: a plain mkdir, not `home.file."...".keep`. That would put a
+      # /nix/store symlink inside the shared folder, and every client reading
+      # it over sshfs fails with "Operation not permitted" on `ls -l`.
+      home.activation.sharedDirectory = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+        $DRY_RUN_CMD ${pkgs.coreutils}/bin/mkdir -p ${lib.escapeShellArg mountPoint}
+      '';
 
       home.persistence = lib.mkIf (hasHomePersistence && persistenceEnabled) {
         "/nix/persist".directories = [ cfg.directory ];
