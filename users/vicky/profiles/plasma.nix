@@ -10,7 +10,12 @@
 # Plasma Manager; layout, shortcuts, MIME defaults, KDE Connect, and wallet
 # persistence live here because they are operator posture, not shared substrate.
 let
-  trashPath = "${config.home.homeDirectory}/.local/share/Trash";
+  # Plasma Manager reads "/" in a group name as a nested-group separator, so a
+  # raw path collapses into [/][/][/][/][/]. Escaping each slash as "\/" keeps
+  # the whole path as one group, which is what ktrashrc expects.
+  trashPath = lib.replaceStrings [ "/" ] [ "\\/" ] (
+    "${config.home.homeDirectory}/.local/share/Trash"
+  );
 
   # Plasma 6 stores accepted output state here. This captures Solanine's
   # manually confirmed DisplayPort mode so the next activation does not drift
@@ -90,6 +95,9 @@ in
 {
   programs.plasma = {
     enable = true;
+
+    # Plain black desktop: no image, no slideshow, nothing to redraw.
+    workspace.wallpaperPlainColor = "0,0,0";
 
     panels = [
       {
@@ -407,6 +415,10 @@ in
 
       "plasma-localerc".Formats.LANG = "en_GB.UTF-8";
 
+      # Screenshot/screencast notifications stay silent while Do Not Disturb is
+      # on. "/" separates nested KConfig groups: [Applications][org.kde.spectacle].
+      "plasmanotifyrc"."Applications/org.kde.spectacle".ShowPopupsInDndMode = false;
+
       "plasmaparc".General = {
         RaiseMaximumVolume = true;
         VolumeStep = 1;
@@ -425,6 +437,8 @@ in
         };
 
         VideoSave = {
+          # VideoPlatform::Format::WebP (1 << 2). WebM_VP9 is 1, MP4_H264 is 2.
+          preferredVideoFormat = 4;
           translatedScreencastsFolder = "Screencasts";
           videoFilenameTemplate = "<yyyy>/<MM>-<MMMM>/Screencast_<title>_<yyyy><MM><dd>_<HH><mm><ss>";
         };
