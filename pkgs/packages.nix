@@ -9,5 +9,6 @@
   nwnexplorer = pkgs.callPackage ./nwnexplorer.nix { };
   omp = pkgs.callPackage ./omp/package.nix { };
   nwtoolset = pkgs.callPackage ./nwtoolset.nix { };
+  rtk = pkgs.callPackage ./rtk.nix { };
   fallow = pkgs.callPackage ./fallow.nix { };
 }

@@ -20,6 +20,7 @@
     claude.enable = true;
     codegraph.enable = true;
     herdr.enable = true;
+    rtk.enable = true;
     mattSkills.enable = true;
   };
 }
