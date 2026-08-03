@@ -81,7 +81,13 @@ in
       ssh.enable = true;
       # Reached over the tailnet like solanine, so the game host can be
       # administered from away without a second inbound port on the router.
-      tailscale.enable = true;
+      tailscale = {
+        enable = true;
+        authKey = {
+          sopsFile = ../../secrets/tailscale.yaml;
+          tags = [ "tag:server" ];
+        };
+      };
       users = {
         enable = true;
         accounts = lib.mapAttrs mkAccount selectedUsers;

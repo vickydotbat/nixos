@@ -438,7 +438,7 @@ in
 
         VideoSave = {
           # VideoPlatform::Format::WebP (1 << 2). WebM_VP9 is 1, MP4_H264 is 2.
-          preferredVideoFormat = 4;
+          preferredVideoFormat = 1;
           translatedScreencastsFolder = "Screencasts";
           videoFilenameTemplate = "<yyyy>/<MM>-<MMMM>/Screencast_<title>_<yyyy><MM><dd>_<HH><mm><ss>";
         };

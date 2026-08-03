@@ -23,6 +23,13 @@ creation_rules:
       - age:
           - *solanine
           - *saturnine
+  # One key for the whole tailnet, so every host that should enrol without a
+  # keyboard can read it. firelink is left out until it joins the tailnet.
+  - path_regex: secrets/tailscale\.yaml$
+    key_groups:
+      - age:
+          - *solanine
+          - *saturnine
   - path_regex: secrets/users-admin\.yaml$
     key_groups:
       - age:

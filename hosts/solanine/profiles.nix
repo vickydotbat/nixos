@@ -78,7 +78,13 @@ in
       };
       # This host is worked on from a phone, so `sshd` is reached over the
       # tailnet instead of an address exposed to the local network.
-      tailscale.enable = true;
+      tailscale = {
+        enable = true;
+        authKey = {
+          sopsFile = ../../secrets/tailscale.yaml;
+          tags = [ "tag:server" ];
+        };
+      };
       users = {
         enable = true;
         accounts = lib.mapAttrs mkAccount selectedUsers;
