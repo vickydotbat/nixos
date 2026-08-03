@@ -79,6 +79,9 @@ in
       packages.enable = true;
       persistence.enable = true;
       ssh.enable = true;
+      # Reached over the tailnet like solanine, so the game host can be
+      # administered from away without a second inbound port on the router.
+      tailscale.enable = true;
       users = {
         enable = true;
         accounts = lib.mapAttrs mkAccount selectedUsers;
