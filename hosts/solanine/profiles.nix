@@ -152,6 +152,15 @@ in
     };
   };
 
+  # `sshd` listens for the tailnet only. The base SSH module opens port 22 on
+  # every interface by default, which was how the household machines reached
+  # each other; the tailnet now carries that traffic, and inbound SSH from the
+  # local network is no longer wanted. Closing it here leaves exactly one
+  # approach road, and one is easier to reason about than two.
+  #
+  # If the tailnet is ever unreachable, this host is reached by sitting at it.
+  services.openssh.openFirewall = false;
+
   environment.systemPackages = with pkgs; [
     unrar
     p7zip

@@ -132,6 +132,13 @@ in
   # and drop every connected player.
   services.logind.settings.Login.LidSwitchIgnoreInhibited = false;
 
+  # `sshd` listens for the tailnet only, as on solanine. The V Rising and Steam
+  # query ports are a separate matter and stay open to the world; this closes
+  # administrative access on the local network, not the game the host serves.
+  #
+  # If the tailnet is ever unreachable, this host is reached by sitting at it.
+  services.openssh.openFirewall = false;
+
   environment.systemPackages = with pkgs; [
     btrfs-progs
     cryptsetup

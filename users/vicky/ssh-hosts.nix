@@ -13,20 +13,27 @@
       IdentitiesOnly = true;
     };
 
-    # Household machines, reachable by DHCP reservation. Both hosts authorize
-    # this same key for `vicky`, so these work in either direction. Host key
-    # checking is left at its default: once each host's OpenSSH keys are stored
-    # in `secrets/hosts-<host>.yaml` they survive reboots, and a changed key
-    # should be a question rather than something accepted silently.
+    # Household machines, now reached over the tailnet rather than by DHCP
+    # reservation. No `HostName` is given on purpose: the alias resolves
+    # through Tailscale's MagicDNS, so the same entry works from the sofa and
+    # from a phone on mobile data, and no LAN address goes stale here when the
+    # router hands out something new. Both hosts authorize this same key for
+    # `vicky`, so these work in either direction.
+    #
+    # The consequence to know: these aliases need Tailscale up on both ends.
+    # The hosts no longer accept SSH on the local network, so there is no LAN
+    # fallback if the tailnet is down. The fallback is a keyboard.
+    #
+    # Host key checking is left at its default: once each host's OpenSSH keys
+    # are stored in `secrets/hosts-<host>.yaml` they survive reboots, and a
+    # changed key should be a question rather than something accepted silently.
     "solanine" = {
-      HostName = "192.168.1.62";
       User = "vicky";
       IdentityFile = "~/.ssh/id_ed25519";
       IdentitiesOnly = true;
     };
 
     "saturnine" = {
-      HostName = "192.168.1.8";
       User = "vicky";
       IdentityFile = "~/.ssh/id_ed25519";
       IdentitiesOnly = true;
