@@ -76,6 +76,9 @@ in
       ssh = {
         enable = true;
       };
+      # This host is worked on from a phone, so `sshd` is reached over the
+      # tailnet instead of an address exposed to the local network.
+      tailscale.enable = true;
       users = {
         enable = true;
         accounts = lib.mapAttrs mkAccount selectedUsers;
