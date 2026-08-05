@@ -61,28 +61,30 @@ in
       '';
     };
 
-    targets = lib.mkOption {
+    pluginTargets = lib.mkOption {
       type = lib.types.listOf lib.types.str;
-      default = [
-        ".claude/skills"
-        ".agents/skills"
-      ];
+      default = [ ".claude/skills" ];
       description = ''
-        Directories, relative to `$HOME`, that get one symlink per skill.
-        Defaults cover Claude Code and Agent Skills-compatible harnesses.
+        Directories, relative to `$HOME`, that get a single symlink to the
+        whole checkout at `<dir>/ponytail`.
+
+        Claude Code treats any directory under `~/.claude/skills/` that carries
+        a `.claude-plugin/plugin.json` as a plugin and loads it as
+        `<name>@skills-dir` with no `settings.json` entry — verified against
+        claude-code 2.1.222 with an otherwise empty `CLAUDE_CONFIG_DIR`. That
+        registers the skills *and* the SessionStart/SubagentStart/
+        UserPromptSubmit hooks in one link, which is why hook registration is
+        not managed separately here.
       '';
     };
 
-    installHooks = lib.mkOption {
-      type = lib.types.bool;
-      default = true;
+    skillTargets = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [ ".agents/skills" ];
       description = ''
-        Link Ponytail's hook scripts into `~/.claude/hooks/ponytail`. The hooks
-        `require()` each other by relative path, so the whole directory is
-        linked rather than individual files. Registering them still means
-        editing `~/.claude/settings.json`, which stays mutable because Claude
-        Code writes to it; see `hooks/claude-codex-hooks.json` in the checkout
-        for the stanza to paste.
+        Directories, relative to `$HOME`, that get one symlink per skill. The
+        plugin mechanism above is Claude Code-specific, so Agent Skills-style
+        harnesses still want bare skill directories.
       '';
     };
   };
@@ -92,6 +94,14 @@ in
       {
         assertion = skills != { };
         message = "theorem.home.agents.ponytail: no skills found under ${skillDir}.";
+      }
+      {
+        assertion = builtins.pathExists "${cfg.src}/.claude-plugin/plugin.json";
+        message = ''
+          theorem.home.agents.ponytail: no .claude-plugin/plugin.json in ${cfg.src}.
+          Without it the checkout links as an inert directory and the hooks never
+          register.
+        '';
       }
     ];
 
@@ -104,10 +114,13 @@ in
     };
 
     home.file = lib.mkMerge (
-      (map linksFor cfg.targets)
-      ++ lib.optional cfg.installHooks {
-        ".claude/hooks/ponytail".source = "${cfg.src}/hooks";
-      }
+      (map linksFor cfg.skillTargets)
+      ++ (map (dir: {
+        "${dir}/ponytail" = {
+          source = cfg.src;
+          recursive = false;
+        };
+      }) cfg.pluginTargets)
     );
   };
 }

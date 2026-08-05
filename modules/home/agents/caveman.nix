@@ -64,28 +64,27 @@ in
       '';
     };
 
-    targets = lib.mkOption {
+    pluginTargets = lib.mkOption {
       type = lib.types.listOf lib.types.str;
-      default = [
-        ".claude/skills"
-        ".agents/skills"
-      ];
+      default = [ ".claude/skills" ];
       description = ''
-        Directories, relative to `$HOME`, that get one symlink per skill.
-        Defaults cover Claude Code and Agent Skills-compatible harnesses.
+        Directories, relative to `$HOME`, that get a single symlink to the
+        whole checkout at `<dir>/caveman`. See the matching option on
+        `ponytail` for why this registers the hooks too.
+
+        Note that the checkout carries a second copy of four skills under
+        `plugins/caveman/skills/`, so Claude Code lists 12 skills where only 6
+        are distinct. The nested copy has no manifest of its own, so linking
+        the root is the only option; the duplication is upstream's.
       '';
     };
 
-    installHooks = lib.mkOption {
-      type = lib.types.bool;
-      default = true;
+    skillTargets = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [ ".agents/skills" ];
       description = ''
-        Link Caveman's hook scripts into `~/.claude/hooks/caveman`. The hooks
-        `require()` each other by relative path, so the whole directory is
-        linked rather than individual files. Registering them still means
-        editing `~/.claude/settings.json`, which stays mutable because Claude
-        Code writes to it; see `.claude-plugin/plugin.json` in the checkout for
-        the stanza to paste.
+        Directories, relative to `$HOME`, that get one symlink per skill, taken
+        from the top-level `skills/` tree only.
       '';
     };
   };
@@ -96,6 +95,14 @@ in
         assertion = skills != { };
         message = "theorem.home.agents.caveman: no skills found under ${skillDir}.";
       }
+      {
+        assertion = builtins.pathExists "${cfg.src}/.claude-plugin/plugin.json";
+        message = ''
+          theorem.home.agents.caveman: no .claude-plugin/plugin.json in ${cfg.src}.
+          Without it the checkout links as an inert directory and the hooks never
+          register.
+        '';
+      }
     ];
 
     home.sessionVariables.CAVEMAN_DEFAULT_MODE = cfg.level;
@@ -105,10 +112,13 @@ in
     };
 
     home.file = lib.mkMerge (
-      (map linksFor cfg.targets)
-      ++ lib.optional cfg.installHooks {
-        ".claude/hooks/caveman".source = "${cfg.src}/src/hooks";
-      }
+      (map linksFor cfg.skillTargets)
+      ++ (map (dir: {
+        "${dir}/caveman" = {
+          source = cfg.src;
+          recursive = false;
+        };
+      }) cfg.pluginTargets)
     );
   };
 }
