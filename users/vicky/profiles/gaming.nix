@@ -27,9 +27,14 @@ in
       # (the single-player rules) instead of a canned preset.
       preset = "";
 
-      # Twice daily, and only when nobody is on and the world is freshly
-      # saved. Confirm `playerCountCommand` against a running server: until
-      # it parses a count, every firing skips.
+      # RCON exists so the idle-restart guard can ask whether anyone is on.
+      # The port stays unpublished (`rconPublish` defaults false), so this is
+      # reachable only through `podman exec` on this host. It is world-readable
+      # in the Nix store, which is acceptable for something nothing outside the
+      # container can connect to; publishing the port would change that.
+      rconPassword = "wch3wLeDyve5Lv61uvsG";
+
+      # Twice daily, and only when nobody is on and the world is freshly saved.
       maintenance.enable = true;
     };
     lutris.enable = true;

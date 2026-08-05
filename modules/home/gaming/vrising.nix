@@ -96,7 +96,10 @@ let
     "-p"
     "${toString cfg.queryPort}:${toString cfg.queryPort}/udp"
   ]
-  ++ lib.optionals (cfg.rconPassword != "") [
+  # Publishing is deliberately separate from enabling. `/usr/bin/rcon` in the
+  # image runs mcrcon against 127.0.0.1 inside the container, so `podman exec`
+  # reaches RCON with nothing bound on the host at all.
+  ++ lib.optionals (cfg.rconPassword != "" && cfg.rconPublish) [
     "-p"
     "${toString cfg.rconPort}:${toString cfg.rconPort}/tcp"
   ];
@@ -167,7 +170,7 @@ let
 
       # Empty world? No count parsed means the RCON command is wrong or the
       # server is mid-boot; either way, do not touch it.
-      if ! out=$(podman exec -i vrising /app/rcon.sh ${lib.escapeShellArg cfg.maintenance.playerCountCommand} 2>/dev/null); then
+      if ! out=$(podman exec -i vrising /usr/bin/rcon ${lib.escapeShellArg cfg.maintenance.playerCountCommand} 2>/dev/null); then
         echo "rcon unreachable; skipping restart"
         exit 0
       fi
@@ -235,7 +238,9 @@ let
           exec podman exec -it vrising /bin/bash ;;
         rcon)
           shift
-          exec podman exec -i vrising /app/rcon.sh "$@" ;;
+          # /app/rcon.sh does not exist in the image; the wrapper is
+          # /usr/bin/rcon, which runs mcrcon against 127.0.0.1 in-container.
+          exec podman exec -i vrising /usr/bin/rcon "$@" ;;
         *)
           echo "usage: vrising {start|stop|restart|status|logs|update|shell|rcon <command>}" >&2
           exit 64 ;;
@@ -360,6 +365,17 @@ in
       type = lib.types.port;
       default = 9878;
       description = "TCP RCON port, published only when rconPassword is set.";
+    };
+
+    rconPublish = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = ''
+        Bind the RCON port on the host. Off by default: the idle-restart guard
+        and `vrising rcon` both go through `podman exec`, which reaches RCON
+        inside the container without exposing it. Turn this on only to reach
+        RCON from another machine, and read the password caveat below first.
+      '';
     };
 
     rconPassword = lib.mkOption {
