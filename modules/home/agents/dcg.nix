@@ -23,6 +23,7 @@
 let
   cfg = config.theorem.home.agents.dcg;
   hookPath = "${config.home.homeDirectory}/.claude/dcg-hook";
+  tomlFormat = pkgs.formats.toml { };
 in
 {
   options.theorem.home.agents.dcg = {
@@ -34,9 +35,28 @@ in
       defaultText = lib.literalExpression "pkgs.dcg";
       description = "The dcg package to install.";
     };
+
+    settings = lib.mkOption {
+      type = tomlFormat.type;
+      default = { };
+      example = lib.literalExpression ''
+        {
+          packs.enabled = [ "containers.podman" "database.sqlite" ];
+        }
+      '';
+      description = ''
+        Written to `~/.config/dcg/config.toml`. `dcg init` documents the full
+        schema. `general.self_heal_hook` is forced off here: self-healing is
+        what re-writes the hook to a garbage-collectable store path, and the
+        activation script below owns the hook entry instead.
+      '';
+    };
   };
 
   config = lib.mkIf cfg.enable {
+    theorem.home.agents.dcg.settings.general.self_heal_hook = false;
+
+    xdg.configFile."dcg/config.toml".source = tomlFormat.generate "dcg-config.toml" cfg.settings;
     home.packages = [ cfg.package ];
 
     home.file.".claude/dcg-hook".source = "${cfg.package}/bin/dcg";
