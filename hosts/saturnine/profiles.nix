@@ -93,6 +93,7 @@ in
         accounts = lib.mapAttrs mkAccount selectedUsers;
       };
       zram.enable = true;
+      oom.enable = true;
     };
 
     desktop = {
