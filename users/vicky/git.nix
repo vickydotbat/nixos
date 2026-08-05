@@ -45,5 +45,23 @@
     init = {
       defaultBranch = "main";
     };
+
+    # Push over SSH even when the remote is an https:// URL. The key is
+    # already on every system that gets this profile, since it is the same
+    # identity `sshSigning` uses to sign commits, so a fresh machine can push
+    # without `gh auth login`, a `tea` token, or a credential helper.
+    #
+    # `pushInsteadOf`, not `insteadOf`: fetching stays anonymous over https.
+    # Rewriting fetches too would make cloning depend on the key being
+    # present, and Nix's git fetcher honours these rewrites when it resolves
+    # `git+https://` flake inputs.
+    #
+    # Gitea knows this key as `archvillainette`; the SSH user is still `git`,
+    # and `ssh-hosts.nix` pins the host to port 22, so no ssh:// form with an
+    # explicit port is needed here.
+    url = {
+      "git@github.com:".pushInsteadOf = "https://github.com/";
+      "git@git.westgate.pw:".pushInsteadOf = "https://git.westgate.pw/";
+    };
   };
 }
