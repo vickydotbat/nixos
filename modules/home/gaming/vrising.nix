@@ -151,6 +151,59 @@ let
     '';
   };
 
+  # Idle restart. Podman's --rm plus a fresh Wine boot is what actually clears
+  # the drift; nothing here trims memory in place.
+  maintenance = pkgs.writeShellApplication {
+    name = "vrising-maintenance";
+    runtimeInputs = [
+      pkgs.systemd
+      pkgs.podman
+      pkgs.coreutils
+      pkgs.findutils
+      pkgs.gnugrep
+    ];
+    text = ''
+      systemctl --user is-active --quiet vrising.service || exit 0
+
+      # Empty world? No count parsed means the RCON command is wrong or the
+      # server is mid-boot; either way, do not touch it.
+      if ! out=$(podman exec -i vrising /app/rcon.sh ${lib.escapeShellArg cfg.maintenance.playerCountCommand} 2>/dev/null); then
+        echo "rcon unreachable; skipping restart"
+        exit 0
+      fi
+
+      count=$(printf '%s' "$out" | grep -oE '[0-9]+' | head -1 || true)
+      if [ -z "$count" ]; then
+        echo "no player count in rcon output; skipping restart"
+        exit 0
+      fi
+      if [ "$count" -ne 0 ]; then
+        echo "$count player(s) connected; skipping restart"
+        exit 0
+      fi
+
+      # The save version directory changes between game versions (v3, v4, ...),
+      # so glob it rather than pinning one.
+      newest=$(find ${lib.escapeShellArg "${dataDir}/saves/Saves"} \
+        -type f -name 'AutoSave_*.save.gz' -printf '%T@ %p\n' 2>/dev/null \
+        | sort -rn | head -1 | cut -d' ' -f2- || true)
+
+      if [ -z "$newest" ]; then
+        echo "no autosave found; skipping restart"
+        exit 0
+      fi
+
+      age=$(( $(date +%s) - $(stat -c %Y "$newest") ))
+      if [ "$age" -gt ${toString cfg.maintenance.maxSaveAge} ]; then
+        echo "newest autosave is ''${age}s old; skipping restart"
+        exit 0
+      fi
+
+      echo "world empty, autosave ''${age}s old; restarting"
+      exec systemctl --user restart vrising.service
+    '';
+  };
+
   # `vrising` for ad-hoc control: vrising logs -f, vrising restart, vrising rcon "..."
   control = pkgs.writeShellApplication {
     name = "vrising";
@@ -361,6 +414,43 @@ in
       description = "Extra V_RISING_SERVER_* variables, merged last.";
     };
 
+    maintenance = {
+      enable = lib.mkEnableOption "periodic restart of an idle server";
+
+      onCalendar = lib.mkOption {
+        type = lib.types.str;
+        default = "*-*-* 05,17:00:00";
+        description = ''
+          When to consider a restart, in `systemd.time` calendar format. Each
+          firing only checks; it restarts nothing unless every guard passes.
+        '';
+      };
+
+      playerCountCommand = lib.mkOption {
+        type = lib.types.str;
+        default = "playerlist";
+        description = ''
+          RCON command whose output the guard scans for a player count.
+
+          UNVERIFIED: the server was stopped when this was written, so the
+          command name could not be probed. If it is wrong the guard reads no
+          count and skips the restart, which is the safe direction, but the
+          timer then never fires. Confirm with `vrising rcon playerlist` while
+          the server runs and correct this if needed.
+        '';
+      };
+
+      maxSaveAge = lib.mkOption {
+        type = lib.types.int;
+        default = 600;
+        description = ''
+          Restart only if the newest autosave is younger than this many
+          seconds, so the world on disk is current. Keep it comfortably above
+          `autoSaveInterval`, or the guard never sees a fresh enough save.
+        '';
+      };
+    };
+
     persist = lib.mkOption {
       type = lib.types.bool;
       default = persistenceEnabled;
@@ -417,6 +507,26 @@ in
       # outside that job, so the desktop comes up immediately.
       systemd.user.timers.vrising = lib.mkIf cfg.autoStart {
         Timer.OnStartupSec = "30s";
+        Install.WantedBy = [ "timers.target" ];
+      };
+
+      # Every guard below exits 0 on anything unexpected. A missed restart is
+      # invisible; one that lands on a populated world drops players and loses
+      # whatever happened since the last autosave.
+      systemd.user.services.vrising-maintenance = lib.mkIf cfg.maintenance.enable {
+        Unit.Description = "Restart V Rising when the world is empty and saved";
+        Service = {
+          Type = "oneshot";
+          ExecStart = lib.getExe maintenance;
+        };
+      };
+
+      systemd.user.timers.vrising-maintenance = lib.mkIf cfg.maintenance.enable {
+        Timer = {
+          OnCalendar = cfg.maintenance.onCalendar;
+          Persistent = false;
+          RandomizedDelaySec = "5m";
+        };
         Install.WantedBy = [ "timers.target" ];
       };
     })

@@ -26,6 +26,11 @@ in
       # Empty preset so the server reads the migrated ServerGameSettings.json
       # (the single-player rules) instead of a canned preset.
       preset = "";
+
+      # Twice daily, and only when nobody is on and the world is freshly
+      # saved. Confirm `playerCountCommand` against a running server: until
+      # it parses a count, every firing skips.
+      maintenance.enable = true;
     };
     lutris.enable = true;
     mangohud = {
