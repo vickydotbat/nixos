@@ -19,8 +19,7 @@ let
   ];
 
   linksFor =
-    dir:
-    lib.mapAttrs' (name: path: lib.nameValuePair "${dir}/${name}" { source = path; }) skills;
+    dir: lib.mapAttrs' (name: path: lib.nameValuePair "${dir}/${name}" { source = path; }) skills;
 in
 {
   theorem.home.agents = {
@@ -46,6 +45,11 @@ in
     herdr.enable = true;
     rtk.enable = true;
     mattSkills.enable = true;
+
+    # Always-on output shaping, same tier as the ADHD kit above. `level` is the
+    # default mode for a new session; both accept a runtime switch afterwards.
+    ponytail.enable = true;
+    caveman.enable = true;
   };
 
   home.file = lib.mkMerge (

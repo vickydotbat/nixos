@@ -89,6 +89,19 @@
       url = "github:ayghri/i-have-adhd";
       flake = false;
     };
+
+    # Output-shaping skill kits; plain repos, no flake. Both were wired into
+    # the Codex module once and lost when that module went package-only; they
+    # are harness-agnostic skill modules now.
+    ponytail = {
+      url = "github:DietrichGebert/ponytail";
+      flake = false;
+    };
+
+    caveman = {
+      url = "github:JuliusBrussee/caveman";
+      flake = false;
+    };
   };
 
   outputs =
