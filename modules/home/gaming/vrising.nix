@@ -154,6 +154,35 @@ let
     '';
   };
 
+  # Steam A2S_INFO against the query port, printing just the player count.
+  # Modern servers answer the first request with an 'A' challenge, so the
+  # request is sent again with the token appended.
+  playerCount = pkgs.writeText "vrising-player-count.py" ''
+    import socket, sys
+
+    port, timeout = int(sys.argv[1]), float(sys.argv[2])
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock.settimeout(timeout)
+
+    request = b"\xff\xff\xff\xffTSource Engine Query\x00"
+    sock.sendto(request, ("127.0.0.1", port))
+    data, _ = sock.recvfrom(4096)
+
+    if data[4:5] == b"A":
+        sock.sendto(request + data[5:9], ("127.0.0.1", port))
+        data, _ = sock.recvfrom(4096)
+
+    if data[4:5] != b"I":
+        sys.exit("unexpected A2S header: %r" % data[4:5])
+
+    # Header and protocol byte, then four NUL-terminated strings (name, map,
+    # folder, game), then the two-byte appid. Players is the byte after that.
+    body = data[6:]
+    for _ in range(4):
+        body = body[body.index(b"\x00") + 1 :]
+    print(body[2])
+  '';
+
   # Idle restart. Podman's --rm plus a fresh Wine boot is what actually clears
   # the drift; nothing here trims memory in place.
   maintenance = pkgs.writeShellApplication {
@@ -163,21 +192,15 @@ let
       pkgs.podman
       pkgs.coreutils
       pkgs.findutils
-      pkgs.gnugrep
+      pkgs.python3
     ];
     text = ''
       systemctl --user is-active --quiet vrising.service || exit 0
 
-      # Empty world? No count parsed means the RCON command is wrong or the
-      # server is mid-boot; either way, do not touch it.
-      if ! out=$(podman exec -i vrising /usr/bin/rcon ${lib.escapeShellArg cfg.maintenance.playerCountCommand} 2>/dev/null); then
-        echo "rcon unreachable; skipping restart"
-        exit 0
-      fi
-
-      count=$(printf '%s' "$out" | grep -oE '[0-9]+' | head -1 || true)
-      if [ -z "$count" ]; then
-        echo "no player count in rcon output; skipping restart"
+      # Empty world? No answer means the server is mid-boot or the query port
+      # is not up yet; either way, do not touch it.
+      if ! count=$(python3 ${playerCount} ${toString cfg.queryPort} ${toString cfg.maintenance.queryTimeout} 2>/dev/null); then
+        echo "player count unavailable; skipping restart"
         exit 0
       fi
       if [ "$count" -ne 0 ]; then
@@ -442,17 +465,16 @@ in
         '';
       };
 
-      playerCountCommand = lib.mkOption {
-        type = lib.types.str;
-        default = "playerlist";
+      queryTimeout = lib.mkOption {
+        type = lib.types.int;
+        default = 4;
         description = ''
-          RCON command whose output the guard scans for a player count.
+          Seconds to wait for the Steam A2S_INFO reply carrying the player
+          count. A timeout means the count is unknown, so the guard skips.
 
-          UNVERIFIED: the server was stopped when this was written, so the
-          command name could not be probed. If it is wrong the guard reads no
-          count and skips the restart, which is the safe direction, but the
-          timer then never fires. Confirm with `vrising rcon playerlist` while
-          the server runs and correct this if needed.
+          The count does not come from RCON: `help` on this image lists only
+          announce, shutdown, version and time — nothing reports who is
+          connected. A2S on the query port does, and needs no password.
         '';
       };
 
