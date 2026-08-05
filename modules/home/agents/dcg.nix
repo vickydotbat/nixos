@@ -9,6 +9,10 @@
 # rebuild, and pins the hook entry in settings.json to that path. dcg also
 # "repairs" the entry back to a store path whenever it runs, so the activation
 # script rewrites it every rebuild rather than only seeding it once.
+#
+# `dcg doctor` reports the hook as NOT REGISTERED because it compares the
+# command string against the resolved store binary path without following the
+# symlink. Cosmetic: the hook fires and blocks fine through the stable path.
 {
   config,
   lib,
@@ -43,9 +47,10 @@ in
       $DRY_RUN_CMD mkdir -p "$(dirname "$settings")"
       [ -s "$settings" ] || $DRY_RUN_CMD echo '{}' > "$settings"
 
-      # Drop any hook entry whose only command is dcg (including store-path
-      # rewrites dcg itself makes), then prepend the canonical one. Writing
-      # through a temp file keeps the original intact if jq chokes.
+      # Strip every dcg command (including store-path rewrites dcg itself
+      # makes, even when merged into an entry alongside other hooks), drop
+      # entries left empty, then prepend the canonical one. Writing through a
+      # temp file keeps the original intact if jq chokes.
       $DRY_RUN_CMD ${pkgs.jq}/bin/jq \
         --arg hook ${lib.escapeShellArg hookPath} \
         '
@@ -53,8 +58,8 @@ in
             [{ matcher: "Bash|PowerShell",
                hooks: [{ type: "command", command: $hook }] }]
             + ((.hooks.PreToolUse // [])
-               | map(select((.hooks | length == 1
-                             and (.[0].command | test("/dcg(-hook)?$"))) | not)))
+               | map(.hooks |= map(select(.command | test("/dcg(-hook)?$") | not)))
+               | map(select(.hooks | length > 0)))
           )
         ' "$settings" > "$settings.tmp" \
         && $DRY_RUN_CMD mv "$settings.tmp" "$settings"
