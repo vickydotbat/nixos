@@ -12,6 +12,14 @@ in
     blender = {
       enable = true;
       persistedConfigVersions = [ "5.1" ];
+      mcp = {
+        enable = true;
+        # 5.1 = nixpkgs Blender, 4.0 = blender-402-bin (NWN pin).
+        addonVersions = [
+          "5.1"
+          "4.0"
+        ];
+      };
     };
     discord = {
       enable = true;

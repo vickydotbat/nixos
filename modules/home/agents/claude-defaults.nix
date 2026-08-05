@@ -76,6 +76,8 @@ in
       ".claude/statusline.sh" = {
         source = statusline;
         executable = true;
+        # old hand-written statusline.sh may exist on hosts configured before this module
+        force = true;
       };
     };
 

@@ -26,6 +26,22 @@ in
       '';
     };
 
+    mcp = {
+      enable = lib.mkEnableOption "Blender MCP (addon + server) for agent-driven modeling";
+
+      addonVersions = lib.mkOption {
+        type = lib.types.listOf lib.types.str;
+        default = cfg.persistedConfigVersions;
+        defaultText = lib.literalExpression "theorem.home.desktop.blender.persistedConfigVersions";
+        description = ''
+          Blender configuration version directories (as under
+          `~/.config/blender`) that receive the MCP addon. Add versions of
+          other pinned Blender builds (for example `"4.0"` for the NWN
+          Blender) so every installed Blender can talk to the MCP server.
+        '';
+      };
+    };
+
     persistedConfigVersions = lib.mkOption {
       type = lib.types.listOf lib.types.str;
       default = [ (lib.versions.majorMinor cfg.package.version) ];
@@ -44,6 +60,19 @@ in
       home.packages = [
         cfg.package
       ];
+    })
+    (lib.mkIf (cfg.enable && cfg.mcp.enable) {
+      home.packages = [ pkgs.blender-mcp ];
+
+      # The addon still has to be enabled once per version in
+      # Edit > Preferences > Add-ons ("Blender MCP"); the enabled state lives
+      # in the persisted userpref.blend.
+      xdg.configFile = lib.listToAttrs (
+        map (version: {
+          name = "blender/${version}/scripts/addons/blender_mcp_addon.py";
+          value.source = pkgs.blender-mcp.passthru.addon;
+        }) cfg.mcp.addonVersions
+      );
     })
     (lib.optionalAttrs hasHomePersistence {
       home.persistence."/nix/persist" =
