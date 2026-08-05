@@ -44,6 +44,10 @@ in
     codegraph.enable = true;
     herdr.enable = true;
     rtk.enable = true;
+
+    # Blocks destructive shell commands (rm -rf /, git reset --hard, ...)
+    # before Claude Code runs them, via a PreToolUse hook.
+    dcg.enable = true;
     mattSkills.enable = true;
 
     # Always-on output shaping, same tier as the ADHD kit above. `level` is the
