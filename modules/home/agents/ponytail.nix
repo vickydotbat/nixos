@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   inputs,
   ...
 }:
@@ -104,6 +105,13 @@ in
         '';
       }
     ];
+
+    # The hooks are Node scripts invoked as bare `node ...` from the plugin
+    # manifest, so the interpreter has to be on PATH or every session start
+    # fails with `node: command not found`. The module owns that dependency
+    # rather than assuming the host provides it; solanine happens to have
+    # nodejs in system packages, saturnine did not.
+    home.packages = [ pkgs.nodejs ];
 
     # Env var wins over the config file upstream; both are set so a session
     # started outside the Home Manager environment still gets the right mode.

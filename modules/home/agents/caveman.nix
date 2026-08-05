@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   inputs,
   ...
 }:
@@ -104,6 +105,11 @@ in
         '';
       }
     ];
+
+    # Same Node dependency as the ponytail module next door; listing it in both
+    # keeps either one working when the other is disabled. Identical derivation,
+    # so home.packages dedupes it.
+    home.packages = [ pkgs.nodejs ];
 
     home.sessionVariables.CAVEMAN_DEFAULT_MODE = cfg.level;
 
