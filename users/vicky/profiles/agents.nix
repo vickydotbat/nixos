@@ -50,6 +50,10 @@ in
     # default mode for a new session; both accept a runtime switch afterwards.
     ponytail.enable = true;
     caveman.enable = true;
+
+    # Seeds statusLine and permissions.defaultMode into ~/.claude/settings.json
+    # once, then leaves the file alone so in-CLI changes stick.
+    claudeDefaults.enable = true;
   };
 
   home.file = lib.mkMerge (
