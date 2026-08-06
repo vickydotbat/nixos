@@ -51,13 +51,20 @@ in
     mattSkills.enable = true;
 
     # Always-on output shaping, same tier as the ADHD kit above. `level` is the
-    # default mode for a new session; both accept a runtime switch afterwards.
+    # default mode for a new session; it accepts a runtime switch afterwards.
     ponytail.enable = true;
-    caveman.enable = true;
+
+    # Off on purpose: caveman drops articles and filler, which fights the ELI5
+    # output style below. Ponytail only shapes what gets built, not how it reads,
+    # so it stays.
+    caveman.enable = false;
 
     # Seeds statusLine and permissions.defaultMode into ~/.claude/settings.json
     # once, then leaves the file alone so in-CLI changes stick.
-    claudeDefaults.enable = true;
+    claudeDefaults = {
+      enable = true;
+      outputStyle = "ELI5";
+    };
   };
 
   home.file = lib.mkMerge (
@@ -74,6 +81,10 @@ in
         # The hook only fires when this flag file exists. Declaring it here is
         # what makes ADHD mode always-on in every session.
         ".claude/.i-have-adhd-always".text = "";
+
+        # Output style selected by claudeDefaults.outputStyle above. Claude Code
+        # reads styles from this directory by their `name:` front-matter field.
+        ".claude/output-styles/ELI5.md".source = ../agents/all/output-styles/ELI5.md;
       }
     ]
   );

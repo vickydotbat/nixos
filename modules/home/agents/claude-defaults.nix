@@ -63,6 +63,17 @@ in
       '';
     };
 
+    outputStyle = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      example = "ELI5";
+      description = ''
+        Name of the output style new sessions start in, written to
+        `outputStyle`. Must match the `name:` of a style in
+        `~/.claude/output-styles`. `null` skips the key entirely.
+      '';
+    };
+
     statusLine = lib.mkOption {
       type = lib.types.bool;
       default = ponytail.enable || caveman.enable;
@@ -93,10 +104,16 @@ in
       $DRY_RUN_CMD ${pkgs.jq}/bin/jq \
         --arg statusline ${lib.escapeShellArg statuslinePath} \
         --arg mode ${lib.escapeShellArg (toString cfg.permissionMode)} \
+        --arg style ${lib.escapeShellArg (toString cfg.outputStyle)} \
         '
           ${lib.optionalString cfg.statusLine ''
             if (.statusLine // null) == null
             then .statusLine = { type: "command", command: $statusline }
+            else . end |
+          ''}
+          ${lib.optionalString (cfg.outputStyle != null) ''
+            if (.outputStyle // null) == null
+            then .outputStyle = $style
             else . end |
           ''}
           ${lib.optionalString (cfg.permissionMode != null) ''
