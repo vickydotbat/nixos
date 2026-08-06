@@ -5,6 +5,9 @@ configuration, not a shared theorem module.
 
 ## Layout
 
+- `all/CLAUDE.md` is installed as `~/.claude/CLAUDE.md`, the global doctrine
+  every Claude Code session loads. Edit it here, never in `$HOME`: the copy
+  there is a read-only link into the Nix store.
 - `all/skills/*` is installed into `~/.agents/skills/`.
 - `all/commands/*` is installed into `~/.agents/commands/`.
 - `codex/*` is installed into `~/.codex/` when Codex is enabled.

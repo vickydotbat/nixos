@@ -98,6 +98,18 @@ in
         # The hook only fires when this flag file exists. Declaring it here is
         # what makes ADHD mode always-on in every session.
         ".claude/.i-have-adhd-always".text = "";
+
+        # Global agent doctrine, identical on every machine. `force` because
+        # hosts configured before this line have a hand-written copy in place.
+        #
+        # The link points into the Nix store, so it is read-only: Claude Code's
+        # `#` memory shortcut cannot append to it. Edit the file in this repo
+        # and rebuild instead. `autoMemoryEnabled` is off in settings.json, so
+        # nothing else writes here either.
+        ".claude/CLAUDE.md" = {
+          source = ../agents/all/CLAUDE.md;
+          force = true;
+        };
       }
     ]
   );
