@@ -9,6 +9,5 @@
     ./profiles/web.nix
     ./profiles/packages.nix
     ./profiles/agents.nix
-    ./profiles/sow-backup.nix
   ];
 }
