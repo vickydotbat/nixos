@@ -49,6 +49,10 @@ in
     # before Claude Code runs them, via a PreToolUse hook.
     dcg.enable = true;
 
+    # Matt Pocock's skills for Codex and pi only; Claude Code takes them from
+    # the marketplace below.
+    mattSkills.enable = true;
+
     # Always-on output shaping, same tier as the ADHD kit above. `level` is the
     # default mode for a new session; both accept a runtime switch afterwards.
     ponytail.enable = true;

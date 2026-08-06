@@ -196,6 +196,22 @@
         "type": "sourcehut"
       }
     },
+    "matt-skills": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1785953398,
+        "narHash": "sha256-RwFJdrPnyieN65QrwSfABRuBzMdyUIf/qoJ1M8zLLps=",
+        "owner": "mattpocock",
+        "repo": "skills",
+        "rev": "8b36d4fb2635b3c21998dcd8144439c9e5ba7302",
+        "type": "github"
+      },
+      "original": {
+        "owner": "mattpocock",
+        "repo": "skills",
+        "type": "github"
+      }
+    },
     "nix-index-database": {
       "inputs": {
         "nixpkgs": [
@@ -361,6 +377,7 @@
         "i-have-adhd": "i-have-adhd",
         "impermanence": "impermanence",
         "import-tree": "import-tree",
+        "matt-skills": "matt-skills",
         "nix-index-database": "nix-index-database",
         "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs",
