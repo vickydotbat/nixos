@@ -5,10 +5,14 @@
   ...
 }:
 
-# Matt Pocock's agent skills (https://github.com/mattpocock/skills), installed
-# declaratively instead of by upstream's dev-only `scripts/link-skills.sh`.
-# Every skill is a directory holding a SKILL.md; upstream groups them in
-# category folders, and agents want them flat under a skills directory.
+# Matt Pocock's agent skills (https://github.com/mattpocock/skills), linked from
+# a pinned checkout for harnesses that cannot install plugins. Every skill is a
+# directory holding a SKILL.md; upstream groups them in category folders, and
+# agents want them flat under a skills directory.
+#
+# Claude Code does not go through here: it installs the same repo as a
+# marketplace plugin (see `claudeDefaults.plugins`), which self-updates. Only
+# the Agent Skills-style harnesses, Codex and pi, need this checkout.
 
 let
   cfg = config.theorem.home.agents.mattSkills;
@@ -73,13 +77,11 @@ in
 
     targets = lib.mkOption {
       type = lib.types.listOf lib.types.str;
-      default = [
-        ".claude/skills"
-        ".agents/skills"
-      ];
+      default = [ ".agents/skills" ];
       description = ''
         Directories, relative to `$HOME`, that get one symlink per skill.
-        Defaults cover Claude Code and Agent Skills-compatible harnesses.
+        `.claude/skills` is deliberately absent: Claude Code gets these skills
+        from the marketplace, and linking them here too would load them twice.
       '';
     };
   };

@@ -1,84 +1,79 @@
-# Global Agent Instructions
+# Global agent rules
 
-These instructions apply to Pi coding-agent work on this machine. Keep them
-small enough to serve every repository, and let project-local `AGENTS.md`,
-`CLAUDE.md`, docs, tests, and user instructions refine them.
+Short, always-on rules. The full reasoning is in the `engineering-policy` skill
+— load it with `/skill:engineering-policy` for non-trivial or unclear work.
 
-## Locality First
+## Before you edit — every time
 
-Start from the current working directory and the nearest repository
-instructions. Prefer local evidence over general memory.
+1. **Read the rules for THIS path first.** Read the nearest `AGENTS.md` (the
+   engine auto-loads the chain from cwd up). If a project skill matches your task
+   (e.g. threading, NUI, hooks, conventions), open its `SKILL.md` and follow it
+   — do not work from memory. Weak recall is the top cause of broken conventions.
+2. **State a one-line plan** for anything beyond a trivial edit: what you'll
+   change, which files, how you'll check it. Multi-file or refactor work gets a
+   short written plan first (see `engineering-policy`).
+3. **Match the surrounding code.** Follow the project's existing naming, file
+   layout, and idioms. The nearest `AGENTS.md` wins over your defaults.
 
-Before non-trivial edits, read only the context needed to avoid a misleading
-local patch:
+Stay on the task. Don't drift into refactors, renames, dependency bumps, or
+"cleanups" that weren't asked for.
 
-- nearest agent instructions and project docs
-- package/build metadata and managed-environment files
-- nearby implementation and tests for the touched behavior
-- relevant CI or task-runner configuration when verification depends on it
+## Workflow — wargames
 
-Use `rg` or existing project search tools before broad file reads. Do not load
-unrelated doctrine, large docs, vendored trees, generated outputs, or old
-plans unless the task points there.
+One flow, scaled to the task. No SDD/spec bureaucracy; the artifacts are the
+plan note, the diff, and the verdict.
 
-## Efficient Work
+1. **Scout** — trivial edits: read the touched code yourself. Anything
+   multi-file or unfamiliar: dispatch the `scout` subagent (read-only) for a
+   brief of touch points, flow, reuse candidates, tests, and risks.
+2. **Plan** — one-line plan for small work; for larger work use
+   `/skill:brainstorming` / `/skill:writing-plans` and keep the plan in a short
+   note the user can veto. Debugging → `/skill:systematic-debugging`.
+3. **Build** — you implement, smallest working diff, tests alongside behavior
+   changes.
+4. **Verify adversarially** — never grade your own homework:
+   - normal change: dispatch `verifier` on the diff (it tries to refute "done");
+   - pre-PR or risky change: run the `4r-review` chain — four blind review
+     lenses, `verifier` merges and confirms;
+   - confirmed findings → `fixer` (surgical, root-cause), then re-verify.
 
-Make the smallest repair that satisfies the request.
+Subagents get a scoped brief (what changed, where, how to check) — not the
+whole conversation. Reviewers stay blind to each other; only the verifier
+reads all reports.
 
-- Reuse existing modules, helpers, commands, and patterns before adding new
-  machinery.
-- Do not perform drive-by cleanup, broad rewrites, dependency updates, or
-  formatting churn outside the task.
-- Ask only when missing context changes safety, scope, data, architecture,
-  deployment, or public behavior. Otherwise make a conservative local
-  assumption and name it.
-- Stop and report the blocker if the same edit or command fails twice.
+## Safety — hard rules
 
-## Managed Environments
+- **Git:** Don't commit unless asked. Never commit to `main`/`master`. Never
+  force-push, `reset --hard`, `git clean`, delete branches, or rewrite history
+  unless explicitly asked. (Enforced at the tool boundary by `git-safety-gate`.)
+- **AI attribution:** If a commit trailer identifies this agent, use
+  `Co-Authored-By: Pi Agent <pi-agent@local.invalid>`. Do not copy model- or
+  vendor-specific attribution from specs or examples.
+- **Stay on the current branch.** Preserve unrelated user changes; mention them.
+- **Secrets:** never read, print, move, or commit `.env`, `.sops`, keys, tokens,
+  or credentials. If a command might expose secrets, don't run it.
+- **Scope:** ask before anything touching architecture, data, migrations,
+  deployment, or compatibility. Prefer the simplest thing that works.
 
-This machine is often NixOS or another managed environment. Do not assume a
-generic FHS Linux host or globally installed tools.
+## Verify before you claim done
 
-Before running build, test, package, or setup commands, check for project-local
-environment declarations such as `flake.nix`, `shell.nix`, `.envrc`,
-`devenv.nix`, `default.nix`, devcontainer files, package metadata, Makefiles,
-or documented task runners.
+- For non-trivial changes, run at least one relevant check or test.
+- If you couldn't run it, say so plainly — name what you skipped and why.
+- Never report success you didn't verify. Don't hide failures or partial work.
+- Test behavior, not incidental details (wording, ordering, snapshots).
 
-Prefer the repository's dev shell, flake app, container, or task runner. Do not
-add packages, flakes, containers, services, or persistent environment changes
-unless the user asked for that work or an inspected failure proves it is the
-smallest repair.
+## Restraint
 
-## NixOS Baseline
+Ponytail mode is active for output and implementation restraint: smallest
+working diff, stdlib/native before dependencies, no speculative abstractions.
 
-When working on NixOS configuration, flakes, Home Manager, dev shells, or
-system deployment:
+## Environment
 
-- verify option names before suggesting configuration
-- keep secrets out of the Nix store, logs, examples, and command output
-- ask for execution context before rebuild, deployment, disk, LUKS,
-  impermanence, or destructive system commands
-- name the privilege mechanism being used, such as `sudo` or `run0`
-- prefer `nix eval`, `nix build`, `nix flake check`, and dry-build or test
-  rebuilds before activation when relevant
+This machine runs NixOS — see the appended NixOS rules. Prefer repo-native Nix
+entry points (`flake.nix`, `nix develop`, `just`, documented commands). No
+`sudo`, no ad-hoc global installs.
 
-## Worktree Safety
+---
 
-Before editing, committing, branching, or running broad git commands, inspect
-the current worktree with `git status --short`, `git branch --show-current`,
-and `git diff --stat` when the directory is a git repository.
-
-Work on the current branch unless the user asks otherwise. Leave unrelated
-dirty changes alone. Do not commit, push, switch branches, modify remotes,
-rebase, reset, clean, or delete branches unless explicitly asked.
-
-Do not touch secrets, credentials, tokens, certificates, `.env` files, SOPS
-data, SSH material, or provider configuration unless the user explicitly asks.
-
-## Verification
-
-Run the narrowest useful verification for the change. If verification is not
-run, say why. Do not claim success just because an edit looks plausible.
-
-For final responses, report only what matters: context read, what changed,
-checks run, and any remaining risk.
+Full policy, Context Receipt, locality, testing, docs, and planning detail:
+`/skill:engineering-policy`.

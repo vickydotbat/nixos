@@ -76,7 +76,9 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Matt Pocock's agent skills; plain repo, no flake.
+    # Matt Pocock's agent skills; plain repo, no flake. Claude Code installs
+    # these from the marketplace instead; this pin only feeds the non-Claude
+    # harnesses through `mattSkills`.
     matt-skills = {
       url = "github:mattpocock/skills";
       flake = false;
