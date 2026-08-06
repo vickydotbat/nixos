@@ -67,6 +67,51 @@ in
       # Matt Pocock's skills used to be linked from a pinned checkout. Upstream
       # ships them as a marketplace plugin now, so Claude Code fetches and
       # updates them itself instead of waiting for a `nix flake update`.
+      # Policy keys, re-applied on every rebuild so no machine drifts. Taste
+      # keys — model, theme, effortLevel, autoCompact — stay mutable on
+      # purpose, so changing them in the CLI still sticks.
+      settings = {
+        # Off: cloud connectors, remote control of this session, and the
+        # bundled skill set (the marketplace plugins below cover it).
+        disableClaudeAiConnectors = true;
+        disableRemoteControl = true;
+        disableBundledSkills = true;
+
+        # Off: the Workflows and Artifact features, plus the nag that asks
+        # about Workflows once they are gone.
+        disableWorkflows = true;
+        disableArtifact = true;
+        skipWorkflowUsageWarning = true;
+
+        # Claude Code writing to memory files behind your back; CLAUDE.md is
+        # a read-only store link now anyway.
+        autoMemoryEnabled = false;
+
+        permissions = {
+          allow = [ "Bash(codex exec*)" ];
+
+          # Tools that are off for good: plan mode (ADHD skill drives the
+          # flow instead), notebook edits, and everything that would let a
+          # session reach outside it — messages, notifications, remote
+          # triggers, wakeups, cron.
+          deny = [
+            "EnterPlanMode"
+            "ExitPlanMode"
+            "DesignSync"
+            "NotebookEdit"
+            "SendMessage"
+            "PushNotification"
+            "RemoteTrigger"
+            "ReportFindings"
+            "ScheduleWakeup"
+            "AskUserQuestion"
+            "CronCreate"
+            "CronDelete"
+            "CronList"
+          ];
+        };
+      };
+
       # Marketplaces Claude Code installs from, and what to enable out of them.
       # ponytail and caveman still get linked into `~/.agents/skills` by their
       # own modules, for harnesses that do not speak the plugin protocol.
@@ -108,6 +153,26 @@ in
         # nothing else writes here either.
         ".claude/CLAUDE.md" = {
           source = ../agents/all/CLAUDE.md;
+          force = true;
+        };
+
+        # Codex and Pi read their own doctrine files, written in their own
+        # voice and referring to their own subagents and skills, so they are
+        # not copies of CLAUDE.md above. Each one is the live file as of this
+        # commit, moved into the repo so every machine gets the same text.
+        ".codex/AGENTS.md" = {
+          source = ../agents/codex/AGENTS.md;
+          force = true;
+        };
+
+        ".pi/agent/AGENTS.md" = {
+          source = ../agents/pi/agent/AGENTS.md;
+          force = true;
+        };
+
+        # Appended to Pi's system prompt; the NixOS half of the rules above.
+        ".pi/agent/APPEND_SYSTEM.md" = {
+          source = ../agents/pi/agent/APPEND_SYSTEM.md;
           force = true;
         };
       }

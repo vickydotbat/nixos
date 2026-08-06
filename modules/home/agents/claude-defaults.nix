@@ -82,6 +82,23 @@ in
       description = "Seed a statusLine badge combining whichever of ponytail and caveman are enabled.";
     };
 
+    settings = lib.mkOption {
+      type = lib.types.attrsOf lib.types.anything;
+      default = { };
+      example = {
+        disableWorkflows = true;
+      };
+      description = ''
+        Settings re-applied on every rebuild, for the policy keys that should
+        be the same on every machine — what is switched off, what is denied.
+        Merged recursively into `settings.json`, so untouched keys survive;
+        a list here replaces the list in the file rather than adding to it.
+
+        Anything you want to change from inside the CLI belongs in an option
+        above instead, not here: this overwrites such an edit on next rebuild.
+      '';
+    };
+
     marketplaces = lib.mkOption {
       type = lib.types.attrsOf lib.types.str;
       default = { };
@@ -132,7 +149,9 @@ in
         --arg mode ${lib.escapeShellArg (toString cfg.permissionMode)} \
         --argjson marketplaces ${lib.escapeShellArg (builtins.toJSON marketplaces)} \
         --argjson plugins ${lib.escapeShellArg (builtins.toJSON cfg.plugins)} \
+        --argjson settings ${lib.escapeShellArg (builtins.toJSON cfg.settings)} \
         '
+          . * $settings |
           .extraKnownMarketplaces = ((.extraKnownMarketplaces // {}) + $marketplaces) |
           .enabledPlugins = ((.enabledPlugins // {}) + $plugins) |
           ${lib.optionalString cfg.statusLine ''

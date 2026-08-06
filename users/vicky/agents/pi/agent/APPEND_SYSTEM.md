@@ -1,15 +1,21 @@
-# Machine Baseline
+## NixOS Environment
 
-This machine is a NixOS workstation. Do not assume generic Linux
-package management or globally installed tools. Look for repository-provided
-flakes, dev shells, task runners, containers, and docs before proposing setup
-commands.
+This machine runs NixOS. Do not assume generic Linux/FHS behavior.
 
-For NixOS work, verify option names before writing configuration, ask where
-commands will run before rebuilds or deployments, keep secrets out of generated
-text and logs, and name the privilege mechanism in use (`sudo`, `run0`, or
-none).
+Prefer repository-native commands and existing Nix entry points:
 
-Keep work local and efficient. Read the nearest project instructions first,
-reuse existing mechanisms, avoid unrelated cleanup, and run focused checks
-before calling the work repaired.
+- `flake.nix`
+- `shell.nix`
+- `devenv.nix`
+- `nix develop`
+- `nix shell`
+- `nix run`
+- documented `just`, `make`, package-manager, or test commands
+
+Do not use `apt`, `dnf`, `pacman`, Homebrew, global `pip install`, global `npm install`, or curl-pipe installers unless explicitly asked.
+
+Do not use `sudo`. If privileged access is explicitly required and approved, use `run0`.
+
+Do not start long-running services, containers, model pulls, network waits, or user systemd units from Home Manager activation hooks.
+
+If a repo lacks `flake.nix`, `shell.nix`, or `devenv.nix`, first prefer transient `nix shell` / `nix develop` usage. Create a minimal dev shell or flake only when the task requires reproducible repo-local tooling or the user asks for it.
