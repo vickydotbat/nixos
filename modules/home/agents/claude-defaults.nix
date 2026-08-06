@@ -16,6 +16,10 @@
 # sets them; after that the file is yours, and edits stick. The cost is that
 # changing a value here does not propagate to a machine that already has the
 # key — delete it there and rebuild, or edit it directly.
+#
+# `marketplaces` and `plugins` are the exception: those two keys are merged in
+# on every rebuild, so a plugin listed here is installed on every machine. They
+# merge instead of replace, so plugins added by hand with `/plugin` stay.
 
 let
   cfg = config.theorem.home.agents.claudeDefaults;
@@ -37,6 +41,14 @@ let
   # happens once, and a store path baked into the file would rot into a
   # garbage-collected reference on the next `nix flake update`.
   statuslinePath = "${config.home.homeDirectory}/.claude/statusline.sh";
+
+  # `<name> = "<owner>/<repo>"` -> the shape settings.json wants.
+  marketplaces = lib.mapAttrs (_: repo: {
+    source = {
+      source = "github";
+      inherit repo;
+    };
+  }) cfg.marketplaces;
 in
 {
   options.theorem.home.agents.claudeDefaults = {
@@ -69,6 +81,31 @@ in
       defaultText = lib.literalExpression "ponytail.enable || caveman.enable";
       description = "Seed a statusLine badge combining whichever of ponytail and caveman are enabled.";
     };
+
+    marketplaces = lib.mkOption {
+      type = lib.types.attrsOf lib.types.str;
+      default = { };
+      example = {
+        mattpocock = "mattpocock/skills";
+      };
+      description = ''
+        Claude Code plugin marketplaces, as `<name> = "<owner>/<repo>"` on
+        GitHub. Written to `extraKnownMarketplaces` on every rebuild.
+      '';
+    };
+
+    plugins = lib.mkOption {
+      type = lib.types.attrsOf lib.types.bool;
+      default = { };
+      example = {
+        "mattpocock-skills@mattpocock" = true;
+      };
+      description = ''
+        Plugins to enable (or explicitly disable), keyed
+        `<plugin>@<marketplace>`. Written to `enabledPlugins` on every rebuild;
+        Claude Code then downloads and updates them itself.
+      '';
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -93,7 +130,11 @@ in
       $DRY_RUN_CMD ${pkgs.jq}/bin/jq \
         --arg statusline ${lib.escapeShellArg statuslinePath} \
         --arg mode ${lib.escapeShellArg (toString cfg.permissionMode)} \
+        --argjson marketplaces ${lib.escapeShellArg (builtins.toJSON marketplaces)} \
+        --argjson plugins ${lib.escapeShellArg (builtins.toJSON cfg.plugins)} \
         '
+          .extraKnownMarketplaces = ((.extraKnownMarketplaces // {}) + $marketplaces) |
+          .enabledPlugins = ((.enabledPlugins // {}) + $plugins) |
           ${lib.optionalString cfg.statusLine ''
             if (.statusLine // null) == null
             then .statusLine = { type: "command", command: $statusline }

@@ -62,30 +62,17 @@ in
       '';
     };
 
-    pluginTargets = lib.mkOption {
-      type = lib.types.listOf lib.types.str;
-      default = [ ".claude/skills" ];
-      description = ''
-        Directories, relative to `$HOME`, that get a single symlink to the
-        whole checkout at `<dir>/ponytail`.
-
-        Claude Code treats any directory under `~/.claude/skills/` that carries
-        a `.claude-plugin/plugin.json` as a plugin and loads it as
-        `<name>@skills-dir` with no `settings.json` entry — verified against
-        claude-code 2.1.222 with an otherwise empty `CLAUDE_CONFIG_DIR`. That
-        registers the skills *and* the SessionStart/SubagentStart/
-        UserPromptSubmit hooks in one link, which is why hook registration is
-        not managed separately here.
-      '';
-    };
-
     skillTargets = lib.mkOption {
       type = lib.types.listOf lib.types.str;
       default = [ ".agents/skills" ];
       description = ''
-        Directories, relative to `$HOME`, that get one symlink per skill. The
-        plugin mechanism above is Claude Code-specific, so Agent Skills-style
-        harnesses still want bare skill directories.
+        Directories, relative to `$HOME`, that get one symlink per skill, for
+        Agent Skills-style harnesses.
+
+        Claude Code is not one of them any more: it installs ponytail from the
+        upstream marketplace (see `claudeDefaults.plugins`), which also
+        registers the hooks. Linking the checkout into `~/.claude/skills/` as
+        well would load the whole kit twice.
       '';
     };
   };
@@ -95,14 +82,6 @@ in
       {
         assertion = skills != { };
         message = "theorem.home.agents.ponytail: no skills found under ${skillDir}.";
-      }
-      {
-        assertion = builtins.pathExists "${cfg.src}/.claude-plugin/plugin.json";
-        message = ''
-          theorem.home.agents.ponytail: no .claude-plugin/plugin.json in ${cfg.src}.
-          Without it the checkout links as an inert directory and the hooks never
-          register.
-        '';
       }
     ];
 
@@ -121,14 +100,6 @@ in
       defaultMode = cfg.level;
     };
 
-    home.file = lib.mkMerge (
-      (map linksFor cfg.skillTargets)
-      ++ (map (dir: {
-        "${dir}/ponytail" = {
-          source = cfg.src;
-          recursive = false;
-        };
-      }) cfg.pluginTargets)
-    );
+    home.file = lib.mkMerge (map linksFor cfg.skillTargets);
   };
 }

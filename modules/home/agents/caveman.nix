@@ -65,27 +65,16 @@ in
       '';
     };
 
-    pluginTargets = lib.mkOption {
-      type = lib.types.listOf lib.types.str;
-      default = [ ".claude/skills" ];
-      description = ''
-        Directories, relative to `$HOME`, that get a single symlink to the
-        whole checkout at `<dir>/caveman`. See the matching option on
-        `ponytail` for why this registers the hooks too.
-
-        Note that the checkout carries a second copy of four skills under
-        `plugins/caveman/skills/`, so Claude Code lists 12 skills where only 6
-        are distinct. The nested copy has no manifest of its own, so linking
-        the root is the only option; the duplication is upstream's.
-      '';
-    };
-
     skillTargets = lib.mkOption {
       type = lib.types.listOf lib.types.str;
       default = [ ".agents/skills" ];
       description = ''
         Directories, relative to `$HOME`, that get one symlink per skill, taken
-        from the top-level `skills/` tree only.
+        from the top-level `skills/` tree only, for Agent Skills-style
+        harnesses.
+
+        Claude Code gets caveman from the upstream marketplace instead (see
+        `claudeDefaults.plugins`), hooks included.
       '';
     };
   };
@@ -95,14 +84,6 @@ in
       {
         assertion = skills != { };
         message = "theorem.home.agents.caveman: no skills found under ${skillDir}.";
-      }
-      {
-        assertion = builtins.pathExists "${cfg.src}/.claude-plugin/plugin.json";
-        message = ''
-          theorem.home.agents.caveman: no .claude-plugin/plugin.json in ${cfg.src}.
-          Without it the checkout links as an inert directory and the hooks never
-          register.
-        '';
       }
     ];
 
@@ -117,14 +98,6 @@ in
       defaultMode = cfg.level;
     };
 
-    home.file = lib.mkMerge (
-      (map linksFor cfg.skillTargets)
-      ++ (map (dir: {
-        "${dir}/caveman" = {
-          source = cfg.src;
-          recursive = false;
-        };
-      }) cfg.pluginTargets)
-    );
+    home.file = lib.mkMerge (map linksFor cfg.skillTargets);
   };
 }

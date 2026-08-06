@@ -48,7 +48,6 @@ in
     # Blocks destructive shell commands (rm -rf /, git reset --hard, ...)
     # before Claude Code runs them, via a PreToolUse hook.
     dcg.enable = true;
-    mattSkills.enable = true;
 
     # Always-on output shaping, same tier as the ADHD kit above. `level` is the
     # default mode for a new session; both accept a runtime switch afterwards.
@@ -56,8 +55,29 @@ in
     caveman.enable = true;
 
     # Seeds statusLine and permissions.defaultMode into ~/.claude/settings.json
-    # once, then leaves the file alone so in-CLI changes stick.
-    claudeDefaults.enable = true;
+    # once, then leaves the file alone so in-CLI changes stick. Marketplaces
+    # and plugins are the exception; those are re-applied on every rebuild.
+    claudeDefaults = {
+      enable = true;
+
+      # Matt Pocock's skills used to be linked from a pinned checkout. Upstream
+      # ships them as a marketplace plugin now, so Claude Code fetches and
+      # updates them itself instead of waiting for a `nix flake update`.
+      # Marketplaces Claude Code installs from, and what to enable out of them.
+      # ponytail and caveman still get linked into `~/.agents/skills` by their
+      # own modules, for harnesses that do not speak the plugin protocol.
+      marketplaces = {
+        mattpocock = "mattpocock/skills";
+        ponytail = "DietrichGebert/ponytail";
+        caveman = "JuliusBrussee/caveman";
+      };
+
+      plugins = {
+        "mattpocock-skills@mattpocock" = true;
+        "ponytail@ponytail" = true;
+        "caveman@caveman" = true;
+      };
+    };
   };
 
   home.file = lib.mkMerge (
