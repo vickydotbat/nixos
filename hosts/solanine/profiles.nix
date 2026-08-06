@@ -91,6 +91,8 @@ in
       };
       zram.enable = true;
       oom.enable = true;
+      # Second copy of the SoW restic repositories (sow-platform ADR-0041, #105).
+      sowSecondCopy.enable = true;
     };
 
     desktop = {
