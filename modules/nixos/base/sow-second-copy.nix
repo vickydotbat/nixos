@@ -14,8 +14,10 @@
 #
 # `restic copy` only ever adds snapshots at the destination. That is the
 # property this module exists for: a compromised primary can shrink itself,
-# never the copies. Nothing here runs `forget` or `prune`; retention on the
-# workstations becomes a question only when a disk actually fills.
+# never the copies. Retention is decided HERE, on the workstation: after each
+# copy we `forget --keep-daily 7 --keep-weekly 4 --prune` the local copy, so
+# a daily pull does not stack up forever. The primary still cannot shrink the
+# copies — the keep policy is local and only trims what the policy says.
 #
 # Credentials are decrypted at runtime from the sow-platform checkout with
 # the operator age key (the workstations are recipients of every platform
@@ -44,8 +46,9 @@ let
     fi
 
     # Decrypt the source credentials into a private tmpdir that dies with us.
+    # The unit runs with PrivateTmp, so /tmp here is invisible to other users.
     export SOPS_AGE_KEY_FILE=${lib.escapeShellArg cfg.ageKeyFile}
-    secdir="$(mktemp -d -p /run sow-copy.XXXXXX)"
+    secdir="$(mktemp -d -t sow-copy.XXXXXX)"
     chmod 700 "$secdir"
     trap 'rm -rf "$secdir"' EXIT
     platform=${lib.escapeShellArg cfg.platformRepo}
@@ -65,6 +68,11 @@ let
 
     restic -r "$dest" --password-file "$secdir/pw" copy \
       --from-repo "$RESTIC_REPOSITORY" --from-password-file "$secdir/pw"
+
+    # Trim the local copy so a daily pull does not stack up forever. This is
+    # a local decision with local credentials; the primary cannot trigger it.
+    restic -r "$dest" --password-file "$secdir/pw" forget \
+      --keep-daily 7 --keep-weekly 4 --prune
 
     # Structural check of the local copy: cheap on local disk, and a copy
     # that does not verify is not a copy.
@@ -88,6 +96,10 @@ let
       ];
       serviceConfig = {
         Type = "oneshot";
+        # Run as the operator: the copies live in the operator's home
+        # directory and the nixcfg group grants read access to the age key.
+        User = "vicky";
+        PrivateTmp = true;
         # A full first copy over a home connection can take hours.
         TimeoutStartSec = "12h";
       };
@@ -135,7 +147,7 @@ in
 
     destRoot = lib.mkOption {
       type = lib.types.str;
-      default = "/nix/persist/backups/sow";
+      default = "/home/vicky/Backups/sow";
       description = "Directory holding one local restic repository per source host, plus the status markers.";
     };
 
@@ -153,7 +165,11 @@ in
       # died silently for weeks.
       "sow-copy-failed@" = {
         description = "Record and announce a failed SoW copy for %i";
-        serviceConfig.Type = "oneshot";
+        serviceConfig = {
+          Type = "oneshot";
+          # Same owner as the copies, so the marker sits next to them.
+          User = "vicky";
+        };
         path = [
           pkgs.coreutils
           pkgs.util-linux
