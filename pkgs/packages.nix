@@ -13,4 +13,6 @@
   nwtoolset = pkgs.callPackage ./nwtoolset.nix { };
   rtk = pkgs.callPackage ./rtk.nix { };
   fallow = pkgs.callPackage ./fallow.nix { };
+  # Shadows nixpkgs' tea; see pkgs/tea.nix for why and when to drop it.
+  tea = pkgs.callPackage ./tea.nix { };
 }
