@@ -119,6 +119,37 @@ in
             branch.sort = lib.mkDefault "-committerdate"; # sorts branches by most recent
             tag.sort = lib.mkDefault "version:refname"; # treat numbers as version numbers when sorting tags
 
+            /*
+              Dead-branch cleanup, in two deliberate steps.
+
+              `fetch.prune` above already removes the remote-tracking refs. It
+              does not touch the local branches that pointed at them, so a
+              long-lived checkout silently accumulates branches whose upstream
+              is gone — the forge deleted the remote head when the pull request
+              merged, and the local copy stayed behind.
+
+              `git gone` lists them and deletes nothing. `git gone-prune`
+              deletes them. Never wire the second one into a timer, an
+              activation hook, or a shell startup file: the operator decides
+              when history is discarded.
+
+              The deletion uses `-D`, not `-d`, and that is the sharp edge.
+              A forge that squash-merges rewrites the commits, so a merged
+              branch is never an ancestor of `main` and `-d` refuses all of
+              them. `-D` deletes regardless of merge state, which means a
+              branch that was pushed, had its remote head deleted, and then
+              received new local commits will lose those commits. Read the
+              output of `git gone` before running `git gone-prune`; that is
+              the whole safety mechanism.
+
+              `gone-prune` skips the checked-out branch, which Git would refuse
+              to delete anyway, so the run does not fail on it.
+            */
+            alias = {
+              gone = lib.mkDefault "!git fetch --prune --quiet; git for-each-ref --format='%(refname:short) %(upstream:track)' refs/heads | awk '$2 == \"[gone]\" { print $1 }'";
+              gone-prune = lib.mkDefault "!git gone | grep -vxF \"$(git branch --show-current)\" | xargs -r git branch -D";
+            };
+
             # Trust only this declared shared theorem repository. Do not use
             # `safe.directory = "*"`, which would silence Git's ownership check
             # for every checkout Vicky opens.
