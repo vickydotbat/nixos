@@ -2,7 +2,7 @@
 
 {
   aurora-hak-explorer = pkgs.callPackage ./aurora-hak-explorer.nix { };
-  blender-402-bin = pkgs.callPackage ./blender-402-bin.nix { };
+  blender-501-bin = pkgs.callPackage ./blender-501-bin.nix { };
   blender-mcp = pkgs.callPackage ./blender-mcp.nix { };
   cleanmodels = pkgs.callPackage ./cleanmodels.nix { };
   dcg = pkgs.callPackage ./dcg.nix { };

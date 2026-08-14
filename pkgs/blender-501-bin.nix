@@ -51,12 +51,24 @@
 
 stdenv.mkDerivation rec {
   pname = "blender-bin";
-  version = "4.0.2";
+  version = "5.0.1";
+
+  # majorMinor drives the release directory, the scripts path and the wrapper
+  # name, so a future bump only needs `version` + `hash`.
+  seriesDir = lib.versions.majorMinor version;
+  binName = "blender-${version}";
 
   src = fetchurl {
-    url = "https://download.blender.org/release/Blender4.0/blender-${version}-linux-x64.tar.xz";
-    hash = "sha256-VYOlWIc22ohYxSLvF//11zvlnEem/pGtKcbzJj4iCGo=";
+    url = "https://download.blender.org/release/Blender${seriesDir}/blender-${version}-linux-x64.tar.xz";
+    hash = "sha256-gBlYDuG3Ji5QX0GWoAI3zPdDyI0gWzjTQgFRBnbmCwk=";
   };
+
+  # OpenImageDenoise ships CUDA/HIP device backends that dlopen driver libs at
+  # runtime (found via /run/opengl-driver/lib). They are not present at build.
+  autoPatchelfIgnoreMissingDeps = [
+    "libcuda.so.1"
+    "libamdhip64.so.6"
+  ];
 
   nativeBuildInputs = [
     autoPatchelfHook
@@ -114,8 +126,8 @@ stdenv.mkDerivation rec {
 
     mkdir -p $out/bin
 
-    makeWrapper $out/opt/blender-${version}/blender $out/bin/blender-4.0.2 \
-      --set BLENDER_SYSTEM_SCRIPTS $out/opt/blender-${version}/4.0/scripts \
+    makeWrapper $out/opt/blender-${version}/blender $out/bin/${binName} \
+      --set BLENDER_SYSTEM_SCRIPTS $out/opt/blender-${version}/${seriesDir}/scripts \
       --prefix LD_LIBRARY_PATH : "/run/opengl-driver/lib:${
         lib.makeLibraryPath [
           libGL
@@ -129,19 +141,19 @@ stdenv.mkDerivation rec {
 
     mkdir -p $out/share/icons/hicolor/scalable/apps
     cp $out/opt/blender-${version}/blender.svg \
-      $out/share/icons/hicolor/scalable/apps/blender-4.0.2.svg
+      $out/share/icons/hicolor/scalable/apps/${binName}.svg
 
     runHook postInstall
   '';
 
   desktopItems = [
     (makeDesktopItem {
-      name = "blender-4.0.2";
-      desktopName = "Blender 4.0.2";
+      name = binName;
+      desktopName = "Blender ${version}";
       genericName = "3D Modeler";
       comment = "3D modeling, animation, rendering and post-production";
-      exec = "blender-4.0.2 %f";
-      icon = "blender-4.0.2";
+      exec = "${binName} %f";
+      icon = binName;
       terminal = false;
       categories = [
         "Graphics"
@@ -159,6 +171,6 @@ stdenv.mkDerivation rec {
     homepage = "https://www.blender.org";
     license = lib.licenses.gpl3Plus;
     platforms = [ "x86_64-linux" ];
-    mainProgram = "blender-4.0.2";
+    mainProgram = binName;
   };
 }

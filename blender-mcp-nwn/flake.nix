@@ -22,7 +22,7 @@
         overlays = [ theorem.overlays.default ];
       };
 
-      blender = pkgs.blender-402-bin; # /bin/blender-4.0.2
+      blender = pkgs.blender-501-bin; # /bin/blender-5.0.1 (via lib.getExe)
       # bpy lives *inside* Blender; the host env only needs the MCP transport.
       # anthropic is here because you asked for it — the server doesn't import it.
       pyenv = pkgs.python3.withPackages (ps: [
@@ -41,7 +41,7 @@
         name = "blender-mcp-nwn";
         inherit runtimeInputs;
         text = ''
-          export BLENDER_BIN=${blender}/bin/blender-4.0.2
+          export BLENDER_BIN=${pkgs.lib.getExe blender}
           exec ${pyenv}/bin/python ${./mcp_server.py} "$@"
         '';
       };
@@ -57,7 +57,7 @@
       devShells.${system}.default = pkgs.mkShell {
         packages = runtimeInputs;
         shellHook = ''
-          export BLENDER_BIN=${blender}/bin/blender-4.0.2
+          export BLENDER_BIN=${pkgs.lib.getExe blender}
           echo "blender-mcp-nwn dev shell — BLENDER_BIN=$BLENDER_BIN" >&2
         '';
       };

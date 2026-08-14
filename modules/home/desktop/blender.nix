@@ -36,7 +36,7 @@ in
         description = ''
           Blender configuration version directories (as under
           `~/.config/blender`) that receive the MCP addon. Add versions of
-          other pinned Blender builds (for example `"4.0"` for the NWN
+          other pinned Blender builds (for example `"5.0"` for the NWN
           Blender) so every installed Blender can talk to the MCP server.
         '';
       };

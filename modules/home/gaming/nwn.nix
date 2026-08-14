@@ -19,7 +19,7 @@ let
   nwnDocumentsDir = "${config.home.homeDirectory}/Documents/Neverwinter Nights";
   winePrefixDir = "${config.home.homeDirectory}/.local/share/wineprefixes";
   windowsDocumentsDir = "C:\\users\\${config.home.username}\\Documents\\Neverwinter Nights";
-  nwnBlender = pkgs.blender-402-bin;
+  nwnBlender = pkgs.blender-501-bin;
   nwnBlenderConfigVersion = lib.versions.majorMinor nwnBlender.version;
   nwnexplorer = pkgs.nwnexplorer.override {
     inherit nwnInstallDir;
@@ -230,6 +230,9 @@ in
         directories = [
           ".local/share/Neverwinter Nights"
           ".config/blender/${nwnBlenderConfigVersion}"
+          # Keep the old 4.0 config so Blender 5.0 can migrate NWN settings on
+          # first run. Drop once 5.0 has its own tuned state.
+          ".config/blender/4.0"
         ];
       };
     })
