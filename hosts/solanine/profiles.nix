@@ -57,6 +57,7 @@ in
       nix.unfreePackageNames = [
         "corefonts"
         "discord"
+        "discord-unwrapped"
         "obsidian"
         "spotify"
         "unrar"
