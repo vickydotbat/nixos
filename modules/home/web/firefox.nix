@@ -317,7 +317,14 @@ in
       xdg.desktopEntries.${cfg.desktopEntryName} = {
         name = cfg.desktopName;
         genericName = "Web Browser";
-        exec = "${lib.getExe cfg.package} --name ${cfg.desktopEntryName} --profile ${profilePath} %U";
+        # ponytail: XWayland fallback, not a preference change.
+        # KWin 6.7.4 + libwayland 1.26 kill any client that acks a removed
+        # Wayland global ("wl_fixes#N: error 0: the given registry did not
+        # announce global M"). Firefox dies with every tab and window a few
+        # times a day; polkit-kde hits the same error. Under XWayland Firefox
+        # never speaks Wayland, so it cannot be killed by this.
+        # Drop this once the compositor-side race is fixed upstream.
+        exec = "${pkgs.coreutils}/bin/env MOZ_ENABLE_WAYLAND=0 ${lib.getExe cfg.package} --name ${cfg.desktopEntryName} --profile ${profilePath} %U";
         icon = cfg.icon;
         terminal = false;
         categories = [
