@@ -1,16 +1,12 @@
 {
-  inputs,
   lib,
   ...
 }:
 
 let
   # Skill directories linked into every harness that reads a skills folder.
-  # `human-voice` is written here; `i-have-adhd` comes from a pinned checkout
-  # of https://github.com/ayghri/i-have-adhd.
   skills = {
     human-voice = ../agents/all/skills/human-voice;
-    i-have-adhd = "${inputs.i-have-adhd}/skills/i-have-adhd";
   };
 
   skillTargets = [
@@ -53,8 +49,8 @@ in
     # the marketplace below.
     mattSkills.enable = true;
 
-    # Always-on output shaping, same tier as the ADHD kit above. `level` is the
-    # default mode for a new session; it accepts a runtime switch afterwards.
+    # Always-on output shaping. `level` is the default mode for a new session;
+    # it accepts a runtime switch afterwards.
     ponytail.enable = true;
 
     # Off on purpose: caveman drops articles and filler, which fights the ELI5
@@ -98,9 +94,9 @@ in
         permissions = {
           allow = [ "Bash(codex exec*)" ];
 
-          # Tools that are off for good: plan mode (ADHD skill drives the
-          # flow instead), notebook edits, and everything that would let a
-          # session reach outside it — messages, notifications, remote
+          # Tools that are off for good: plan mode (the ELI5 output style
+          # drives the flow instead), notebook edits, and everything that
+          # would let a session reach outside it — messages, notifications, remote
           # triggers, wakeups, cron.
           deny = [
             "EnterPlanMode"
@@ -145,17 +141,6 @@ in
     (map linksFor skillTargets)
     ++ [
       {
-        # Upstream SessionStart hook for the ADHD kit. It looks for SKILL.md at
-        # `../skills/i-have-adhd/SKILL.md` relative to its own path, which from
-        # `~/.claude/hooks/` resolves to the skill linked above. Register it in
-        # `~/.claude/settings.json` under `hooks.SessionStart`; that file stays
-        # mutable because Claude Code writes to it.
-        ".claude/hooks/adhd-always-on.sh".source = "${inputs.i-have-adhd}/hooks/always-on.sh";
-
-        # The hook only fires when this flag file exists. Declaring it here is
-        # what makes ADHD mode always-on in every session.
-        ".claude/.i-have-adhd-always".text = "";
-
         # Output style selected by claudeDefaults.outputStyle above. Claude Code
         # reads styles from this directory by their `name:` front-matter field.
         ".claude/output-styles/ELI5.md".source = ../agents/all/output-styles/ELI5.md;

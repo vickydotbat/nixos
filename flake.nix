@@ -84,14 +84,6 @@
       flake = false;
     };
 
-    # ADHD output-shaping kit; plain repo, no flake. Upstream ships it as a
-    # Claude Code plugin; installed here as a skill so the pin lives in
-    # `flake.lock` instead of Claude's mutable plugin cache.
-    i-have-adhd = {
-      url = "github:ayghri/i-have-adhd";
-      flake = false;
-    };
-
     # Output-shaping skill kits; plain repos, no flake. Both were wired into
     # the Codex module once and lost when that module went package-only; they
     # are harness-agnostic skill modules now.

@@ -229,6 +229,11 @@ in
             # Total Cookie Protection
             "network.cookie.cookieBehavior" = 5;
 
+            # Keep cookies across restarts. A Firefox prefs migration turned
+            # "clear on shutdown" on, which logged every site out at quit.
+            "privacy.sanitize.sanitizeOnShutdown" = false;
+            "privacy.clearOnShutdown_v2.cookiesAndStorage" = false;
+
             # Optional: reduces cross-site tracking further, but may break some flows.
             "privacy.partition.network_state" = true;
 
@@ -291,6 +296,9 @@ in
             # Memory cache is fine, but cap it too.
             "browser.cache.memory.enable" = true;
             "browser.cache.memory.capacity" = 65536; # 64 MiB, in KiB
+
+            # Reopen the previous windows and tabs at startup.
+            "browser.startup.page" = 3;
 
             # Session restore writes into the persisted profile area.
             # Reduce write frequency so ~/.mozilla is less chatty.

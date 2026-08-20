@@ -127,22 +127,6 @@
         "type": "github"
       }
     },
-    "i-have-adhd": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1786364424,
-        "narHash": "sha256-/h4HxkUbtRGoqgyFvjJrd++XmOd1KSVku5dR2/f9b/s=",
-        "owner": "ayghri",
-        "repo": "i-have-adhd",
-        "rev": "2ed064090711586e0c97a2fbbf15465fe8f1808b",
-        "type": "github"
-      },
-      "original": {
-        "owner": "ayghri",
-        "repo": "i-have-adhd",
-        "type": "github"
-      }
-    },
     "impermanence": {
       "inputs": {
         "home-manager": [
@@ -374,7 +358,6 @@
         "caveman": "caveman",
         "disko": "disko",
         "home-manager": "home-manager",
-        "i-have-adhd": "i-have-adhd",
         "impermanence": "impermanence",
         "import-tree": "import-tree",
         "matt-skills": "matt-skills",

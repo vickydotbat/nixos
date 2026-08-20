@@ -20,6 +20,55 @@ This machine runs NixOS — don't assume FHS/generic Linux.
 - Home Manager activation hooks must not start long-running services,
   containers, model pulls, or network waits.
 
+## Blender and NWN model tooling
+
+This machine has more than one Blender. Pick the right one.
+
+- `blender-5.0.1` is the pin for Neverwinter Nights work. Neverblender 5.0.0 is
+  installed for it as an extension in
+  `~/.config/blender/5.0/extensions/user_default/neverblender`. Use this one for
+  any NWN:EE `.mdl` import or export.
+- `blender` is the plain nixpkgs build. It has no NWN tooling. Do not use it for
+  model work.
+- Blender 4.0 has an older Neverblender plus the `nwn2mdk` addon, which reads
+  NWN2 `.mdb` files. That addon ships Windows programs (`nw2fbx.exe`,
+  `fbx2nw.exe`), so it needs `wine`. `wine` is on PATH. The Blender 4.0 binary
+  itself is not on PATH, so run it from the Nix store or add it back.
+
+You do not need a GUI. Run Blender headless and let it execute a script:
+
+```sh
+blender-5.0.1 --background --python /tmp/my_script.py
+```
+
+`cleanmodels` and `neverwinter-nim` are on PATH for ASCII `.mdl` cleanup and for
+packing HAK and ERF files.
+
+### Blender MCP
+
+There is a `blender-mcp` server on PATH and its addon is installed into the
+Blender config directories. It is **not** registered with Claude Code by
+default, so the Blender tools will not exist in a session.
+
+Check first, and believe the output:
+
+```sh
+claude mcp list
+```
+
+If Blender is missing and you want it:
+
+```sh
+claude mcp add --scope user blender -- blender-mcp
+```
+
+It only works when Blender is already open with the "Blender MCP" addon enabled,
+and the port in the addon's N-panel matches the server. A new Claude Code
+session has to start before the tools appear.
+
+MCP is a convenience, not a requirement. Headless `--background --python` does
+the same work today and is easier to repeat.
+
 ## rtk
 
 `rtk` is a wrapper that runs a command and prints a shorter version of its
