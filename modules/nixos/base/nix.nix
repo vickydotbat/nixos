@@ -101,10 +101,16 @@ in
         sopsFile = cfg.accessTokensSopsFile;
         key = "nix-access-tokens";
         owner = "root";
-        group = "root";
-        mode = "0400";
-        # Fetches run as root under the daemon, so the daemon is the process
-        # that has to pick the token up.
+        group = "users";
+        # 0440, not 0400. Flake inputs are fetched by the `nix` CLI in the
+        # calling user's own process, NOT by the daemon, so a root-only file
+        # leaves every non-root `nix flake update` unauthenticated. The `!`
+        # include fails silently in that case, which looks exactly like the
+        # config working. Readable by `users` is the point: on a personal
+        # machine that group is the human who already runs the rebuilds.
+        mode = "0440";
+        # The daemon reads nix.conf once at startup, so a rotated token only
+        # reaches root-side fetches after a restart.
         restartUnits = [ "nix-daemon.service" ];
       };
     };
