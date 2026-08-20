@@ -30,6 +30,15 @@ creation_rules:
       - age:
           - *solanine
           - *saturnine
+  # GitHub token for nix's flake fetcher. Unauthenticated fetches share a
+  # 60-requests-per-hour limit per IP, which a few flake inputs exhaust on
+  # their own. Every host that evaluates this flake needs to read it.
+  - path_regex: secrets/nix-access-tokens\.yaml$
+    key_groups:
+      - age:
+          - *solanine
+          - *firelink
+          - *saturnine
   - path_regex: secrets/users-admin\.yaml$
     key_groups:
       - age:

@@ -59,6 +59,7 @@ in
           "corefonts"
           "vista-fonts"
           "discord"
+          "discord-unwrapped"
           "obsidian"
           "nvidia-kernel-modules"
           "nvidia-x11"
@@ -75,7 +76,9 @@ in
           "unrar"
           "nwtoolset"
         ];
+        accessTokensSopsFile = ../../secrets/nix-access-tokens.yaml;
       };
+
       packages.enable = true;
       persistence.enable = true;
       ssh.enable = true;

@@ -54,6 +54,7 @@ in
         homeWifi.ssid = "iliadbox-228BDF";
       };
       nix.enable = true;
+      nix.accessTokensSopsFile = ../../secrets/nix-access-tokens.yaml;
       nix.unfreePackageNames = [
         "corefonts"
         "discord"

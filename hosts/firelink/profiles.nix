@@ -52,6 +52,7 @@ in
           "discord"
           "obsidian"
         ];
+        accessTokensSopsFile = ../../secrets/nix-access-tokens.yaml;
       };
       packages.enable = true;
       persistence.enable = true;

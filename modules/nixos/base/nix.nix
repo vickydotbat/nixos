@@ -29,6 +29,26 @@ in
         Modules and hosts should add only packages they actually enable.
       '';
     };
+
+    accessTokensSopsFile = lib.mkOption {
+      type = lib.types.nullOr lib.types.path;
+      default = null;
+      description = ''
+        SOPS file holding a `nix-access-tokens` entry, whose plaintext is a
+        ready-made nix.conf fragment, normally one
+        `access-tokens = github.com=<token>` line.
+
+        Unauthenticated GitHub fetches share sixty requests an hour per IP, and
+        a handful of flake inputs burn that on their own. After it runs out
+        every evaluation dies with HTTP 403, including the rebuild that would
+        have fixed it.
+
+        The token stays out of `nix.settings`, because those values land
+        world-readable in /etc/nix/nix.conf and in the store. It is included by
+        path instead, so only root can read it. Leave this null on a host that
+        does not fetch from GitHub.
+      '';
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -67,6 +87,25 @@ in
         # the VS Code marketplace CDN. HTTP/1.1 costs a little parallelism and
         # downloads without complaint.
         http2 = false;
+      };
+
+      # A `!` include is non-fatal, so a host still evaluates and boots on the
+      # first run, before sops-install-secrets has ever written the file.
+      extraOptions = lib.mkIf (cfg.accessTokensSopsFile != null) ''
+        !include ${config.sops.secrets.nix-access-tokens.path}
+      '';
+    };
+
+    sops.secrets = lib.mkIf (cfg.accessTokensSopsFile != null) {
+      nix-access-tokens = {
+        sopsFile = cfg.accessTokensSopsFile;
+        key = "nix-access-tokens";
+        owner = "root";
+        group = "root";
+        mode = "0400";
+        # Fetches run as root under the daemon, so the daemon is the process
+        # that has to pick the token up.
+        restartUnits = [ "nix-daemon.service" ];
       };
     };
 
