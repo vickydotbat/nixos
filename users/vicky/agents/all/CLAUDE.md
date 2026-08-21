@@ -106,6 +106,13 @@ section replaces it. Telemetry stays off.
 - Never commit to `main`/`master`. Never force-push.
 - No destructive commands (`git reset --hard`, `git clean`, branch deletion,
   history rewrites) unless explicitly asked.
+- HARD RULE: never start a new branch while the current branch is not merged
+  into `main`. This holds even when the new work feels unrelated. Finish, merge,
+  or abandon the current branch first, or ask.
+- Gate before every `git checkout -b` / `git switch -c`: run `git rev-parse
+  --abbrev-ref HEAD`. If it is not `main`/`master`, run `git branch --merged
+  main` and check the current branch is in the list. Not in the list → stop and
+  ask. Only `main` is a legal base for a new branch.
 - HARD RULE: one active branch and one open PR per repo per effort. Reuse the
   existing open feature branch/PR for every follow-up phase of the same work.
   Never create a new branch, a stacked branch, or a second PR while one is
