@@ -39,6 +39,32 @@ let
       if [ -n "$cwd" ]; then
         cd "$cwd" || exit 0
       fi
+
+      # The command often targets a repo other than the session directory,
+      # either through a leading `cd <path>` or through `git -C <path>`. Judge
+      # the repo the command really touches. Otherwise a branch created in a
+      # second repo is compared against the session repo's HEAD, and the guard
+      # refuses work it has no say over.
+      #
+      # ponytail: the first `cd` or `-C` wins. A command that hops between two
+      # repos is judged on the first one. Split the tool call instead of
+      # teaching this more.
+      target_dir=""
+      if [[ $command =~ git[[:space:]]+-C[[:space:]]+([^[:space:]\;\&\|]+) ]]; then
+        target_dir=''${BASH_REMATCH[1]}
+      elif [[ $command =~ (^|[[:space:]\;\&\|])cd[[:space:]]+([^[:space:]\;\&\|]+) ]]; then
+        target_dir=''${BASH_REMATCH[2]}
+      fi
+      target_dir=''${target_dir//\"/}
+      target_dir=''${target_dir//\'/}
+      # The command string reaches the hook before the shell runs it, so
+      # `cd ~/repo` still carries a literal tilde.
+      target_dir=''${target_dir/#\~\//$HOME/}
+      if [ -n "$target_dir" ]; then
+        # A path that does not resolve is not this hook's business.
+        cd "$target_dir" 2>/dev/null || exit 0
+      fi
+
       git rev-parse --git-dir >/dev/null 2>&1 || exit 0
 
       # Empty on a detached HEAD.
