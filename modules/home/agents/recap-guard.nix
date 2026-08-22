@@ -12,6 +12,23 @@
 # the matched phrases back. The agent then re-checks with a command or deletes
 # the claim, and the second stop goes through untouched.
 #
+# What it must NOT do, learned from it doing all three:
+#
+#   1. Grade a sub-agent's report. Sub-agent records share the session's
+#      transcript file and outnumber the main chain roughly five to one, so
+#      "the last assistant message" without an isSidechain filter is usually
+#      not the message the user is about to read.
+#   2. Grade the PREVIOUS response. The last text record in the file is only
+#      this response's if this response has already written one; when the hook
+#      wins that race it re-grades the message before it — which, after a
+#      block, is the agent's own "re-checked just now: #156 is closed"
+#      sentence. The hook then flags the verification it asked for, and every
+#      following turn inherits the same stale record. Only text written after
+#      the last thing the USER typed is this response.
+#   3. Fire when the response already checked. A recap written directly under a
+#      `tea pr list` in the same turn is fresh by construction; asking for it
+#      again teaches the agent that the hook is noise.
+#
 # Registered the same way as dcg.nix and git-guard.nix: the hook lives at a
 # stable path (~/.claude/recap-guard-hook) that Home Manager repoints on every
 # rebuild, and the activation script pins settings.json to that path. The jq
@@ -49,6 +66,11 @@ let
     "all[[:space:]]+(tests|checks)[[:space:]]+(pass|passing|green)"
   ];
 
+  # Commands that read external state. Running one of these in the same
+  # response IS the check this hook would otherwise demand, so the recap under
+  # it is fresh and the hook stays quiet.
+  verifierPattern = "(^|[^[:alnum:]_-])(git|tea|gh|glab|curl|systemctl|journalctl|make)([^[:alnum:]_-]|$)";
+
   hook = pkgs.writeShellApplication {
     name = "recap-guard-hook";
     runtimeInputs = [ pkgs.jq ];
@@ -74,18 +96,50 @@ let
         exit 0
       fi
 
-      # Last assistant record that actually said something. Records whose
-      # content is pure tool_use are skipped, so this is the text the user is
-      # about to read.
-      #
-      # -c keeps each record's text on ONE line as a JSON string, so `tail -n 1`
-      # picks the last message rather than the last N lines of several. The
-      # second jq decodes that string back to plain text.
+      # The turn boundary: the newest record the USER actually typed. Tool
+      # results are user records too and must not count, or every tool call
+      # would start a new "turn" and the boundary would mean nothing.
+      since=$(
+        jq -r 'select(.isSidechain != true)
+               | select(.type == "user")
+               | select((.message.content | type) == "string"
+                        or (any(.message.content[]?; .type == "text")))
+               | .timestamp // empty' "$transcript" 2>/dev/null \
+          | tail -n 1 || echo ""
+      )
+      if [ -z "$since" ]; then
+        exit 0
+      fi
+
+      # This response, and only this response: main chain, after the boundary.
+      turn=$(
+        jq -c --arg since "$since" \
+           'select(.isSidechain != true)
+            | select(.type == "assistant")
+            | select((.timestamp // "") > $since)' "$transcript" 2>/dev/null || echo ""
+      )
+      if [ -z "$turn" ]; then
+        exit 0
+      fi
+
+      # Already checked? Then the recap is as fresh as a re-check would make it.
+      commands=$(
+        printf '%s\n' "$turn" \
+          | jq -r '.message.content[]? | select(.type == "tool_use") | .input.command // empty' \
+              2>/dev/null || echo ""
+      )
+      if printf '%s' "$commands" | grep -Eq ${lib.escapeShellArg verifierPattern} 2>/dev/null; then
+        exit 0
+      fi
+
+      # The response's own words, which is what the user is about to read. An
+      # empty result means the text record has not been written yet, and
+      # grading the message before it is precisely the bug this avoids.
       last=$(
-        jq -c 'select(.type == "assistant")
-               | select(any(.message.content[]?; .type == "text"))
-               | [.message.content[] | select(.type == "text") | .text]
-               | join("\n")' "$transcript" 2>/dev/null \
+        printf '%s\n' "$turn" \
+          | jq -c 'select(any(.message.content[]?; .type == "text"))
+                   | [.message.content[] | select(.type == "text") | .text]
+                   | join("\n")' 2>/dev/null \
           | tail -n 1 | jq -r '. // ""' 2>/dev/null || echo ""
       )
       if [ -z "$last" ]; then
@@ -109,8 +163,8 @@ let
         printf 'For each one: re-check it with a command, or cut the sentence. A recap\n'
         printf 'that only says what you did needs no verification; a recap that tells\n'
         printf 'the user where things stand does.\n\n'
-        printf 'If you already verified it this turn, say so and finish — this fires\n'
-        printf 'once per response and will not stop you again.\n'
+        printf 'This response ran no command that reads external state, so nothing here\n'
+        printf 'has been checked this turn.\n'
       } >&2
       exit 2
     '';
