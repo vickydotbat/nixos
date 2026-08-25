@@ -49,22 +49,6 @@ in
           and hardware drivers have all been tested after boot.
         '';
       };
-
-      allowUnprivilegedUserNamespaces = lib.mkOption {
-        type = lib.types.bool;
-        default =
-          config.theorem.nixos.desktop.flatpak.enable || config.theorem.nixos.virtualisation.podman.enable;
-        defaultText = lib.literalExpression ''
-          theorem.nixos.desktop.flatpak.enable
-          || theorem.nixos.virtualisation.podman.enable
-        '';
-        description = ''
-          Allow unprivileged user namespaces when declared host features need
-          them. Flatpak and rootless containers are the common reasons; forcing
-          this off globally breaks useful sandboxes while pretending to harden
-          the host.
-        '';
-      };
     };
 
     sysctl.safeDefaults.enable = lib.mkOption {
@@ -275,7 +259,6 @@ in
           protectKernelImage = lib.mkDefault cfg.kernel.protectKernelImage;
           forcePageTableIsolation = lib.mkDefault cfg.kernel.forcePageTableIsolation;
           lockKernelModules = lib.mkDefault cfg.kernel.lockKernelModules;
-          unprivilegedUsernsClone = lib.mkDefault cfg.kernel.allowUnprivilegedUserNamespaces;
         };
       })
 
