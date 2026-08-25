@@ -142,6 +142,25 @@ Markdown files in a repo are only for durable reference or law: a README, an
 ADR, a runbook, an agent guide. If the text describes work you are about to
 do, it is a comment, not a file.
 
+## Local paths
+
+HARD RULE: never write a local filesystem path into anything that leaves this
+machine. That means code, docs, READMEs, ADRs, runbooks, tests, commit
+messages, PR bodies, issue text, and code comments.
+
+- Forbidden: absolute paths (`/home/<user>/...`), the home directory name, the
+  username, hostnames, and `/nix/store/...` paths.
+- Also forbidden: any path outside the repo being written to, even a relative
+  one. A sibling repo, a scratch folder, or a shared assets directory is local
+  layout — it exists on this machine and nowhere else.
+- Allowed: paths relative to the repo root, e.g. `packages/foo/bar.ts`.
+- Need to name something outside the repo? Describe it by role, not by path:
+  "the site icon set", "a prompt kept outside version control".
+- Repo documentation must be agnostic: it has to make sense to someone who
+  cloned the repo and has none of your other directories.
+- Check before every commit: grep the staged diff for `/home/`, the username,
+  and any leading `/`. Fix hits before committing, not after.
+
 ## Secrets
 
 Don't read, print, copy, or commit secrets, credentials, keys, `.env`/`.sops`
