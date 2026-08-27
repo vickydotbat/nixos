@@ -213,6 +213,15 @@ in
           name="''${source_dir##*/}"
           target="$nwn_documents_dir/$name"
 
+          # ponytail: override is not shared; each root keeps its own.
+          if [[ "$name" == "override" ]]; then
+            if [[ -L "$target" ]]; then
+              $DRY_RUN_CMD ${pkgs.coreutils}/bin/rm -f "$target"
+            fi
+            $DRY_RUN_CMD ${pkgs.coreutils}/bin/mkdir -p "$target"
+            continue
+          fi
+
           if [[ -e "$target" && ! -L "$target" ]]; then
             echo "Skipping $target because it already exists and is not a symlink" >&2
             continue
