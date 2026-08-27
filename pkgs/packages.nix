@@ -7,6 +7,7 @@
   cleanmodels = pkgs.callPackage ./cleanmodels.nix { };
   dcg = pkgs.callPackage ./dcg.nix { };
   gimp3-custom = pkgs.callPackage ./gimp3-custom.nix { };
+  habit-hooks = pkgs.callPackage ./habit-hooks.nix { };
   neverwinter-nim = pkgs.callPackage ./neverwinter-nim.nix { };
   nwnexplorer = pkgs.callPackage ./nwnexplorer.nix { };
   omp = pkgs.callPackage ./omp/package.nix { };

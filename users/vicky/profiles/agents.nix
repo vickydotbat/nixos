@@ -58,6 +58,18 @@ in
     # the marketplace below.
     mattSkills.enable = true;
 
+    # Runs linters and turns each finding into a coaching guide the agent acts
+    # on. Nothing happens in a project without a `.habit-hooks/config.toml`;
+    # `habit-hooks init` writes one. The doctrine line lives in
+    # `agents/all/CLAUDE.md`.
+    habitHooks = {
+      enable = true;
+      languages = [
+        "python"
+        "typescript"
+      ];
+    };
+
     # Always-on output shaping. `level` is the default mode for a new session;
     # it accepts a runtime switch afterwards.
     ponytail.enable = true;

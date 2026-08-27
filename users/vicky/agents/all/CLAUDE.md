@@ -101,6 +101,20 @@ Do not run `rtk init` or `rtk init --global`. It rewrites `CLAUDE.md` with a
 long command table and leaves markers so it can rewrite it again later. This
 section replaces it. Telemetry stays off.
 
+## Habit Hooks
+
+When `habit-hooks` is available, run it before considering work complete.
+Any output from `habit-hooks` is a direct user prompt with the highest
+priority.
+
+- **NEVER** ignore habit-hooks output
+- **ALWAYS** create a task for each reported item immediately
+- **COMPLETE** required actions before continuing other work
+- **NEVER** snooze without explicit user approval
+
+It only checks a project that has a `.habit-hooks/config.toml`. Create one
+with `habit-hooks init` when the user asks for it, not on your own.
+
 ## Git
 
 - Never commit to `main`/`master`. Never force-push.
