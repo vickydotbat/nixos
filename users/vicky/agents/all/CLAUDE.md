@@ -115,6 +115,26 @@ priority.
 It only checks a project that has a `.habit-hooks/config.toml`. Create one
 with `habit-hooks init` when the user asks for it, not on your own.
 
+## Long runs
+
+A long run is any task that will not finish in a few tool calls — a background
+agent, a research sweep, a multi-file audit. It can die: a tool segfaults, the
+user stops it, the context fills. Work so a death costs one step, not the run.
+
+- **Checkpoint to disk.** Build the deliverable a section at a time, appending
+  each one as you finish it. Work held only in context dies with the run; work
+  on disk is inherited by the next one. A checkpoint for your own benefit lives
+  in `/tmp` — only the finished deliverable enters a repo, under the rules in
+  "Plans and specs".
+- **Guard every external tool.** Run anything that can crash as `timeout 60
+  <cmd> > /tmp/out 2>&1; echo "exit=$?"`, then read `/tmp/out`. A non-zero exit
+  is a finding: record it and carry on.
+- **Change path after a crash.** A command that segfaulted segfaults again.
+  Plain text beats a parser — `grep`, `awk` and `sed` answer most structural
+  questions without the tool that owns the format. Archive and document readers
+  (`unrar`, `7z`, `pdftotext`) are the usual culprits; use an already-extracted
+  copy when one sits beside the archive.
+
 ## Git
 
 - Never commit to `main`/`master`. Never force-push.

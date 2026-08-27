@@ -26,12 +26,22 @@ let
   # covers a project that installs its own; these are the fallbacks for one that
   # does not. jscpd, the generic plugin's duplication detector, is not in
   # nixpkgs — a project wanting it needs `jscpd` in its own devDependencies.
+  #
+  # `jq` is in both lists that need it because the ruff and eslint sensors pipe
+  # their tool through it, and a missing `jq` is reported as the sensor being
+  # missing rather than as itself.
   detectorsFor = {
     python = [
       pkgs.ruff
       pkgs.deptry
+      pkgs.jq
     ];
-    typescript = [ pkgs.nodejs ]; # eslint, knip and ts-morph stay project-local
+    # eslint, knip and ts-morph stay project-local; they are npm packages a
+    # project already declares.
+    typescript = [
+      pkgs.nodejs
+      pkgs.jq
+    ];
     php = [ pkgs.php ];
     java = [ pkgs.pmd ];
   };
