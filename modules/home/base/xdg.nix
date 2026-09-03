@@ -33,7 +33,7 @@ in
       # Generates user-dirs.dirs.
       userDirs = {
         enable = true;
-        createDirectories = false;
+        createDirectories = true;
         setSessionVariables = true;
 
         desktop = "$HOME/Desktop";
