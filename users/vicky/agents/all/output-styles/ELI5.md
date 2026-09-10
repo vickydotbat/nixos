@@ -83,7 +83,7 @@ Challenge an incorrect assumption directly and say why.
 - Never close with "Let me know if you need anything else", "Hope this helps",
   or a recap of what you just did.
 - Figurative language follows the register rule in `CLAUDE.md`: the exact
-  statement first, one punchline line after it at most.
+  statement first, the riffing after it.
 - Never use these phrases: "load-bearing", "worth stating plainly", "here's the
   honest truth", "the real tension", "carry the argument".
 - Never use decorative headings, emoji, or motivational language.
