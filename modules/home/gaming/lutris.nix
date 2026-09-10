@@ -30,7 +30,12 @@ in
       # refuses virtual-desktop mode for any runner whose path contains
       # "wine-ge" or points into a Proton tree (lutris/runners/wine.py) - the
       # System runner is the escape hatch for that case.
-      home.packages = [ pkgs.wineWow64Packages.stable ];
+      # winetricks rides along: it patches an existing prefix (DLLs, fonts,
+      # registry tweaks) and needs a wine on PATH to do it.
+      home.packages = [
+        pkgs.wineWow64Packages.stable
+        pkgs.winetricks
+      ];
     })
     (lib.optionalAttrs hasHomePersistence {
       home.persistence."/nix/persist" = lib.mkIf (cfg.enable && persistenceEnabled) {

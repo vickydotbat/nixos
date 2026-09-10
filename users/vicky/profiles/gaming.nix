@@ -43,9 +43,78 @@ in
     lutris.enable = true;
     mangohud = {
       enable = true;
-      # settings = {
 
-      # };
+      # Home Manager only writes ~/.config/MangoHud/MangoHud.conf when `settings`
+      # is non-empty, and it writes it as a read-only store symlink. So the
+      # moment anything lands here, Nix owns the whole file and Goverlay stops
+      # being an editor. That is the trade: Goverlay can still read and preview
+      # the HUD, but every future tweak belongs in this attribute set.
+      #
+      # The values below are the Goverlay 1.8.2 layout, carried over verbatim.
+      # `fps_limit` is the one addition. The display is 120 Hz and a cap just
+      # under refresh keeps frame pacing even, which matters most for older
+      # single-threaded games (TERA is a 2011 Unreal 3 title) where the frame
+      # time swings around.
+      #
+      # ponytail: the global config, not `settingsPerApplication`. A per-app file
+      # replaces MangoHud.conf rather than merging with it, so a per-game cap
+      # would mean restating the whole layout per game. One cap at refresh rate
+      # is the right default for every game here.
+      settings = {
+        # Appearance + Layout
+        background_alpha = 0.0;
+        font_scale = 0.65;
+        round_corners = 0;
+        background_color = "000000";
+        text_color = "C0C0C0";
+        position = "top-center";
+        horizontal = 1;
+        hud_compact = 1;
+        hud_no_margin = 1;
+
+        # What shows
+        ram = 1;
+        swap = 1;
+        vram = 1;
+        ram_temp = 1;
+        cpu_temp = 1;
+        gpu_list = 0;
+        gpu_temp = 1;
+        cpu_mhz = 1;
+
+        # FPS
+        fps_limit = 118; # TODO: Dynamically generated per-host from current refresh rate.
+        fps_limit_method = "late";
+        fps_color_change = 1;
+        # vsync = 4;
+
+        # Hotkeys
+        toggle_hud = "Shift_L+F12";
+        toggle_preset = " ";
+        toggle_hud_position = " ";
+        toggle_fps_limit = " ";
+        toggle_logging = " ";
+
+        # Logs
+        output_folder = "${config.xdg.dataHome}/goverlay";
+        log_duration = 30;
+        log_interval = 100;
+
+        # Desktop apps that pick up the Vulkan layer and do not want a HUD.
+        blacklist = [
+          "zenity"
+          "protonplus"
+          "lsfg-vk-ui"
+          "bazzar"
+          "gnome-calculator"
+          "pamac-manager"
+          "lact"
+          "ghb"
+          "bitwig-studio"
+          "ptyxis"
+          "yumex"
+        ];
+      };
     };
   };
 

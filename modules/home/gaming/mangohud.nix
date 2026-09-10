@@ -1,7 +1,6 @@
 {
   config,
   lib,
-  pkgs,
   options,
   ...
 }:
@@ -33,13 +32,11 @@ in
         enable = true;
         settings = cfg.settings;
       };
-      home.packages = with pkgs; [ goverlay ];
     })
     (lib.optionalAttrs hasHomePersistence {
       home.persistence."/nix/persist" = lib.mkIf (cfg.enable && persistenceEnabled) {
         directories = [
           ".config/MangoHud"
-          ".local/share/goverlay"
         ];
       };
     })
