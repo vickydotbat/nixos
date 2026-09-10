@@ -81,6 +81,26 @@ named:
 
 Read the thread before quoting the issue, planning against it, or acting on it.
 
+### Writing to a thread with tea
+
+`tea` renders what it wrote before it exits, and that render stalls on some
+bodies. The command hangs, the comment may or may not have landed, and the
+terminal looks the same either way. A `tea` write stays unconfirmed until the
+thread shows it.
+
+- Compose a long body in a file, then post it bounded and unrendered:
+  `timeout 60 tea comment <n> -o json "$(cat /tmp/body.md)" > /tmp/tea.log 2>&1; echo exit=$?`
+- On any non-zero exit, read the thread and decide from what is there. A retry
+  on faith is how one comment becomes three.
+- Edit a body in place with `tea issues edit <n> -o json -d "$(cat /tmp/body.md)"`.
+  Fetch the current text with `tea issues <n> --comments -o json`, patch it with
+  a script, and send it back whole, so nothing is retyped.
+- The write is done when the thread holds exactly one copy of what you meant to
+  post.
+- `tea` cannot edit or delete a comment afterwards. Repairing a stray one needs
+  the Gitea API and its token, and the token needs Vicky's say-so first. One
+  careful post is the cheap path.
+
 ## Language
 
 When a technical term is needed, explain it in plain words the first time you
