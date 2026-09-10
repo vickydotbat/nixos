@@ -263,7 +263,9 @@ in
       programs.carapace = {
         enable = true;
         enableBashIntegration = true;
-        ignoreCase = true;
+        # CARAPACE_MATCH=1 is carapace's case-insensitive matching, the old
+        # `ignoreCase`. Booleans are wrapped into 1/0 by Home Manager.
+        environment.CARAPACE_MATCH = true;
       };
 
       programs.direnv = {
