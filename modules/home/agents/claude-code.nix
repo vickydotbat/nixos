@@ -89,6 +89,19 @@ in
       '';
     };
 
+    useDevShell = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = ''
+        Run `claude` inside the project's `nix develop` shell. A Bash function
+        looks for a `flake.nix` at the top of the current git repository and,
+        when that flake provides a default dev shell, starts Claude through
+        `nix develop`, so the agent sees the same tools the project promises.
+        Without a flake, or with a flake that has no default dev shell, it runs
+        Claude directly.
+      '';
+    };
+
     persistState = lib.mkOption {
       type = lib.types.bool;
       default = persistenceEnabled;
@@ -120,6 +133,26 @@ in
       home.packages = [
         cfg.package
       ];
+
+      # `nix develop --command` runs the binary straight from PATH, so the
+      # function does not call itself.
+      programs.bash.initExtra = lib.mkIf cfg.useDevShell ''
+        claude() {
+          local root
+          root="$(git rev-parse --show-toplevel 2>/dev/null)" || root="$PWD"
+
+          # A flake.nix is not a promise of a dev shell: a repo can ship a flake
+          # with no devShells.default, and `nix develop` then fails outright.
+          # Probe first, so such a repo still opens Claude. The probe builds the
+          # shell, which the real call then takes from the cache.
+          if [ -e "$root/flake.nix" ] \
+            && nix develop "$root" --command true </dev/null >/dev/null 2>&1; then
+            nix develop "$root" --command claude "$@"
+          else
+            command claude "$@"
+          fi
+        }
+      '';
     })
     (lib.optionalAttrs hasHomePersistence {
       home.persistence."/nix/persist" = lib.mkIf (cfg.enable && cfg.persistState) {

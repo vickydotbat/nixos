@@ -29,7 +29,7 @@
 #      `tea pr list` in the same turn is fresh by construction; asking for it
 #      again teaches the agent that the hook is noise.
 #
-# Registered the same way as dcg.nix and git-guard.nix: the hook lives at a
+# Registered the same way as git-guard.nix: the hook lives at a
 # stable path (~/.claude/recap-guard-hook) that Home Manager repoints on every
 # rebuild, and the activation script pins settings.json to that path. The jq
 # filter strips only recap-guard entries, so all three hooks coexist and the

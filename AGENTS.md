@@ -85,9 +85,12 @@ hands. Commit directly to `main`. Do not open branches or pull requests for
 routine work, and do not ask permission for the commit itself.
 
 This overrides the usual never-commit-to-`main` habit, and it applies to this
-repository only. The other guardrails still hold: no force-push, no history
-rewrites, no destructive git commands, and unrelated working-tree changes are
-preserved or named before they are swept into a commit.
+repository only. git-guard enforces the same shape from the other side: a push
+to `main` passes here, and `git switch -c` is refused.
+
+The other guardrails still hold: no force-push, no history rewrites, no
+destructive git commands, and unrelated working-tree changes are preserved or
+named before they are swept into a commit.
 
 ## NixOS Skill
 

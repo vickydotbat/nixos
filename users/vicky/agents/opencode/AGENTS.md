@@ -102,6 +102,18 @@ risk-specific terms such as `async`, `lock`, `queue`, `lifecycle`,
 `readiness`, `migration`, `retry`, `cache`, `secret`, `permission`, or
 `deployment` when they are relevant.
 
+## Issues and tickets
+
+An issue is a thread: the body plus every comment. A comment often narrows the
+scope, corrects a number, or drops the plan the body still describes. Read the
+whole thread in one call, every time an issue, ticket, or pull request is
+named:
+
+- `gh issue view <n> --comments`, `gh pr view <n> --comments`
+- `tea issues <n> --comments`, `tea pulls <n> --comments`
+
+Read the thread before quoting the issue, planning against it, or acting on it.
+
 ## Operating Principles
 
 - Make the smallest safe change that satisfies the task.

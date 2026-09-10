@@ -36,18 +36,39 @@ in
     pi.enable = true;
     omp.enable = false;
     codex.enable = true;
-    claude.enable = true;
+    claude = {
+      enable = true;
+
+      # Start Claude inside the project's devshell when the repo has a
+      # flake.nix, so it gets the same tools the project promises.
+      useDevShell = true;
+    };
     codegraph.enable = true;
+
+    # Builds a markdown context graph of a repo so agents stop re-reading it.
+    # Package-only: run `graft init` once per project to build the graph and
+    # wire it into Claude Code.
+    graft.enable = true;
     herdr.enable = true;
     rtk.enable = true;
 
-    # Blocks destructive shell commands (rm -rf /, git reset --hard, ...)
-    # before Claude Code runs them, via a PreToolUse hook.
-    dcg.enable = true;
+    # Refuses a delete git cannot undo: rm -r or a wildcard rm aimed at files
+    # that are untracked, or at a folder outside any repo.
+    rmGuard.enable = true;
 
     # Blocks two things CLAUDE.md only asks for in prose, which agents skip:
     # a new branch on top of unmerged work, and any push that lands on main.
     gitGuard.enable = true;
+
+    # The system theorem is tended by one pair of hands and takes every change
+    # on main, so there the guard flips: pushing main passes, opening a branch
+    # is refused.
+    gitGuard.trunkRepos = [ "vickydotbat/nixos" ];
+
+    # Refuses an issue or pull request opened without its comments. A comment
+    # often changes what the body says, so the thread is read whole or not at
+    # all.
+    issueGuard.enable = true;
 
     # Stops a closing summary that repeats stale facts — "PR X is still open"
     # when it merged an hour ago. Fires once per response, on claims about
