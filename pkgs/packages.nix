@@ -5,8 +5,8 @@
   blender-501-bin = pkgs.callPackage ./blender-501-bin.nix { };
   blender-mcp = pkgs.callPackage ./blender-mcp.nix { };
   cleanmodels = pkgs.callPackage ./cleanmodels.nix { };
-  dcg = pkgs.callPackage ./dcg.nix { };
   gimp3-custom = pkgs.callPackage ./gimp3-custom.nix { };
+  graft = pkgs.callPackage ./graft.nix { };
   habit-hooks = pkgs.callPackage ./habit-hooks.nix { };
   neverwinter-nim = pkgs.callPackage ./neverwinter-nim.nix { };
   nwnexplorer = pkgs.callPackage ./nwnexplorer.nix { };
