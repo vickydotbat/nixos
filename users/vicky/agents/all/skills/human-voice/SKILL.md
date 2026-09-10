@@ -1,6 +1,6 @@
 ---
 name: human-voice
-description: Use when writing or revising prose — documentation, READMEs, code comments, articles, blog posts, release notes, PR and issue text, emails — or when the user says text "sounds like AI", "sounds robotic", "sounds sterile", or asks for a plainer voice. Sweeps a draft for AI tells and replaces each with plain human phrasing, keeping the author's opinions and the history of how they got there.
+description: Use when writing or revising prose — documentation, READMEs, code comments, articles, blog posts, release notes, PR and issue text, emails — or when the user says text "sounds like AI", "sounds robotic", "sounds sterile", or asks for a plainer voice. Sweeps a draft for AI tells and replaces each with plain human phrasing.
 ---
 
 # Human voice
@@ -53,8 +53,7 @@ as machine-written even when no tell survives.
   State the fact and let the reader judge its size.
 - **Flattened judgment** — *this ultimately led to the conclusion that the two
   served similar purposes*. If the author has a view, write the view:
-  *prestige classes were just subclasses wearing a fancy hat*. Never invent a
-  view they have not stated.
+  *prestige classes were just subclasses wearing a fancy hat*.
 - **Participle tails** — a clause hung on the end starting with *highlighting,
   underscoring, showcasing, reflecting, ensuring*. Cut it, or promote it to its
   own sentence with real content in it.

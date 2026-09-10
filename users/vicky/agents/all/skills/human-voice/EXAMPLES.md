@@ -1,7 +1,7 @@
 # Before and after
 
-Pairs for the tells that are hard to spot in your own draft. Each "after" is
-shorter and carries more fact than its "before".
+Pairs for the tells that are hard to spot in your own draft. Each "after"
+carries more fact than its "before".
 
 ## Puffery
 
@@ -69,6 +69,8 @@ louder version of the same tell.
   it and the whole thing fell apart, so the table now splits per archetype.
 
 ## Symmetry
+
+A shape example, not a text pair.
 
 - **Before:** three sections of four paragraphs each, one per option, with a
   summary closing every one.
