@@ -55,6 +55,33 @@ louder version of the same tell.
 - **Before:** Experts generally recommend rotating keys regularly.
 - **After:** The OWASP cheat sheet recommends rotating keys every 90 days.
 
+## Flattened judgment
+
+- **Before:** This ultimately led to the conclusion that prestige classes and
+  subclasses served similar functional purposes.
+- **After:** Prestige classes were just subclasses wearing a fancy hat.
+
+## Tidy progression
+
+- **Before:** The design uses a single class table, which cleanly supports every
+  archetype in the game.
+- **After:** One class table worked for a while. Then I built three classes with
+  it and the whole thing fell apart, so the table now splits per archetype.
+
+## Symmetry
+
+- **Before:** three sections of four paragraphs each, one per option, with a
+  summary closing every one.
+- **After:** six paragraphs on the option that shipped, one paragraph on the two
+  that did not, no summaries.
+
+## Quotable everything
+
+- **Before:** Character creation became a spreadsheet before you even start the
+  game, a DMV queue of prompts, a steaming pile of math dressed as choice.
+- **After:** Character creation became a spreadsheet before you even start the
+  game. Eleven prompts, and nine of them ask for numbers.
+
 ## Formula ending
 
 - **Before:** Despite its simple design, the tool faces challenges common to
