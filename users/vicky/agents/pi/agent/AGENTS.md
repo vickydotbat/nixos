@@ -90,12 +90,18 @@ machine is wrapped: without a terminal it stops after 60 seconds (`TEA_TIMEOUT`
 changes that) and exits 124. A `tea` write stays unconfirmed until the thread
 shows it.
 
+`tea` also reads stdin to EOF and appends it to the body. An agent shell never
+sends EOF, so a `tea` call without `</dev/null` waits until the timeout kills
+it, every time. The timeout only turns that hang into a failure. Closing stdin
+prevents it.
+
+- Close stdin on every `tea` call, reads included: `</dev/null`.
 - Compose a long body in a file, then post it:
-  `tea comment <n> "$(cat /tmp/body.md)" > /tmp/tea.log 2>&1; echo exit=$?`
+  `tea comment <n> "$(cat /tmp/body.md)" </dev/null > /tmp/tea.log 2>&1; echo exit=$?`
 - On any non-zero exit, read the thread and decide from what is there. A retry
   on faith is how one comment becomes three.
-- Edit a body in place with `tea issues edit <n> -o json -d "$(cat /tmp/body.md)"`.
-  Fetch the current text with `tea issues <n> --comments -o json`, patch it with
+- Edit a body in place with `tea issues edit <n> -o json -d "$(cat /tmp/body.md)" </dev/null`.
+  Fetch the current text with `tea issues <n> --comments -o json </dev/null`, patch it with
   a script, and send it back whole, so nothing is retyped.
 - The write is done when the thread holds exactly one copy of what you meant to
   post.
