@@ -7,12 +7,20 @@
 #
 # The recipe is nixpkgs' own, with the version, hashes, and SDK stamp moved
 # forward.
+#
+# The binary is wrapped. Run without a terminal on stdout (every agent shell),
+# tea gets a hard timeout. A `tea comment` there has been seen to post, then
+# stall while it renders the reply, so the shell hung with no sign whether the
+# comment landed. A stdin read with no EOF hangs the same way. Agents were told
+# both in prose and kept tripping, so the guard now lives in the tool.
 {
   lib,
   buildGoModule,
+  coreutils,
   fetchFromGitea,
   git,
   installShellFiles,
+  runtimeShell,
   stdenv,
   writableTmpDirAsHomeHook,
 }:
@@ -65,6 +73,23 @@ buildGoModule (finalAttrs: {
     $out/bin/tea completion pwsh > $out/share/powershell/tea.Completion.ps1
 
     $out/bin/tea man --out $out/share/man/man1/tea.1
+  ''
+  # ponytail: 60 s covers every issue and PR call. A slow `tea clone` or a
+  # large `tea api` download can outrun it; raise TEA_TIMEOUT for that run.
+  + ''
+    mv $out/bin/tea $out/bin/.tea-real
+    cat > $out/bin/tea <<EOF
+    #!${runtimeShell}
+    [ -t 1 ] && exec $out/bin/.tea-real "\$@"
+    ${coreutils}/bin/timeout "\''${TEA_TIMEOUT:-60}" $out/bin/.tea-real "\$@"
+    rc=\$?
+    if [ \$rc -eq 124 ]; then
+      echo "tea: timed out after \''${TEA_TIMEOUT:-60}s. A write may have landed anyway." >&2
+      echo "tea: read the thread (tea issues <n> --comments) before you retry." >&2
+    fi
+    exit \$rc
+    EOF
+    chmod +x $out/bin/tea
   '';
 
   doInstallCheck = true;

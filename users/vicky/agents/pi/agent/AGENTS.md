@@ -85,12 +85,13 @@ Read the thread before quoting the issue, planning against it, or acting on it.
 ### Writing to a thread with tea
 
 `tea` renders what it wrote before it exits, and that render stalls on some
-bodies. The command hangs, the comment may or may not have landed, and the
-terminal looks the same either way. A `tea` write stays unconfirmed until the
-thread shows it.
+bodies. The comment may or may not have landed when it does. The `tea` on this
+machine is wrapped: without a terminal it stops after 60 seconds (`TEA_TIMEOUT`
+changes that) and exits 124. A `tea` write stays unconfirmed until the thread
+shows it.
 
-- Compose a long body in a file, then post it bounded and unrendered:
-  `timeout 60 tea comment <n> -o json "$(cat /tmp/body.md)" > /tmp/tea.log 2>&1; echo exit=$?`
+- Compose a long body in a file, then post it:
+  `tea comment <n> "$(cat /tmp/body.md)" > /tmp/tea.log 2>&1; echo exit=$?`
 - On any non-zero exit, read the thread and decide from what is there. A retry
   on faith is how one comment becomes three.
 - Edit a body in place with `tea issues edit <n> -o json -d "$(cat /tmp/body.md)"`.
