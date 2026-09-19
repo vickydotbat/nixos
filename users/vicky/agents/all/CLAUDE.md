@@ -97,10 +97,10 @@ prevents it.
 
 - Close stdin on every `tea` call, reads included: `</dev/null`.
 - Compose a long body in a file, then post it:
-  `tea comment <n> "$(cat /tmp/body.md)" </dev/null > /tmp/tea.log 2>&1; echo exit=$?`
+  `tea comment <n> "$(cat /tmp/$CLAUDE_CODE_SESSION_ID/body.md)" </dev/null > /tmp/$CLAUDE_CODE_SESSION_ID/tea.log 2>&1; echo exit=$?`
 - On any non-zero exit, read the thread and decide from what is there. A retry
   on faith is how one comment becomes three.
-- Edit a body in place with `tea issues edit <n> -o json -d "$(cat /tmp/body.md)" </dev/null`.
+- Edit a body in place with `tea issues edit <n> -o json -d "$(cat /tmp/$CLAUDE_CODE_SESSION_ID/body.md)" </dev/null`.
   Fetch the current text with `tea issues <n> --comments -o json </dev/null`, patch it with
   a script, and send it back whole, so nothing is retyped.
 - The write is done when the thread holds exactly one copy of what you meant to
@@ -145,7 +145,7 @@ This machine has more than one Blender. Pick the right one.
 You do not need a GUI. Run Blender headless and let it execute a script:
 
 ```sh
-blender-5.0.1 --background --python /tmp/my_script.py
+blender-5.0.1 --background --python /tmp/$CLAUDE_CODE_SESSION_ID/my_script.py
 ```
 
 `cleanmodels` and `neverwinter-nim` are on PATH for ASCII `.mdl` cleanup and for
@@ -222,6 +222,25 @@ priority.
 It only checks a project that has a `.habit-hooks/config.toml`. Create one
 with `habit-hooks init` when the user asks for it, not on your own.
 
+## Scratch files
+
+`/tmp` is shared. Other sessions and agents on this machine write there at the
+same moment, under the same obvious names: `body.md`, `out`, `pr.json`. Every
+file you write for yourself lives in a scratch folder named for this session:
+
+```sh
+mkdir -p /tmp/$CLAUDE_CODE_SESSION_ID
+```
+
+- Write the full path in every command. `$CLAUDE_CODE_SESSION_ID` is set in each
+  shell, and a variable of your own does not survive between tool calls.
+- Another harness uses its own session ID. With none, create the folder once
+  with `mktemp -d` and reuse the path it prints.
+- A file outside your folder belongs to someone else, whatever its name. Read
+  back only what you wrote.
+
+A shared name once carried one session's PR body onto another session's PR.
+
 ## Long runs
 
 A long run is any task that will not finish in a few tool calls — a background
@@ -231,11 +250,11 @@ user stops it, the context fills. Work so a death costs one step, not the run.
 - **Checkpoint to disk.** Build the deliverable a section at a time, appending
   each one as you finish it. Work held only in context dies with the run; work
   on disk is inherited by the next one. A checkpoint for your own benefit lives
-  in `/tmp` — only the finished deliverable enters a repo, under the rules in
+  in your scratch folder — only the finished deliverable enters a repo, under the rules in
   "Plans and specs".
-- **Guard every external tool.** Run anything that can crash as `timeout 60
-  <cmd> > /tmp/out 2>&1; echo "exit=$?"`, then read `/tmp/out`. A non-zero exit
-  is a finding: record it and carry on.
+- **Guard every external tool.** Run anything that can crash as
+  `timeout 60 <cmd> > /tmp/$CLAUDE_CODE_SESSION_ID/out 2>&1; echo "exit=$?"`,
+  then read that file. A non-zero exit is a finding: record it and carry on.
 - **Change path after a crash.** A command that segfaulted segfaults again.
   Plain text beats a parser — `grep`, `awk` and `sed` answer most structural
   questions without the tool that owns the format. Archive and document readers

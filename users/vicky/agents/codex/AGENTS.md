@@ -143,6 +143,24 @@ If the task is urgent or very small, still produce a compact Context Receipt bef
 
 If a required context file is missing, stale, contradictory, or too large to inspect safely, stop and ask.
 
+## Scratch files
+
+`/tmp` is shared. Other sessions and agents on this machine write there at the
+same moment, under the same obvious names: `body.md`, `out`, `pr.json`. Every
+file you write for yourself lives in a scratch folder of this session's own.
+Create it once, at the first file you need, and reuse the path it prints:
+
+```sh
+mktemp -d /tmp/codex-XXXXXX
+```
+
+- Write the full path in every command. A shell variable of your own does not
+  survive between tool calls.
+- A file outside your folder belongs to someone else, whatever its name. Read
+  back only what you wrote.
+
+A shared name once carried one session's PR body onto another session's PR.
+
 ## Issues and tickets
 
 An issue is a thread: the body plus every comment. A comment often narrows the
@@ -170,10 +188,10 @@ prevents it.
 
 - Close stdin on every `tea` call, reads included: `</dev/null`.
 - Compose a long body in a file, then post it:
-  `tea comment <n> "$(cat /tmp/body.md)" </dev/null > /tmp/tea.log 2>&1; echo exit=$?`
+  `tea comment <n> "$(cat <scratch>/body.md)" </dev/null > <scratch>/tea.log 2>&1; echo exit=$?`
 - On any non-zero exit, read the thread and decide from what is there. A retry
   on faith is how one comment becomes three.
-- Edit a body in place with `tea issues edit <n> -o json -d "$(cat /tmp/body.md)" </dev/null`.
+- Edit a body in place with `tea issues edit <n> -o json -d "$(cat <scratch>/body.md)" </dev/null`.
   Fetch the current text with `tea issues <n> --comments -o json </dev/null`, patch it with
   a script, and send it back whole, so nothing is retyped.
 - The write is done when the thread holds exactly one copy of what you meant to
