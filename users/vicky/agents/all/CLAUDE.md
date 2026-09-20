@@ -272,27 +272,49 @@ user stops it, the context fills. Work so a death costs one step, not the run.
   override this, and git-guard refuses the commit either way.
 - No destructive commands (`git reset --hard`, `git clean`, branch deletion,
   history rewrites) unless explicitly asked.
-- HARD RULE: never start a new branch while the current branch is not merged
-  into `main`. This holds even when the new work feels unrelated. Finish, merge,
-  or abandon the current branch first, or ask.
+- HARD RULE: never start a *loose* branch while the current branch is not
+  merged into `main`. A loose branch is one made with `git checkout -b` or
+  `git switch -c`, which records nothing about what it sits on. Its base
+  disappears under it when the parent PR squash-merges, and the rebase that
+  follows conflicts on every line the parent touched.
 - Gate before every `git checkout -b` / `git switch -c`: run `git rev-parse
   --abbrev-ref HEAD`. If it is not `main`/`master`, run `git branch --merged
-  main` and check the current branch is in the list. Not in the list → stop and
-  ask. Only `main` is a legal base for a new branch.
-- HARD RULE: one active branch and one open PR per repo per effort. Reuse the
-  existing open feature branch/PR for every follow-up phase of the same work.
-  Never create a new branch, a stacked branch, or a second PR while one is
-  still open for that effort, unless explicitly asked.
-- Before `git checkout -b` or opening a PR, **list the open PRs first** (`tea
-  pr list` / `gh pr list`). If one is open for this effort, push to its branch
-  instead. An open PR is reusable until it merges — do not open a second one
-  because the new change "feels separate". Same ticket, same session, or a
-  follow-up prompted by review of the first change all mean the same effort.
-- A follow-up that fixes or reverts something in the open PR **always** belongs
-  in that PR, never in a new one.
-- Two open PRs for one effort is also a sequencing bug, not just clutter:
+  main` and check the current branch is in the list. Not in the list → either
+  stack the work (below) or stop and ask. Only `main` is a legal base for a
+  loose branch.
+- Default: one branch and one open PR per repo per effort. Reuse the existing
+  open feature branch/PR for every follow-up phase of the same work. A follow-up
+  that fixes or reverts something in the open PR **always** belongs in that PR.
+
+### Stacked branches
+
+Work that genuinely builds on an unmerged branch, and that a reviewer would
+rather see as its own change, goes in a **stack**. This is allowed without
+asking. It is the answer to "this depends on the open PR but is a separate
+change", which the loose-branch rule above would otherwise strand.
+
+- Build every stack with `git-spice` (`gs`), never by hand. The tool records
+  each branch's base, so a squash merge upstream is handled by replaying only
+  the unmerged work instead of the parent's now-duplicated commits. A
+  hand-rolled stack is exactly the failure the loose-branch rule bans.
+- `gs branch create <name>` from the branch it depends on. `gs stack submit`
+  opens or updates one PR per branch, each targeting the one below it.
+- After any branch in the stack merges: `gs repo sync`, then `gs stack restack`,
+  then `gs stack submit` again. Sync asks the forge what merged, drops those
+  branches, and retargets their children. Skipping it is how the stack rots.
+- Merge bottom-up, never a child before its parent. A child merged first ships
+  the parent's unreviewed work under the child's PR number.
+- Each PR body names what it sits on, so a reviewer who opens the middle of a
+  stack knows it is not readable alone.
+- Stack only where the split is real. Two PRs that cannot be reviewed apart are
+  one PR that was cut in half. When in doubt, keep it in the open PR.
+- git-guard does not see `gs` commands, and that is deliberate: the guard exists
+  to stop untracked branches on unmerged work, and `gs` tracks them. Do not
+  route around the guard with raw git to build a stack.
+- Two open PRs that are *not* a stack, for one effort, remain a sequencing bug:
   whichever merges first ships an incomplete change, and release/version bumps
-  land without the work they are supposed to cover.
+  land without the work they are supposed to cover. A stack has a declared
+  order; two loose PRs do not.
 - Never reuse a branch after its remote was deleted (e.g. its PR was merged
   and the remote branch removed — `git status` shows "upstream is gone"). Its
   base is stale; start a fresh branch off freshly-pulled `main` instead.

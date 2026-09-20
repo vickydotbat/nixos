@@ -174,15 +174,37 @@ in
         ];
       };
 
+      # `git-spice` (`gs`) manages stacks of dependent branches: each branch
+      # targets the one below it, and one command rebases the whole stack and
+      # opens or updates a pull request per branch.
+      #
+      # It is a client-side tool. Nothing is installed into the forge; it talks
+      # to the ordinary pull-request API with a token of its own, so a forge
+      # that never heard of it behaves exactly as before.
+      #
+      # The reason it earns a place here is squash merges. A squash discards
+      # the parent branch's commits and writes their content as one new commit,
+      # so a follow-up branch built on that parent is no longer an ancestor of
+      # anything on trunk. A plain rebase replays the now-duplicated commits
+      # and conflicts on every line they touched. `gs repo sync` asks the forge
+      # whether the parent's pull request merged, drops the merged branch, and
+      # restacks its children onto the new trunk without replaying merged work.
+      # Genuine conflicts still surface; the manufactured ones stop.
       home.packages = with pkgs; [
         tea
         github-cli
+        git-spice
       ];
     })
     (lib.optionalAttrs hasHomePersistence {
       home.persistence."/nix/persist" = lib.mkIf (cfg.enable && cfg.persistState) {
         directories = [
           ".config/tea"
+          # git-spice stores its forge token in the D-Bus Secret Service when
+          # one is running, and falls back to `secrets.json` under this
+          # directory when none is. Persisting it covers the fallback; on a
+          # host with a live keyring the directory is simply empty.
+          ".config/git-spice"
         ];
       };
     })

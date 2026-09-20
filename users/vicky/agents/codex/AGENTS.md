@@ -237,7 +237,7 @@ Never run destructive commands such as `git reset --hard`, `git clean`, deleting
 
 Reuse the current feature branch unless the user asks for a new one.
 
-Do not create stacked branches unless explicitly asked.
+Stacked branches are allowed for work that genuinely builds on an unmerged branch. Build them with `git-spice` (`gs branch create`, then `gs stack submit`), never with bare `git checkout -b`, and merge them bottom-up, running `gs repo sync` after each merge.
 
 Do not overwrite, revert, reformat, or “clean up” user changes unless the user explicitly asks.
 

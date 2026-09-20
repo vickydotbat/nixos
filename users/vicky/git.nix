@@ -63,5 +63,13 @@
       "git@github.com:".pushInsteadOf = "https://github.com/";
       "git@git.westgate.pw:".pushInsteadOf = "https://git.westgate.pw/";
     };
+
+    # git-spice recognises the public forges by hostname alone. A self-hosted
+    # Gitea has no such tell, so the instance is named here; without it `gs`
+    # refuses to submit, reporting that it cannot determine the forge.
+    #
+    # Written as a subsection so Git reads the key back as
+    # `spice.forge.gitea.url`, which is the name git-spice looks up.
+    spice."forge.gitea".url = "https://git.westgate.pw";
   };
 }

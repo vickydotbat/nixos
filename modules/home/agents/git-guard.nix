@@ -2,6 +2,10 @@
 # that agents keep ignoring, because prose is not enforcement:
 #
 #   1. No new branch while the current branch is not merged into main/master.
+#      This catches `git checkout -b` and `git switch -c` only. git-spice (`gs`)
+#      is deliberately invisible to the pre-filter below, because a `gs` stack
+#      records each branch's base and survives the squash merge that breaks a
+#      hand-rolled one. The guard is against untracked work, not against depth.
 #   2. No push that lands on main/master.
 #   3. No Co-Authored-By line in a commit message.
 #
@@ -126,10 +130,14 @@ let
           if ! grep -Fxq "$current" <<<"$merged"; then
             refuse \
               "you are on '$current', which is not merged into '$base'." \
-              "Do not start a new branch on top of unmerged work, even if it feels unrelated." \
+              "A branch made this way records nothing about what it sits on, so it breaks" \
+              "when '$current' squash-merges." \
               "" \
-              "Land the PR for '$current' first, or commit this change on '$current' if it" \
-              "belongs to the same effort. Otherwise stop and ask the user."
+              "Pick one:" \
+              "  - same effort: commit this change on '$current'." \
+              "  - depends on '$current' but reviews separately: 'gs branch create <name>'," \
+              "    then 'gs stack submit'. git-spice tracks the base and restacks after a merge." \
+              "  - unrelated: land the PR for '$current' first, or stop and ask the user."
           fi
         fi
       fi
