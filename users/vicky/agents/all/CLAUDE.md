@@ -285,6 +285,11 @@ user stops it, the context fills. Work so a death costs one step, not the run.
 - Default: one branch and one open PR per repo per effort. Reuse the existing
   open feature branch/PR for every follow-up phase of the same work. A follow-up
   that fixes or reverts something in the open PR **always** belongs in that PR.
+- Before branching or opening a PR, **list the open PRs first** (`tea pr list` /
+  `gh pr list`). You cannot reuse a PR you have not looked for. If one is open
+  for this effort, push to its branch, or stack on it. Same ticket, same
+  session, or a follow-up prompted by review of the first change all mean the
+  same effort — "it feels separate" does not make it one.
 
 ### Stacked branches
 
