@@ -105,7 +105,8 @@ prevents it.
 - On any non-zero exit, read the thread and decide from what is there. A retry
   on faith is how one comment becomes three.
 - Edit a pull request body in place with `tea pr edit <n> -d "$(cat <body file>)" </dev/null`.
-  A Plane work item is written through `plane`, which needs no stdin guard.
+  On a Plane work item, `plane comment` appends and needs no stdin guard;
+  the body itself is edited in Plane's own interface.
 - The write is done when the thread holds exactly one copy of what you meant to
   post.
 - `tea` cannot edit or delete a comment afterwards. Repairing a stray one needs
