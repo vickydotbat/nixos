@@ -95,8 +95,9 @@ scope, corrects a number, or drops the plan the body still describes. Read the
 whole thread in one call, every time an issue, ticket, or pull request is
 named:
 
-- `gh issue view <n> --comments`, `gh pr view <n> --comments`
-- `tea issues <n> --comments`, `tea pulls <n> --comments`
+- `plane show GAME-12` — a Plane work item and every comment on it.
+- `tea pulls <n> --comments` — a Gitea pull request thread.
+- `gh issue view <n> --comments`, `gh pr view <n> --comments` — GitHub.
 
 Read the thread before quoting the issue, planning against it, or acting on it.
 
@@ -118,9 +119,8 @@ prevents it.
   `tea comment <n> "$(cat <scratch>/body.md)" </dev/null > <scratch>/tea.log 2>&1; echo exit=$?`
 - On any non-zero exit, read the thread and decide from what is there. A retry
   on faith is how one comment becomes three.
-- Edit a body in place with `tea issues edit <n> -o json -d "$(cat <scratch>/body.md)" </dev/null`.
-  Fetch the current text with `tea issues <n> --comments -o json </dev/null`, patch it with
-  a script, and send it back whole, so nothing is retyped.
+- Edit a pull request body in place with `tea pr edit <n> -d "$(cat <body file>)" </dev/null`.
+  A Plane work item is written through `plane`, which needs no stdin guard.
 - The write is done when the thread holds exactly one copy of what you meant to
   post.
 - `tea` cannot edit or delete a comment afterwards. Repairing a stray one needs
