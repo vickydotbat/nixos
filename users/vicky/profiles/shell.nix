@@ -4,6 +4,7 @@
     bat.enable = true;
     kitty.enable = true;
     git.enable = true;
+    git-tidy.enable = true;
     nix-index = {
       enable = true;
       commandNotFound.enable = true;

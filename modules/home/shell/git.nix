@@ -129,9 +129,16 @@ in
               merged, and the local copy stayed behind.
 
               `git gone` lists them and deletes nothing. `git gone-prune`
-              deletes them. Never wire the second one into a timer, an
-              activation hook, or a shell startup file: the operator decides
-              when history is discarded.
+              deletes them, and stays a command the operator types. It is the
+              wide rule: a missing upstream is the whole of its evidence.
+
+              The narrow rule runs unattended. `theorem.home.shell.git-tidy`
+              schedules `git-tidy`, which deletes a gone branch only once it
+              has proved the trunk already carries its content — including
+              through a squash merge, which leaves the branch no ancestor of
+              anything — and writes a recovery ref under `refs/tidy/` before
+              every deletion. Keep the two apart: the alias below is faster and
+              blunter, and the judgement it skips is the operator's to supply.
 
               The deletion uses `-D`, not `-d`, and that is the sharp edge.
               A forge that squash-merges rewrites the commits, so a merged
