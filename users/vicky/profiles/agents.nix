@@ -65,6 +65,12 @@ in
     # is refused.
     gitGuard.trunkRepos = [ "vickydotbat/nixos" ];
 
+    # Keeps a git-spice stack from replaying work the forge already squashed.
+    # At session start it untracks branches whose upstream is gone, asks the
+    # forge what merged, and replays the rest — rolling back if the replay
+    # conflicts rather than leaving a detached HEAD behind.
+    gsAutosync.enable = true;
+
     # Refuses an issue or pull request opened without its comments. A comment
     # often changes what the body says, so the thread is read whole or not at
     # all.
