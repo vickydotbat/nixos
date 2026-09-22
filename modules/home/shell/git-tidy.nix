@@ -95,7 +95,7 @@ let
           [[ "$branch" != "$trunk" ]] || continue
 
           if ! branch_landed "$branch" "$trunk_ref"; then
-            printf '%s: %s has commits the trunk does not carry, kept\n' "$repo" "$branch"
+            printf '%s: could not prove the trunk carries %s, kept\n' "$repo" "$branch"
             continue
           fi
 
@@ -117,7 +117,16 @@ let
             gs branch untrack "$branch" >/dev/null 2>&1 || true
           fi
 
-          git branch -D "$branch" >/dev/null
+          # A branch checked out in another worktree cannot be deleted, and
+          # this rite runs unattended. Let one refusal cost one branch: without
+          # the guard the shell's `errexit` ends the repository's whole run,
+          # every branch after it is skipped, and the run repeats that way
+          # daily with nobody watching.
+          if ! git branch -D "$branch" >/dev/null 2>&1; then
+            printf '%s: could not delete %s, kept\n' "$repo" "$branch" >&2
+            continue
+          fi
+
           printf '%s: deleted %s (recover with: git branch %s refs/tidy/branches/%s)\n' \
             "$repo" "$branch" "$branch" "$branch"
         done < <(git for-each-ref --format='%(refname:short) %(upstream:track)' refs/heads)
@@ -157,7 +166,10 @@ let
           fi
 
           git update-ref "refs/tidy/stash/$sha" "$sha"
-          git stash drop --quiet "$gd"
+          if ! git stash drop --quiet "$gd"; then
+            printf '%s: could not drop %s, kept\n' "$repo" "$gd" >&2
+            continue
+          fi
           printf '%s: dropped autostash %s (recover with: git stash apply refs/tidy/stash/%s)\n' \
             "$repo" "''${sha:0:9}" "$sha"
         done
