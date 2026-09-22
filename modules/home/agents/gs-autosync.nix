@@ -63,6 +63,14 @@ let
 
       start_branch="$(git rev-parse --abbrev-ref HEAD)"
 
+      # Prune first. The loop below reads a state only a prune-fetch can
+      # produce: a branch reads `[gone]` once its remote-tracking ref is
+      # removed, and the session right after a merge has not fetched yet.
+      # Without this the first session after every merge still replays the
+      # squashed branch, fails, and rolls back — the exact noise this hook
+      # exists to remove, with a message attached.
+      git fetch --quiet --prune origin 2>/dev/null
+
       # git-spice drops a branch only when the forge says its change request
       # merged. A branch submitted with `tea` has no change request, so a squash
       # merge leaves it tracked for good: gs cannot see its content already in
