@@ -82,15 +82,34 @@ let
     };
   };
 
-  # The account's Plane API key, rendered as a bare token file the user's shell
-  # exports as PLANE_API_KEY. The filter above keeps this silent until the key
-  # exists in the account's SOPS file, so the theorem evaluates either way.
+  # The account's Plane API key, on its own path for a live API check, and the
+  # source the env template below interpolates. The filter above keeps this
+  # silent until the key exists in the account's SOPS file, so the theorem
+  # evaluates either way.
   mkPlaneApiKeySecret = _: user: {
     name = "plane/${user.username}/api-key";
     value = {
       sopsFile = user.secrets.sopsFile;
       key = "plane-api-key";
       path = "/run/secrets/plane-${user.username}-api-key";
+      owner = user.username;
+      group = "users";
+      mode = "0400";
+    };
+  };
+
+  # The one file the tracker client reads when the environment is bare: base
+  # URL, workspace and key as plain KEY=VALUE. SOPS substitutes the placeholder
+  # at activation, so the key never reaches the Nix store.
+  mkPlaneEnvTemplate = _: user: {
+    name = "plane/${user.username}/env";
+    value = {
+      content = ''
+        PLANE_BASE_URL=https://plane.westgate.pw
+        PLANE_WORKSPACE=shadows-over-westgate
+        PLANE_API_KEY=${config.sops.placeholder."plane/${user.username}/api-key"}
+      '';
+      path = "/run/secrets/plane-${user.username}-env";
       owner = user.username;
       group = "users";
       mode = "0400";
@@ -174,4 +193,8 @@ in
       lib.mapAttrsToList mkUserSshPublicKeySecret usersWithAuthorizedSshPublicKeys
     )
     // lib.foldl' lib.recursiveUpdate { } (lib.mapAttrsToList mkUserSshSecrets usersWithSshSecrets);
+
+  sops.templates = builtins.listToAttrs (
+    lib.mapAttrsToList mkPlaneEnvTemplate usersWithPlaneApiKeys
+  );
 }
