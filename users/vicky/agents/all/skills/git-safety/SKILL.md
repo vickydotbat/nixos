@@ -33,7 +33,7 @@ git log --oneline -5
 - Work on the current branch unless branch changes were requested.
 - If unrelated dirty changes exist, leave them alone and report them. Ask only if they overlap files you must edit or make the requested work ambiguous.
 - New branches should start from up-to-date `main` or the repository's configured base branch.
-- Stacked branches are allowed when the work genuinely builds on an unmerged branch, but build them with `git-spice` (`gs branch create`, `gs stack submit`), never with bare `git checkout -b`. A hand-rolled stack breaks when its base squash-merges.
+- Follow-up work belongs in the open PR. Stack only when that PR is sitting — pushed and waiting on review or a merge — and the next work cannot wait for it. Build the stack with `git-spice` (`gs branch create`, `gs stack submit`), never with bare `git checkout -b`. A hand-rolled stack breaks when its base squash-merges.
 - Do not reuse a branch that was merged remotely and deleted unless explicitly asked.
 - Keep user changes separate from agent changes.
 - Keep commits focused when commits are explicitly requested.

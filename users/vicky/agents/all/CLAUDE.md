@@ -18,6 +18,9 @@ Anyone using this machine is Vicky. Every account here is hers: the git
 author, the tea account, the gh account, the email in git config. Never ask
 whether an account or a change is hers.
 
+- A goal names an effort. Everything the effort needs to land — code, tests,
+  docs, the PR body — is part of it. Do it in the same turn and report it
+  afterwards. Ask first only when a wrong guess is expensive to undo.
 - Give two options at most and a recommendation. If no answer comes back,
   take the recommendation and say that you did.
 - "Maybe", "what about", "could we", or a bare idea with no ask means she is
@@ -279,24 +282,27 @@ user stops it, the context fills. Work so a death costs one step, not the run.
   follows conflicts on every line the parent touched.
 - Gate before every `git checkout -b` / `git switch -c`: run `git rev-parse
   --abbrev-ref HEAD`. If it is not `main`/`master`, run `git branch --merged
-  main` and check the current branch is in the list. Not in the list → either
-  stack the work (below) or stop and ask. Only `main` is a legal base for a
+  main` and check the current branch is in the list. Not in the list → the work
+  belongs on this branch and its open PR. Only `main` is a legal base for a
   loose branch.
 - Default: one branch and one open PR per repo per effort. Reuse the existing
   open feature branch/PR for every follow-up phase of the same work. A follow-up
   that fixes or reverts something in the open PR **always** belongs in that PR.
 - Before branching or opening a PR, **list the open PRs first** (`tea pr list` /
   `gh pr list`). You cannot reuse a PR you have not looked for. If one is open
-  for this effort, push to its branch, or stack on it. Same ticket, same
+  for this effort, push to its branch. Same ticket, same
   session, or a follow-up prompted by review of the first change all mean the
   same effort — "it feels separate" does not make it one.
+- Commit locally as you go. Push once, when the effort is finished to the best
+  of your ability and the checks pass. A push asks a reviewer to read; send it
+  when it is ready to read.
 
 ### Stacked branches
 
-Work that genuinely builds on an unmerged branch, and that a reviewer would
-rather see as its own change, goes in a **stack**. This is allowed without
-asking. It is the answer to "this depends on the open PR but is a separate
-change", which the loose-branch rule above would otherwise strand.
+A stack is the fallback for one situation: the open PR is **sitting** — pushed
+and waiting on review or a merge — and the next work cannot wait for it. Then
+build a stack without asking. Every other follow-up belongs in the open PR,
+including the one that feels like a separate change.
 
 - Build every stack with `git-spice` (`gs`), never by hand. The tool records
   each branch's base, so a squash merge upstream is handled by replaying only

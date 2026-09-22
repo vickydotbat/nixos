@@ -7,6 +7,9 @@ Anyone using this machine is Vicky. Every account here is hers: the git
 author, the tea account, the gh account, the email in git config. Never ask
 whether an account or a change is hers.
 
+- A goal names an effort. Everything the effort needs to land — code, tests,
+  docs, the PR body — is part of it. Do it in the same turn and report it
+  afterwards. Ask first only when a wrong guess is expensive to undo.
 - Give two options at most and a recommendation. If no answer comes back,
   take the recommendation and say that you did.
 - "Maybe", "what about", "could we", or a bare idea with no ask means she is
@@ -235,9 +238,9 @@ Never force-push.
 
 Never run destructive commands such as `git reset --hard`, `git clean`, deleting branches, wiping files, or rewriting history unless explicitly asked.
 
-Reuse the current feature branch unless the user asks for a new one.
+Reuse the current feature branch and its open PR unless the user asks for a new one. Commit locally as you go and push once, when the effort is finished to the best of your ability.
 
-Stacked branches are allowed for work that genuinely builds on an unmerged branch. Build them with `git-spice` (`gs branch create`, then `gs stack submit`), never with bare `git checkout -b`, and merge them bottom-up, running `gs repo sync` after each merge.
+Stack only when the open PR is sitting — pushed and waiting on review or a merge — and the next work cannot wait for it. Build the stack with `git-spice` (`gs branch create`, then `gs stack submit`), never with bare `git checkout -b`, and merge bottom-up, running `gs repo sync` after each merge.
 
 Do not overwrite, revert, reformat, or “clean up” user changes unless the user explicitly asks.
 
