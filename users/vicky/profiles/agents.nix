@@ -82,11 +82,6 @@ in
     # all.
     issueGuard.enable = true;
 
-    # Stops a closing summary that repeats stale facts — "PR X is still open"
-    # when it merged an hour ago. Fires once per response, on claims about
-    # external state only, via a Stop hook.
-    recapGuard.enable = true;
-
     # Matt Pocock's skills for Codex and pi only; Claude Code takes them from
     # the marketplace below.
     mattSkills.enable = true;
