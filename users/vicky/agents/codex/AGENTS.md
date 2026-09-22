@@ -238,7 +238,7 @@ Never force-push.
 
 Never run destructive commands such as `git reset --hard`, `git clean`, deleting branches, wiping files, or rewriting history unless explicitly asked.
 
-Reuse the current feature branch and its open PR unless the user asks for a new one. Commit locally as you go and push once, when the effort is finished to the best of your ability.
+Reuse the current feature branch and its open PR unless the user asks for a new one. When a push happens, push once, after the effort is finished to the best of your ability.
 
 Stack only when the open PR is sitting — pushed and waiting on review or a merge — and the next work cannot wait for it. Build the stack with `git-spice` (`gs branch create`, then `gs stack submit`), never with bare `git checkout -b`, and merge bottom-up, running `gs repo sync` after each merge.
 

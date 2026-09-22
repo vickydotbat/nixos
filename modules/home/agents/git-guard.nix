@@ -135,8 +135,9 @@ let
               "" \
               "Pick one:" \
               "  - same effort: commit this change on '$current'." \
-              "  - depends on '$current' but reviews separately: 'gs branch create <name>'," \
-              "    then 'gs stack submit'. git-spice tracks the base and restacks after a merge." \
+              "  - the PR for '$current' is already sitting and this cannot wait for it:" \
+              "    'gs branch create <name>', then 'gs stack submit'. git-spice tracks the" \
+              "    base and restacks after a merge." \
               "  - unrelated: land the PR for '$current' first, or stop and ask the user."
           fi
         fi
