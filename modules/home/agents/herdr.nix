@@ -8,8 +8,10 @@
 # The one piece Nix does own is the Claude Code integration. `herdr integration
 # install claude` writes a hook script into ~/.claude/hooks and an entry into
 # settings.json, both outside any generation and both invisible to a rebuild.
-# The copy beside this file is that script, verbatim, installed the way every
-# other agent hook here is installed.
+# The copy beside this file is that script, verbatim, installed at the path
+# herdr itself looks at — `herdr integration status` reads that path to decide
+# whether the integration is present, so taking it over is the only way to own
+# it without herdr writing a second copy back.
 #
 # Owning it costs a pin. The vendored script speaks integration protocol
 # version 9, and a newer herdr may expect a newer one. `integrationPinnedFor`
@@ -27,7 +29,7 @@
 
 let
   cfg = config.theorem.home.agents.herdr;
-  hookPath = "${config.home.homeDirectory}/.claude/herdr-agent-state-hook";
+  hookPath = "${config.home.homeDirectory}/.claude/hooks/herdr-agent-state.sh";
   hasHomePersistence = options.home ? persistence;
   persistenceEnabled = config.theorem.home.base.persistence.enable;
 in
@@ -100,9 +102,15 @@ in
       # Wrapping it to pin an interpreter would change the behaviour of a
       # script herdr owns the contents of, for no gain: the guard already
       # makes a missing python3 a quiet no-op.
-      home.file.".claude/herdr-agent-state-hook" = {
+      home.file.".claude/hooks/herdr-agent-state.sh" = {
         source = ./herdr-claude-hook.sh;
         executable = true;
+        # `herdr integration status` decides whether the integration is present
+        # by reading this exact path. Install anywhere else and herdr believes
+        # it is missing, writes its own copy back, and both run until a rebuild
+        # strips one — the drift this module exists to end. `force` because the
+        # hand-written copy is already sitting there.
+        force = true;
       };
 
       home.activation.herdrClaudeHook = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
@@ -111,12 +119,13 @@ in
         $DRY_RUN_CMD mkdir -p "$(dirname "$settings")"
         [ -s "$settings" ] || $DRY_RUN_CMD echo '{}' > "$settings"
 
-        # Strip any stale herdr entry, including the `hooks/` script this
-        # module replaced, drop groups left empty, then append the
-        # canonical one. Writing through a temp file keeps the original
-        # intact if jq chokes.
+        # Strip any stale herdr entry, drop groups left empty, then append the
+        # canonical one, quoted the way herdr writes it so a reinstall
+        # produces a byte-identical line rather than a second entry. Writing
+        # through a temp file keeps the original intact if jq chokes.
         $DRY_RUN_CMD ${pkgs.jq}/bin/jq \
           --arg hook ${lib.escapeShellArg hookPath} \
+          --arg q "'" \
           --argjson timeout ${toString cfg.claudeHook.timeout} \
           '
             .hooks.SessionStart = (
@@ -124,7 +133,9 @@ in
                | map(.hooks |= map(select(.command | test("herdr-agent-state") | not)))
                | map(select(.hooks | length > 0)))
               + [{ matcher: "*",
-                   hooks: [{ type: "command", command: ($hook + " session"), timeout: $timeout }] }]
+                   hooks: [{ type: "command",
+                             command: ("bash " + $q + $hook + $q + " session"),
+                             timeout: $timeout }] }]
             )
           ' "$settings" > "$settings.tmp" \
           && $DRY_RUN_CMD mv "$settings.tmp" "$settings"
