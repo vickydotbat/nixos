@@ -46,6 +46,10 @@ refuse "$(cmd 'mkdir -p /tmp/$CLAUDE_CODE_SESSION_ID')"
 refuse "$(cmd "cat /tmp/$sid/out")"
 refuse "{\"file_path\":\"/tmp/$sid/body.md\",\"content\":\"x\"}"
 
+# Content that merely quotes the shared path, written where it belongs.
+allow "{\"file_path\":\"/tmp/$sid/$agent/notes.md\",\"content\":\"see /tmp/$sid/pr-body.md\"}"
+allow "{\"file_path\":\"users/vicky/agents/all/CLAUDE.md\",\"old_string\":\"/tmp/\$CLAUDE_CODE_SESSION_ID\",\"new_string\":\"x\"}"
+
 # Its own folder underneath, which is the whole point.
 allow "$(cmd "echo body > /tmp/$sid/$agent/pr-body.md")"
 allow "{\"file_path\":\"/tmp/$sid/$agent/body.md\",\"content\":\"x\"}"

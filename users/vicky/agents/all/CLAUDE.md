@@ -256,10 +256,12 @@ loser never learns it lost.
   full path in every command, and substitute it wherever this file shows
   `/tmp/$CLAUDE_CODE_SESSION_ID/...`.
 - The session folder itself belongs to the main thread. scratch-guard refuses
-  a subagent that reads or writes directly in it, so a forgotten path is an
-  error rather than a silent overwrite.
+  a Bash, Write, or Edit call from a subagent that names it, so a forgotten
+  path is an error rather than a silent overwrite.
 - The main thread keeps using `/tmp/$CLAUDE_CODE_SESSION_ID` as above. Hand a
-  subagent a path explicitly if it needs to read something you wrote.
+  subagent a path explicitly if it needs to read something you wrote; the
+  subagent opens it with the Read tool. A `cat` is refused, because the guard
+  cannot tell a read from a write on a command line.
 
 ## Long runs
 

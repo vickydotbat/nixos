@@ -23,16 +23,23 @@ if [ "$event" = "SubagentStart" ]; then
         "Scratch folder for this subagent: " + $dir + " (already created). "
         + "Write every scratch file there, with the full path in every command. "
         + "/tmp/$CLAUDE_CODE_SESSION_ID itself is shared with every sibling subagent; "
-        + "reading or writing directly in it is refused."
+        + "a Bash, Write, or Edit call that names it is refused. To read a file the "
+        + "parent left there, open it with the Read tool."
       )
     }
   }'
   exit 0
 fi
 
-# Every string in the tool input at once: a Bash command line, a Write or Edit
-# file_path, whatever a future tool names a path.
-text=$(jq -r '[.tool_input | .. | strings] | join("\n")' <<<"$payload")
+# Only the fields that carry a path. Scanning the whole tool input would refuse
+# an edit to a file that merely quotes the shared path — this doctrine file
+# names it five times.
+#
+# ponytail: a bash heredoc that writes the path into file content still trips
+# the guard. Narrowing further means parsing shell, which costs more than the
+# occasional false refusal.
+text=$(jq -r '[.tool_input.command, .tool_input.file_path]
+              | map(select(. != null)) | join("\n")' <<<"$payload")
 
 # Both spellings of the shared folder: the resolved session id, and the
 # variable the doctrine tells agents to write.
