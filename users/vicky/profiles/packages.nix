@@ -76,6 +76,11 @@ in
   home.persistence."/nix/persist" = lib.mkIf config.theorem.home.base.persistence.enable {
     directories = [
       ".local/share/SillyTavern"
+
+      # Root rolls back on boot, so an unpersisted uv cache means uvx refetches
+      # every tool it runs from PyPI after each reboot. Keeping the cache costs
+      # a few hundred MiB of persisted disk and saves the download.
+      ".cache/uv"
     ];
   };
 }
