@@ -71,6 +71,12 @@ in
     # conflicts rather than leaving a detached HEAD behind.
     gsAutosync.enable = true;
 
+    # Gives every subagent its own folder under the session's scratch
+    # directory and refuses the shared one. Subagents inherit the parent's
+    # session id, so without this they all write /tmp/<session>/pr-body.md and
+    # quietly overwrite each other.
+    scratchGuard.enable = true;
+
     # Refuses an issue or pull request opened without its comments. A comment
     # often changes what the body says, so the thread is read whole or not at
     # all.

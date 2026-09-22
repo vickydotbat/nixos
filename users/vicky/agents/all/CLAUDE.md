@@ -244,6 +244,23 @@ mkdir -p /tmp/$CLAUDE_CODE_SESSION_ID
 
 A shared name once carried one session's PR body onto another session's PR.
 
+### Subagents
+
+A subagent inherits the parent's session ID, so `/tmp/$CLAUDE_CODE_SESSION_ID`
+is one folder shared by every subagent running at once, not one folder each.
+Nine of them reaching for `pr-body.md` is nine writers on one file, and the
+loser never learns it lost.
+
+- A subagent is handed its own folder, `/tmp/$CLAUDE_CODE_SESSION_ID/<agent
+  id>`, in its opening context. It already exists. Write everything there,
+  full path in every command, and substitute it wherever this file shows
+  `/tmp/$CLAUDE_CODE_SESSION_ID/...`.
+- The session folder itself belongs to the main thread. scratch-guard refuses
+  a subagent that reads or writes directly in it, so a forgotten path is an
+  error rather than a silent overwrite.
+- The main thread keeps using `/tmp/$CLAUDE_CODE_SESSION_ID` as above. Hand a
+  subagent a path explicitly if it needs to read something you wrote.
+
 ## Long runs
 
 A long run is any task that will not finish in a few tool calls — a background
