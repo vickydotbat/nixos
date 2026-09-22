@@ -53,7 +53,12 @@ ssh:
       -----END OPENSSH PRIVATE KEY-----
     id_ed25519.pub: ssh-ed25519 AAAA... comment
 firefox-backup-age-identity: AGE-SECRET-KEY-...
+plane-api-key: "plane_api_..."
 ```
+
+`plane-api-key` is the account's Plane work-item tracker token. The host renders
+it to `/run/secrets/plane-<name>-api-key`, readable only by that user, and the
+user's shell exports it as `PLANE_API_KEY`.
 
 Create or edit encrypted files from the repository root with
 repository-relative paths, not `/secrets/...`:

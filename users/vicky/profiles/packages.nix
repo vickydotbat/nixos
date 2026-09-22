@@ -68,6 +68,9 @@ in
 
     discordify
     ffmpeg
+
+    # `uvx` runs the Plane MCP server declared by a project's .mcp.json.
+    uv
   ];
 
   home.persistence."/nix/persist" = lib.mkIf config.theorem.home.base.persistence.enable {

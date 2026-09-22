@@ -46,6 +46,10 @@ let
     _: user: userHasAccountSecretKey user "headroom-env:"
   ) selectedUsers;
 
+  usersWithPlaneApiKeys = lib.filterAttrs (
+    _: user: userHasAccountSecretKey user "plane-api-key:"
+  ) selectedUsers;
+
   mkPasswordSecret = _: user: {
     name = user.passwordHashSecret;
     value = {
@@ -72,6 +76,21 @@ let
       sopsFile = user.secrets.sopsFile;
       key = "headroom-env";
       path = "/run/secrets/headroom-${user.username}-env";
+      owner = user.username;
+      group = "users";
+      mode = "0400";
+    };
+  };
+
+  # The account's Plane API key, rendered as a bare token file the user's shell
+  # exports as PLANE_API_KEY. The filter above keeps this silent until the key
+  # exists in the account's SOPS file, so the theorem evaluates either way.
+  mkPlaneApiKeySecret = _: user: {
+    name = "plane/${user.username}/api-key";
+    value = {
+      sopsFile = user.secrets.sopsFile;
+      key = "plane-api-key";
+      path = "/run/secrets/plane-${user.username}-api-key";
       owner = user.username;
       group = "users";
       mode = "0400";
@@ -119,6 +138,7 @@ in
       lib.mapAttrsToList mkFirefoxBackupIdentitySecret usersWithFirefoxBackupIdentities
     )
     // builtins.listToAttrs (lib.mapAttrsToList mkHeadroomEnvSecret usersWithHeadroomEnvSecrets)
+    // builtins.listToAttrs (lib.mapAttrsToList mkPlaneApiKeySecret usersWithPlaneApiKeys)
     //
       lib.optionalAttrs (config.theorem.nixos.base.ssh.enable && hasHostSecretKey "ssh_host_ed25519_key:")
         {
