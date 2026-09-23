@@ -130,6 +130,11 @@ This machine runs NixOS — don't assume FHS/generic Linux.
   if the task needs reproducible tooling or the user asks.
 - Home Manager activation hooks must not start long-running services,
   containers, model pulls, or network waits.
+- Containers run on podman. There is no Docker daemon and no `docker.service`.
+  A `docker` command goes to `/run/current-system/sw/bin/docker`, podman's
+  Docker shim. A `docker` from a dev shell or `nix shell` wins on PATH and has
+  no daemon behind it. A tool that wants a Docker socket takes
+  `DOCKER_HOST=unix:///run/user/$(id -u)/podman/podman.sock`.
 
 ## Blender and NWN model tooling
 
