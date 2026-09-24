@@ -6,7 +6,7 @@
   gdk-pixbuf,
   gimp,
   gimp3-with-plugins,
-  gexiv2,
+  gexiv2_0_10,
   glib,
   gobject-introspection,
   harfbuzz,
@@ -33,7 +33,7 @@ let
     (lib.getLib babl)
     (lib.getLib gdk-pixbuf)
     (lib.getLib gegl)
-    (lib.getLib gexiv2)
+    (lib.getLib gexiv2_0_10)
     (lib.getLib gimp)
     (lib.getLib glib)
     (lib.getLib gobject-introspection)

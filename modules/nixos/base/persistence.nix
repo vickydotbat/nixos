@@ -269,11 +269,11 @@ in
 
     system.activationScripts.persist-files.deps = [ "persistedKnownHosts" ];
 
-    services.journald.extraConfig = ''
-      SystemMaxUse=512M
-      SystemKeepFree=1G
-      RuntimeMaxUse=128M
-      MaxFileSec=1week
-    '';
+    services.journald.settings.Journal = {
+      SystemMaxUse = lib.mkDefault "512M";
+      SystemKeepFree = "1G";
+      RuntimeMaxUse = lib.mkDefault "128M";
+      MaxFileSec = "1week";
+    };
   };
 }

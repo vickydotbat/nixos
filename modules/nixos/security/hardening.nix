@@ -308,10 +308,10 @@ in
       (lib.mkIf cfg.journald.boundLocalLogs {
         services.journald = {
           upload.enable = lib.mkDefault false;
-          extraConfig = lib.mkAfter ''
-            SystemMaxUse=${cfg.journald.systemMaxUse}
-            RuntimeMaxUse=${cfg.journald.runtimeMaxUse}
-          '';
+          settings.Journal = {
+            SystemMaxUse = cfg.journald.systemMaxUse;
+            RuntimeMaxUse = cfg.journald.runtimeMaxUse;
+          };
         };
       })
 
