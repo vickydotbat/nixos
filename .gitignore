@@ -36,6 +36,7 @@
 
 # Keep selected root files
 !/.sops.yaml
+!/.prettierignore
 !/AGENTS.md
 !/CLAUDE.md
 !/flake.lock
