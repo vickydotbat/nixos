@@ -53,6 +53,42 @@ let
     };
 
   };
+
+  # The official "complete package" layout: bin/, codex-resources/, codex-path/
+  # and codex-package.json side by side. Codex 0.157+ refuses to start its
+  # app-server daemon without it, and the nightly flake ships only bin/codex.
+  # The binaries are static musl, so they run unpatched; dontFixup keeps Nix
+  # from stripping or rewriting them.
+  #
+  # 0.159.0-alpha.4 is pinned because it carries openai/codex#47968, the fix
+  # for Btrfs subvolume device IDs that break sandbox socket isolation on this
+  # impermanence layout. Move to a stable tag once one contains that fix.
+  codexReleasePackage = pkgs.stdenvNoCC.mkDerivation rec {
+    pname = "codex";
+    version = "0.159.0-alpha.4";
+
+    src = pkgs.fetchurl {
+      url = "https://github.com/openai/codex/releases/download/rust-v${version}/codex-package-x86_64-unknown-linux-musl.tar.gz";
+      hash = "sha256-S89DC+IAXmkBUAhfaCpn5elDP3snsczRzxWZQO49JjU=";
+    };
+
+    sourceRoot = ".";
+    dontFixup = true;
+
+    installPhase = ''
+      runHook preInstall
+      mkdir -p "$out"
+      cp -r bin codex-resources codex-path codex-package.json "$out/"
+      runHook postInstall
+    '';
+
+    meta = {
+      description = "Official Codex CLI release package";
+      homepage = "https://github.com/openai/codex";
+      mainProgram = "codex";
+      platforms = [ "x86_64-linux" ];
+    };
+  };
 in
 {
   options.theorem.home.agents.codex = {
@@ -82,11 +118,12 @@ in
 
     package = lib.mkOption {
       type = lib.types.package;
-      default = codexNightlyPackage;
-      defaultText = lib.literalExpression "theorem.home.agents.codex nightly wrapper";
+      default = codexReleasePackage;
+      defaultText = lib.literalExpression "theorem.home.agents.codex pinned official release package";
       description = ''
-        Codex CLI package to install. Defaults to a self-refreshing wrapper
-        around `nightly.flakeRef`.
+        Codex CLI package to install. Defaults to the pinned official release
+        package. The self-refreshing wrapper around `nightly.flakeRef` is kept
+        for when that flake ships the complete package layout again.
       '';
     };
 
