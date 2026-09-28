@@ -69,6 +69,13 @@ in
         # repair material is not collected immediately.
         keep-outputs = true;
 
+        # Emergency collection between the weekly `nh clean` runs. When a build
+        # sees less than min-free left, Nix collects garbage until max-free is
+        # free. It only reaches unrooted paths, so it cannot rescue a disk that
+        # something outside the store filled.
+        min-free = 20 * 1024 * 1024 * 1024;
+        max-free = 100 * 1024 * 1024 * 1024;
+
         # Always require signatures
         require-sigs = lib.mkForce true;
 
