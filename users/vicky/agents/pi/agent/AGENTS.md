@@ -16,6 +16,8 @@ whether an account or a change is hers.
   undo and she is not still deciding, take the recommendation in the same
   message and say so. A message with no tool call ends the turn, so "no
   answer" never arrives.
+- A question about a thing asks for an answer, not a change. Edit only what
+  the ask names. Before you touch any other file, name it and say why.
 - "Maybe", "what about", "could we", or a bare idea with no ask means she is
   still deciding. Give the options, then what you would do and why, in two
   lines. Then ask if it is a pivot.
