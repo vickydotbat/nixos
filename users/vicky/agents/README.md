@@ -8,8 +8,10 @@ configuration, not a shared theorem module.
 - `all/CLAUDE.md` is installed as `~/.claude/CLAUDE.md`, the global doctrine
   every Claude Code session loads. Edit it here, never in `$HOME`: the copy
   there is a read-only link into the Nix store.
-- `all/skills/*` is installed into `~/.agents/skills/`.
-- `all/commands/*` is installed into `~/.agents/commands/`.
+- Skills under `all/skills/` are installed into `~/.agents/skills/` and
+  `~/.claude/skills/` only when listed in the `skills` set in
+  `users/vicky/profiles/agents.nix`. Today that is `human-voice` alone.
+- `all/commands/*` is not installed anywhere.
 - `codex/*` is installed into `~/.codex/` when Codex is enabled.
 - `claude/*` is installed into `~/.claude/` when Claude Code is enabled.
 - `opencode/*` is installed into `~/.config/opencode/` when OpenCode is
