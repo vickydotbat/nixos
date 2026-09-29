@@ -98,13 +98,17 @@ in
       ];
     };
 
-    # Always-on output shaping. `level` is the default mode for a new session;
-    # it accepts a runtime switch afterwards.
-    ponytail.enable = true;
+    # Installed for its review skills, not as an always-on mode. `off` skips
+    # the SessionStart ruleset that loaded into every session; call
+    # `/ponytail-review` or `/ponytail-audit` to thin bloated code, or
+    # `/ponytail full` to turn the mode on for one session.
+    ponytail = {
+      enable = true;
+      level = "off";
+    };
 
     # Off on purpose: caveman drops articles and filler, which fights the ELI5
-    # output style below. Ponytail only shapes what gets built, not how it reads,
-    # so it stays.
+    # output style below.
     caveman.enable = false;
 
     # Seeds statusLine and permissions.defaultMode into ~/.claude/settings.json

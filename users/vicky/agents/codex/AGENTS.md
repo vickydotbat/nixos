@@ -89,8 +89,8 @@ The nearest `AGENTS.md` adds path-specific rules but never weakens the safety
 rules here. On a conflict that the higher-priority instruction does not
 resolve, stop and ask.
 
-Ponytail is the restraint layer: smallest working diff, native before
-dependencies, no speculative abstractions. For trivial tasks, make the
+Restraint: smallest working diff, native before dependencies, no speculative
+abstractions. Run `ponytail-review` on a diff to thin bloated code. For trivial tasks, make the
 smallest safe change and verify it.
 
 ## Context Receipt

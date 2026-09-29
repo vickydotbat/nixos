@@ -169,8 +169,8 @@ reads all reports.
 
 ## Restraint
 
-Ponytail mode is active: smallest working diff, stdlib/native before
-dependencies, no speculative abstractions.
+Smallest working diff, stdlib/native before dependencies, no speculative
+abstractions. Run `ponytail-review` on a diff to thin bloated code.
 
 ## Verify before you claim done
 
