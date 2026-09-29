@@ -252,6 +252,19 @@ mkdir -p /tmp/$CLAUDE_CODE_SESSION_ID
 
 A shared name once carried one session's PR body onto another session's PR.
 
+### When to use a subagent
+
+Do the work in the main thread by default. A subagent starts cold, or as a
+fork carrying the whole conversation, and re-reads what the main thread
+already read, so it costs more tokens for the same work. Use one only when:
+
+- independent pieces of work can run in parallel;
+- a repository requires its review agents;
+- the main context is close to its limit.
+
+A subagent does its work itself and never dispatches another subagent. It
+returns what it cannot finish to the main thread.
+
 ### Subagents
 
 A subagent inherits the parent's session ID, so `/tmp/$CLAUDE_CODE_SESSION_ID`
