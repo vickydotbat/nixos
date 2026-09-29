@@ -7,8 +7,8 @@ Anyone using this machine is Vicky. Every account here is hers: the git
 author, the tea account, the gh account, the email in git config. Never ask
 whether an account or a change is hers.
 
-- A goal names an effort. Everything the effort needs to land — code, tests,
-  docs, the PR body — is part of it. Do it in the same turn and report it
+- A goal names an effort. Its definition of done covers everything it needs
+  to land: code, tests, docs, the PR body. Do it in the same turn and report it
   afterwards. Ask first only when a wrong guess is expensive to undo.
 - Give two options at most and a recommendation. When the choice is cheap to
   undo and she is not still deciding, take the recommendation in the same
@@ -57,7 +57,7 @@ Brain-dumps, half-ideas, "maybe" threads, research notes, and thinking out
 loud go to the Obsidian vault at `~/Obsidian/Echo-Reliquary`, in `00_Inbox/`
 as `YYYY-MM-DD-HHMMSS Title.md`. When asked, sort the inbox: move notes into
 the matching folder, merge duplicates, add `[[links]]` to related notes. Never
-delete a note. Stay out of the `Therapy` folder.
+delete a note. Never open the `Therapy` folder.
 
 A vault note that becomes a real decision still becomes a ticket or ADR under
 the pivot rules. The vault is for thinking, the ticket is for doing.
@@ -71,7 +71,7 @@ This machine runs NixOS, not FHS Linux.
 - Missing deps → transient `nix shell`/`nix develop`. Add a dev shell or flake
   only if the task needs reproducible tooling or the user asks. No `apt`,
   `dnf`, `pacman`, Homebrew, global `pip`/`npm`, or curl-pipe installers.
-- Privileged access, once approved, goes through `run0`. There is no `sudo`.
+- Never use `sudo`. Privileged access, once approved, goes through `run0`.
 - Home Manager activation hooks must not start long-running services,
   containers, model pulls, network waits, or user systemd units. Declarative
   config creates or enables services.
@@ -93,7 +93,7 @@ smallest safe change and verify it.
 
 ## Context Receipt
 
-Before modifying files, write a Context Receipt. Keep it brief for small or
+Before modifying files, write a Context Receipt: a pre-flight checklist. Keep it brief for small or
 read-only tasks, but always write it.
 
 1. **Task understood**: what the user asked for.
@@ -154,7 +154,8 @@ may have landed even when `tea` fails.
 - Compose a long body in a file, then post it:
   `tea comment <n> "$(cat <scratch>/body.md)" </dev/null > <scratch>/tea.log 2>&1; echo exit=$?`
 - On any non-zero exit, read the thread and decide from what is there. A retry
-  on faith is how one comment becomes three.
+  on faith is how one comment becomes three, because a `tea` post is not
+  idempotent.
 - Edit a pull request body in place with `tea pr edit <n> -d "$(cat <body file>)" </dev/null`.
   On a Plane work item, `plane comment` appends and needs no stdin guard; the
   body itself is edited in Plane's own interface.

@@ -59,7 +59,7 @@ Brain-dumps, half-ideas, "maybe" threads, research notes, and thinking out
 loud go to the Obsidian vault at `~/Obsidian/Echo-Reliquary`, in `00_Inbox/`
 as `YYYY-MM-DD-HHMMSS Title.md`. When asked, sort the inbox: move notes into
 the matching folder, merge duplicates, add `[[links]]` to related notes. Never
-delete a note. Stay out of the `Therapy` folder.
+delete a note. Never open the `Therapy` folder.
 
 A vault note that becomes a real decision still becomes a ticket or ADR under
 the pivot rules. The vault is for thinking, the ticket is for doing.
@@ -103,7 +103,8 @@ may have landed even when `tea` fails.
 - Compose a long body in a file, then post it:
   `tea comment <n> "$(cat <scratch>/body.md)" </dev/null > <scratch>/tea.log 2>&1; echo exit=$?`
 - On any non-zero exit, read the thread and decide from what is there. A retry
-  on faith is how one comment becomes three.
+  on faith is how one comment becomes three, because a `tea` post is not
+  idempotent.
 - Edit a pull request body in place with `tea pr edit <n> -d "$(cat <body file>)" </dev/null`.
   On a Plane work item, `plane comment` appends and needs no stdin guard; the
   body itself is edited in Plane's own interface.
@@ -140,7 +141,7 @@ plan note, the diff, and the verdict.
    note the user can veto. Debugging → `/skill:systematic-debugging`.
 3. **Build** — you implement, smallest working diff, tests alongside behavior
    changes.
-4. **Verify adversarially** — never grade your own homework:
+4. **Verify adversarially** — red-team the diff, never grade your own homework:
    - normal change: dispatch `verifier` on the diff (it tries to refute "done");
    - pre-PR or risky change: run the `4r-review` chain — four blind review
      lenses, `verifier` merges and confirms;
@@ -163,6 +164,11 @@ reads all reports.
   or credentials. If a command might expose secrets, don't run it.
 - **Scope:** ask before anything touching architecture, data, migrations,
   deployment, or compatibility.
+
+## Restraint
+
+Ponytail mode is active: smallest working diff, stdlib/native before
+dependencies, no speculative abstractions.
 
 ## Verify before you claim done
 

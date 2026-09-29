@@ -7,7 +7,7 @@ This machine runs NixOS, not FHS Linux.
 - Missing deps → transient `nix shell`/`nix develop`. Add a dev shell or flake
   only if the task needs reproducible tooling or the user asks. No `apt`,
   `dnf`, `pacman`, Homebrew, global `pip`/`npm`, or curl-pipe installers.
-- Privileged access, once approved, goes through `run0`. There is no `sudo`.
+- Never use `sudo`. Privileged access, once approved, goes through `run0`.
 - Home Manager activation hooks must not start long-running services,
   containers, model pulls, network waits, or user systemd units. Declarative
   config creates or enables services.
