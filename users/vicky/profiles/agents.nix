@@ -130,6 +130,13 @@ in
         disableRemoteControl = true;
         disableBundledSkills = true;
 
+        # Off: skills and plugins synced down from the claude.ai account
+        # (`anthropic-skills:*`, `design@synced`, `engineering@synced`). Not
+        # one was invoked in 90 days of transcripts, yet every description
+        # loaded on every message. The local `human-voice` stays the only copy.
+        syncClaudeAiSkills = false;
+        syncClaudeAiPlugins = false;
+
         # Off: the Workflows and Artifact features, plus the nag that asks
         # about Workflows once they are gone.
         disableWorkflows = true;
@@ -181,6 +188,12 @@ in
         # would bring the SessionStart hook back on its own. The marketplace
         # entry stays so turning it on is a one-word change.
         "caveman@caveman" = false;
+
+        # Installed by hand once, never invoked in 90 days of transcripts, and
+        # each loads its skill descriptions into every session. The Playwright
+        # MCP (`playwright@claude-plugins-official`) stays; it saw real use.
+        "impeccable@impeccable" = false;
+        "playwright-skill@playwright-skill" = false;
       };
     };
   };
