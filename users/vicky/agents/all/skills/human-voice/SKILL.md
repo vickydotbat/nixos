@@ -1,6 +1,7 @@
 ---
 name: human-voice
 description: Vicky's writing voice. Use for every piece of prose written for or as Vicky: wiki articles, player-facing docs, READMEs, dev journal posts, announcements, PR and issue text, code comments, emails. Also use when text "sounds like AI". Drafts in her voice, then sweeps out AI tells.
+disable-model-invocation: true
 ---
 
 # Human voice
