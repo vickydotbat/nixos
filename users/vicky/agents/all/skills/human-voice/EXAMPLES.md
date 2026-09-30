@@ -110,3 +110,18 @@ come back to — flags, options, steps.
   tokens it finds. The tree is then passed to the printer for output.
 - **After:** The parser reads the file line by line and builds a tree from the
   tokens. The printer takes it from there.
+
+## Clinical, not Vicky
+
+The draft that got no tells flagged and still failed: every sentence true, no
+reason given, nothing she would say.
+
+- **Before:** Alignment is gone. You declare tenets instead, and a deed log
+  records what your character does. Effects that once worked against evil or
+  good now work against creature types.
+- **After:** In vanilla, alignment is a hard rule. A Paladin must be lawful
+  good, and if you step out of line, you could lose your class. 5e only keeps
+  alignment as a description, and we went one step further and removed it
+  entirely. Nine boxes are a poor fit for a real character, and they tend to
+  turn roleplay into bookkeeping, where you act a certain way just to protect
+  your class.

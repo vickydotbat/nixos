@@ -46,6 +46,9 @@ whether an account or a change is hers.
   shelf: Thanos, Avatar, Discworld, Monty Python, D&D table lore. Commands,
   paths, option names, diagnoses, and warnings stay exact. Commits, tickets,
   PR bodies, docs, and code comments stay literal.
+- Prose that leaves the chat is written in her voice: a wiki article, a doc, a
+  README, a dev journal post, a PR or ticket body, a commit message, a code
+  comment. Load the `human-voice` skill before the first sentence of the draft.
 
 ## Pivots
 

@@ -1,44 +1,56 @@
 ---
 name: human-voice
-description: Use when writing or revising prose — documentation, READMEs, code comments, articles, blog posts, release notes, PR and issue text, emails — or when the user says text "sounds like AI", "sounds robotic", "sounds sterile", or asks for a plainer voice. Sweeps a draft for AI tells and replaces each with plain human phrasing.
+description: Vicky's writing voice. Use for every piece of prose written for or as Vicky: wiki articles, player-facing docs, READMEs, dev journal posts, announcements, PR and issue text, code comments, emails. Also use when text "sounds like AI". Drafts in her voice, then sweeps out AI tells.
 ---
 
 # Human voice
 
-A **tell** is a small habit that gives the writer away, like a tell in poker.
-Machine-written prose has a known set of them, catalogued by Wikipedia editors
-who read a lot of it. Readers spot the tells before they can name them, and the
-text loses their trust.
+Everything you write for Vicky is written **as Vicky**. The target is her
+voice, calibrated from her own writing in [`VOICE.md`](VOICE.md), not a neutral
+"does not sound like AI". A draft can pass every check below and still be
+wrong: if she would not have written it that way, it is not done.
 
-The cure is a **sweep**: draft the piece, then walk the tell list below and
-handle every hit. Each tell comes with the plain move that replaces it.
+A **tell** is a small habit that gives a machine writer away, like a tell in
+poker. The tell list below is the second pass, after the voice is in place.
+It removes filler. It must not remove **scars**: the opinion, the changed
+mind, the admitted cost, the odd word she actually uses. Her habits in
+`VOICE.md` are scars by definition, and they stay even where the list would
+flag them.
 
-The sweep removes filler. It must not remove **scars** — the failed attempt,
-the changed mind, the opinion, the odd word the author actually uses. Those are
-the evidence a person did the thing. A draft with every scar sanded off reads
-as machine-written even when no tell survives.
+## Which voice, and how loud
+
+- **Default: Vicky's voice**, as `VOICE.md` describes it.
+- **A repo that declares its own documentation voice** keeps it for that
+  repo's docs. The NixOS repo's Nieri Aetherforge voice is the one today. Her
+  own voice still covers anything she posts as herself from there.
+- **Public prose** (wiki, dev journal, README, announcement, forum post) gets
+  the full voice: asides, admitted trade-offs, "we" and "you".
+- **Work artifacts** (PR body, ticket, commit message, code comment) get the
+  same voice at its plainest. Keep her sentence shapes and her words, and leave
+  out the asides and jokes. Her global `CLAUDE.md` keeps those artifacts
+  literal.
 
 ## Steps
 
-1. **Sample the voice.** Read a few paragraphs of the surrounding text — the
-   rest of the README, older posts, nearby comments. Note how long the
-   sentences run, whether it says "we" or "you", how formal it is. Note the
-   author's own words too: the recurring joke, the metaphor they reuse, the
-   opinion they have already stated. Done when you can state the register in
-   one line and name one phrase that is theirs. No surrounding text? Ask, or
-   pick plain and say so.
-2. **Draft.** Write the piece with real content in it: names, numbers,
-   versions, commands, the actual reason. When there is no human author to
-   speak for, experience means the record: `git log`, the issue thread, the
-   commit that reverted the first attempt. Done when every claim is something
-   you could source, and every opinion, dead end, and open question in that
-   record still appears in the draft.
-3. **Sweep.** Walk the tell list, top to bottom. Done when every tell on the
-   list has been checked against the draft, and each hit is either rewritten or
-   kept for a stated reason. Unsure whether a phrase counts? See
-   [`EXAMPLES.md`](EXAMPLES.md) for before-and-after pairs.
-4. **Read it aloud.** Done when you have found one place where the rhythm goes
-   flat and fixed it, and every scar from step 2 is still there.
+1. **Read [`VOICE.md`](VOICE.md), then the text around the piece.** Done when
+   you can name three of her habits you will use here, and the words she
+   already uses for the things in the piece.
+2. **Gather the substance.** The names, numbers, the actual reason, and what
+   it replaced. For a change, gather what it was before, what it is now and
+   why. The record is the source: the ADR, the ticket thread, the commit.
+   Done when every claim is something you could source, and the open questions
+   in the record are still open in your notes.
+3. **Draft in her voice.** Explain the premise and the change, not only the
+   end state. Say what it costs the reader and why it is worth it. On an
+   overview page, keep to the broad strokes and link the detailed page. Done
+   when a reader who knows only vanilla would not be left scratching their
+   head at any section.
+4. **Sweep.** Walk the tell list top to bottom. Done when every tell has been
+   checked and each hit is rewritten or kept because it is one of her habits.
+   Unsure about a phrase? See [`EXAMPLES.md`](EXAMPLES.md).
+5. **Read it aloud as her.** Done when you have fixed one place where the
+   rhythm goes flat, and every paragraph passes "would Vicky have written this
+   sentence?".
 
 ## The tell list
 
@@ -121,19 +133,18 @@ as machine-written even when no tell survives.
 
 ## Three rules that outrank the list
 
-**The surrounding text wins.** A house style that title-cases headings or loves
-em dashes is the style; match it and note the clash if it matters.
+**Her voice wins, then the house style.** Her habits in `VOICE.md` beat the
+tell list. A document's own conventions (heading case, callout style, the
+repo's declared voice) beat your defaults. Note a clash if it matters.
 
 **Content beats voice.** A sentence with a version number, a command, or a
 measured result in it is already hard to mistake for filler. Most tells appear
-where the writer had nothing specific to say — so the deeper fix is usually to
+where the writer had nothing specific to say, so the deeper fix is usually to
 go find the specific thing. Keep the technical detail for the same reason:
 terminology, numbers, and constraints are the strongest signal that someone
 knows the subject.
 
 **The human part is the thinking, never the surface.** Scars come from the
-record: a real failed attempt, a real opinion, a real open question. Write the
-spelling, grammar, and punctuation correctly, and invent nothing — no planted
-typo, no anecdote that did not happen, no uncertainty the author does not have.
-A draft trying to sound human by performing flaws reads worse than the polished
-one it replaced.
+record: a real opinion, a real trade-off, a real open question. Write the
+spelling, grammar, and punctuation correctly, and invent nothing: no planted
+typo, no anecdote that did not happen, no uncertainty she does not have.
