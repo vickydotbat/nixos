@@ -14,6 +14,13 @@
   xdg.configFile."sow/plane.env".source =
     config.lib.file.mkOutOfStoreSymlink "/run/secrets/plane-vicky-env";
 
+  # Crucible's bootstrap wrapper reads this path when the anonymous release
+  # download is refused, which is always, now that the releases are private.
+  # The same out-of-store symlink as above: until the token is in SOPS it
+  # dangles, and the wrapper reports that it cannot fetch rather than guessing.
+  xdg.configFile."crucible/token".source =
+    config.lib.file.mkOutOfStoreSymlink "/run/secrets/crucible-vicky-token";
+
   # ponytail: interactive shells only. A tool launched straight from a desktop
   # menu gets the config file above instead, which is the documented path.
   programs.bash.initExtra = ''

@@ -50,6 +50,10 @@ let
     _: user: userHasAccountSecretKey user "plane-api-key:"
   ) selectedUsers;
 
+  usersWithCrucibleTokens = lib.filterAttrs (
+    _: user: userHasAccountSecretKey user "crucible-token:"
+  ) selectedUsers;
+
   mkPasswordSecret = _: user: {
     name = user.passwordHashSecret;
     value = {
@@ -116,6 +120,23 @@ let
     };
   };
 
+  # Crucible's releases are not public: the bootstrap wrapper (crucible.sh, and
+  # the sow-codebase dev shell's `crucible`, which is that wrapper) falls back
+  # to ~/.config/crucible/token when the anonymous download is refused. This is
+  # a Gitea access token scoped to read:repository, nothing wider. Silent until
+  # the key exists in the account's SOPS file, like the Plane key above.
+  mkCrucibleTokenSecret = _: user: {
+    name = "crucible/${user.username}/token";
+    value = {
+      sopsFile = user.secrets.sopsFile;
+      key = "crucible-token";
+      path = "/run/secrets/crucible-${user.username}-token";
+      owner = user.username;
+      group = "users";
+      mode = "0400";
+    };
+  };
+
   mkUserSshSecrets = _: user: {
     ${user.ssh.privateKeySecret} = {
       sopsFile = user.ssh.sopsFile;
@@ -158,6 +179,7 @@ in
     )
     // builtins.listToAttrs (lib.mapAttrsToList mkHeadroomEnvSecret usersWithHeadroomEnvSecrets)
     // builtins.listToAttrs (lib.mapAttrsToList mkPlaneApiKeySecret usersWithPlaneApiKeys)
+    // builtins.listToAttrs (lib.mapAttrsToList mkCrucibleTokenSecret usersWithCrucibleTokens)
     //
       lib.optionalAttrs (config.theorem.nixos.base.ssh.enable && hasHostSecretKey "ssh_host_ed25519_key:")
         {
@@ -194,7 +216,5 @@ in
     )
     // lib.foldl' lib.recursiveUpdate { } (lib.mapAttrsToList mkUserSshSecrets usersWithSshSecrets);
 
-  sops.templates = builtins.listToAttrs (
-    lib.mapAttrsToList mkPlaneEnvTemplate usersWithPlaneApiKeys
-  );
+  sops.templates = builtins.listToAttrs (lib.mapAttrsToList mkPlaneEnvTemplate usersWithPlaneApiKeys);
 }
