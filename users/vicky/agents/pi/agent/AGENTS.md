@@ -172,6 +172,27 @@ reads all reports.
 Smallest working diff, stdlib/native before dependencies, no speculative
 abstractions. Run `ponytail-review` on a diff to thin bloated code.
 
+## Tests and checks
+
+A check spends a budget: CPU, memory and the reviewer's wait, on a runner
+other jobs share. A pull request's CI finishes in a few minutes and uses as
+little of the runner as the change needs. Staying under the timeout is not the
+bar; a timeout is a crash guard, and a gate can quadruple under one without
+anyone deciding it should.
+
+- A pull-request gate runs only what the change can reach. A docs-only change
+  builds nothing and still reports its required check. A path the gate does
+  not recognise runs everything, loudly, so the map gets fixed.
+- Release work runs on the release trigger: cross-builds, images, packaging.
+  The pull request proves the code compiles and the tests pass, once.
+- A test proves one result in one place. Shared setup starts once per suite,
+  and an expensive evaluation is done once and shared, not repeated per test.
+- Evidence about CI comes from the CI runner's own log. A local run tells you
+  which step is slow, never why the runner is.
+- A slow or red gate: read the log for the step that burned the time before
+  changing anything. Two gates on one runner slow each other, so the fix is
+  often to stop one of them running at all.
+
 ## Verify before you claim done
 
 - For non-trivial changes, run at least one relevant check or test.
