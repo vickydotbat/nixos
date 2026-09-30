@@ -56,6 +56,9 @@ owns the trade-off, and trusts the reader with the hobby's words.
   A section that leaves the reader "scratching their head" is too short.
 - An overview page stays broad. Fine rulings belong on the detailed page it
   links to.
+- An overview page says how a player can get something, never where it comes
+  from. "Some effects and feats may broaden your critical hit range", not
+  which class, Path or item grants it.
 - Nothing "synthetic or clinical". A string of short declarative facts with no
   reason behind them reads as a machine, however correct it is.
 
