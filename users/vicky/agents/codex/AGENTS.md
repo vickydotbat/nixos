@@ -8,8 +8,9 @@ author, the tea account, the gh account, the email in git config. Never ask
 whether an account or a change is hers.
 
 - A goal names an effort. Its definition of done covers everything it needs
-  to land: code, tests, docs, the PR body. Do it in the same turn and report it
-  afterwards. Ask first only when a wrong guess is expensive to undo.
+  to land: code, tests, docs, the PR body, its settled tickets. Do it in the
+  same turn and report it afterwards. Ask first only when a wrong guess is
+  expensive to undo.
 - Give two options at most and a recommendation. When the choice is cheap to
   undo and she is not still deciding, take the recommendation in the same
   message and say so. A message with no tool call ends the turn, so "no
@@ -143,6 +144,20 @@ before you quote it, plan against it, or act on it:
 - `plane show GAME-12` — a Plane work item and every comment on it.
 - `tea pulls <n> --comments` — a Gitea pull request thread.
 - `gh issue view <n> --comments`, `gh pr view <n> --comments` — GitHub.
+
+Every ticket an effort touches ends settled, and the effort is not done until it
+is. New human developers pick work from the tracker and trust the body. A
+ticket is touched when the branch, a commit, or the PR body names it, or when
+the work reads it and finds it wrong. Each one ends one of two ways:
+
+- **Closed** by the merge, through a closing line in the PR body
+  (`Closes GAME-12`).
+- **Rewritten** so its body states only what remains, true today. This covers
+  work that shipped in part and a premise the work proved wrong. A comment does
+  not settle a ticket, because a new reader trusts the body.
+
+A ticket still open after its pull request merged gets closed by hand, with a
+comment that names the pull request.
 
 ### Writing to a thread with tea
 

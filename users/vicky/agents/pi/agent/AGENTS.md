@@ -93,6 +93,20 @@ before you quote it, plan against it, or act on it:
 - `tea pulls <n> --comments` — a Gitea pull request thread.
 - `gh issue view <n> --comments`, `gh pr view <n> --comments` — GitHub.
 
+Every ticket an effort touches ends settled, and the effort is not done until it
+is. New human developers pick work from the tracker and trust the body. A
+ticket is touched when the branch, a commit, or the PR body names it, or when
+the work reads it and finds it wrong. Each one ends one of two ways:
+
+- **Closed** by the merge, through a closing line in the PR body
+  (`Closes GAME-12`).
+- **Rewritten** so its body states only what remains, true today. This covers
+  work that shipped in part and a premise the work proved wrong. A comment does
+  not settle a ticket, because a new reader trusts the body.
+
+A ticket still open after its pull request merged gets closed by hand, with a
+comment that names the pull request.
+
 ### Writing to a thread with tea
 
 `tea` reads stdin to EOF and appends it to the body. An agent shell never sends
