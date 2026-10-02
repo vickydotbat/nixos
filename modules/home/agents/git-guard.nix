@@ -5,7 +5,8 @@
 #      This catches `git checkout -b` and `git switch -c` only. git-spice (`gs`)
 #      is deliberately invisible to the pre-filter below, because a `gs` stack
 #      records each branch's base and survives the squash merge that breaks a
-#      hand-rolled one. The guard is against untracked work, not against depth.
+#      hand-rolled one. The guard is against untracked work, not against depth;
+#      pr-guard decides when a stack may be built at all.
 #   2. No push that lands on main/master.
 #   3. No Co-Authored-By line in a commit message.
 #

@@ -302,11 +302,10 @@ anyone deciding it should.
   --abbrev-ref HEAD`. If it is not `main`/`master`, run `git branch --merged
   main`. If the current branch is not in the list, the work belongs on this
   branch and its open PR.
-- One branch and one open PR per repo per effort. List the open PRs first
-  (`tea pr list` / `gh pr list`), and push to the one for this effort. Same
-  ticket, same session, or a follow-up from review of the first change all
-  mean the same effort. "It feels separate" does not make it one. A fix or revert of something in the open PR always
-  goes in that PR.
+- One open PR per repository. List the open PRs first (`tea pr list` /
+  `gh pr list`). When one of yours is open, the next commit goes on its branch
+  and into that PR, whatever the ticket, the effort or the review state. A new
+  PR opens only once it has merged or closed. pr-guard refuses a second one.
 - Commit locally as you go. Push once, when the effort is finished and the
   checks pass. A push asks a reviewer to read.
 - Never reuse a branch whose remote was deleted (`git status` shows "upstream
@@ -315,28 +314,27 @@ anyone deciding it should.
 
 ### Stacked branches (stacked diffs)
 
-A stack is the fallback for one situation: the open PR is sitting — pushed and
-waiting on review or a merge — and the next work cannot wait for it. Then
-build a stack without asking. Every other follow-up belongs in the open PR,
-including the one that feels like a separate change.
+A stack is built only when Vicky asks for one in the conversation. A PR
+waiting on review is a PR to push to: the next commit goes on its branch.
 
-- Build every stack with `git-spice` (`gs`). It records each branch's base, so
-  after a squash merge upstream it replays only the unmerged work.
+pr-guard refuses `gs stack submit`, a `gs branch create` off anything but
+`main`, and a second PR. When Vicky asks for a stack, ask her to run
+`touch ~/.claude/pr-guard-allow` in her own terminal before each refused
+step; one allowance lets one command through.
+
+With a stack she asked for:
+
+- Build it with `git-spice` (`gs`). It records each branch's base, so after a
+  squash merge upstream it replays only the unmerged work.
 - `gs branch create <name>` from the branch it depends on. `gs stack submit`
   opens or updates one PR per branch, each targeting the one below it.
 - After any branch in the stack merges: `gs repo sync`, `gs stack restack`,
   then `gs stack submit`. Sync drops the merged branches and retargets their
-  children. Skipping it is how the stack rots.
+  children.
 - Merge bottom-up. A child merged first ships the parent's unreviewed work
   under the child's PR number.
 - Each PR body names what it sits on, so a reviewer who opens the middle of a
   stack knows it is not readable alone.
-- Stack only where the split is real. Two PRs that cannot be reviewed apart
-  are one PR cut in half. When in doubt, keep it in the open PR.
-- git-guard ignores `gs` on purpose: `gs` tracks the bases the guard protects.
-  Build stacks with `gs`, not raw git around the guard.
-- Two open PRs for one effort that are *not* a stack are a sequencing bug:
-  whichever merges first ships an incomplete change.
 
 ## Plans, specs, and brain-dumps
 
