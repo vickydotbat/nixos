@@ -15,6 +15,9 @@
   libxrandr,
 }:
 
+# Pinned to a release until the upstream flake lands
+# (https://github.com/jadzziaa/moonglow-toolset/pull/2). Once it merges, swap
+# this recipe for a flake input, so `nix flake update` pulls the latest build.
 rustPlatform.buildRustPackage (finalAttrs: {
   pname = "moonglow-toolset";
   version = "0.7.1";
