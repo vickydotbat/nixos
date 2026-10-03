@@ -69,6 +69,16 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Moonglow Toolset builds from its own flake on `develop`, reading the
+    # crates from its Cargo.lock, so `nix flake update moonglow-toolset` pulls
+    # the latest commit with no hash to bump here. It follows our nixpkgs; if
+    # Moonglow's rust-version outpaces that Rust, its build fails until
+    # nixpkgs is updated too.
+    moonglow-toolset = {
+      url = "github:jadzziaa/moonglow-toolset";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # Agents
 
     pi = {

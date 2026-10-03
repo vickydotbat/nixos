@@ -8,7 +8,6 @@
   gimp3-custom = pkgs.callPackage ./gimp3-custom.nix { };
   graft = pkgs.callPackage ./graft.nix { };
   habit-hooks = pkgs.callPackage ./habit-hooks.nix { };
-  moonglow-toolset = pkgs.callPackage ./moonglow-toolset.nix { };
   neverwinter-nim = pkgs.callPackage ./neverwinter-nim.nix { };
   nwnexplorer = pkgs.callPackage ./nwnexplorer.nix { };
   omp = pkgs.callPackage ./omp/package.nix { };

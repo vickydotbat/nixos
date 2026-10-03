@@ -1,5 +1,6 @@
 {
   config,
+  inputs,
   lib,
   options,
   pkgs,
@@ -191,7 +192,7 @@ in
         nwnBlender
         pkgs.cleanmodels
         cleanmodels-nvb
-        pkgs.moonglow-toolset
+        inputs.moonglow-toolset.packages.${pkgs.stdenv.hostPlatform.system}.default
         pkgs.neverwinter-nim
         nwnexplorer
         nwtoolset

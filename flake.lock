@@ -224,6 +224,26 @@
         "type": "github"
       }
     },
+    "moonglow-toolset": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1791025431,
+        "narHash": "sha256-CT2676E/G0v9TB9V0QGAI2ccyOBonzG/dw+TBBstK+w=",
+        "owner": "jadzziaa",
+        "repo": "moonglow-toolset",
+        "rev": "7bda8b0cbf7d61004d2726c20a2ceca1875fa171",
+        "type": "github"
+      },
+      "original": {
+        "owner": "jadzziaa",
+        "repo": "moonglow-toolset",
+        "type": "github"
+      }
+    },
     "nix-index-database": {
       "inputs": {
         "nixpkgs": [
@@ -422,6 +442,7 @@
         "impermanence": "impermanence",
         "import-tree": "import-tree",
         "matt-skills": "matt-skills",
+        "moonglow-toolset": "moonglow-toolset",
         "nix-index-database": "nix-index-database",
         "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs",
