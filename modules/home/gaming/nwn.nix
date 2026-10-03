@@ -191,6 +191,7 @@ in
         nwnBlender
         pkgs.cleanmodels
         cleanmodels-nvb
+        pkgs.moonglow-toolset
         pkgs.neverwinter-nim
         nwnexplorer
         nwtoolset
@@ -238,6 +239,12 @@ in
       home.persistence."/nix/persist" = lib.mkIf (cfg.enable && persistenceEnabled) {
         directories = [
           ".local/share/Neverwinter Nights"
+          # Moonglow keeps recovery copies, prefabs and variable sets here.
+          # Losing them on a root wipe defeats the recovery copies' purpose.
+          ".local/share/moonglow"
+          # eframe's window and preference state (app.ron), named after the
+          # app's display name lowercased with its spaces dropped.
+          ".local/share/moonglowtoolset"
           ".config/blender/${nwnBlenderConfigVersion}"
           # Keep the old 4.0 config so Blender 5.0 can migrate NWN settings on
           # first run. Drop once 5.0 has its own tuned state.
