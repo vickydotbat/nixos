@@ -262,6 +262,23 @@ death costs one step, not the run.
   `pdftotext`) are the usual culprits. Use an already-extracted copy when one
   sits beside the archive.
 
+## Runaway work
+
+This machine is Vicky's desktop. A process that runs away freezes it, and a
+freeze costs her unsaved work. On 2026-10-04 an agent's test loop grew a local
+game server to 17 GB and forced a reboot.
+
+- Everything you start has a ceiling. A container gets `--memory`;
+  container-guard refuses one without it. A local build, test or tool that can
+  run away runs as
+  `systemd-run --user --scope -p MemoryMax=4G -p MemorySwapMax=0 timeout 300 <cmd>`.
+- A limit, a timeout or a crash path is proven in a unit test under that
+  ceiling. Code built to run away stays out of every live server, dev stack and
+  game client.
+- A loop you write for a live check has a hard iteration cap.
+- A hung server is stopped in the turn you find it. Take one stack dump, then
+  `docker stop` it. A hang left running keeps growing.
+
 ## Tests and checks
 
 A check spends a budget: CPU, memory and the reviewer's wait, on a runner

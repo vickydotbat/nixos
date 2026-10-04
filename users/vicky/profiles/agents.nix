@@ -56,6 +56,10 @@ in
     # that are untracked, or at a folder outside any repo.
     rmGuard.enable = true;
 
+    # Refuses `podman run` / `docker run` with no --memory, so a runaway
+    # container dies at its own ceiling instead of freezing the desktop.
+    containerGuard.enable = true;
+
     # Blocks two things CLAUDE.md only asks for in prose, which agents skip:
     # a new branch on top of unmerged work, and any push that lands on main.
     gitGuard.enable = true;

@@ -22,6 +22,13 @@
 #   for allocation failure, so it kills the offender early instead of letting
 #   the kernel pick a victim late.
 #
+# A third layer closes a hole the first two left. Rootless Podman puts every
+# container and pod under the user manager's `user.slice`, beside `app.slice`
+# and outside both rules. On 2026-10-04 a local game server there looped to
+# 17 GB, swapped, and froze solanine into a reboot. `user.slice` now has a hard
+# MemoryMax and no swap, so a runaway container dies at its own ceiling and the
+# desktop never notices.
+#
 # A percentage, not a byte count, so the same value is sane on machines with
 # different amounts of RAM.
 
@@ -43,6 +50,20 @@ in
         together can reach it without either misbehaving. Too low costs
         throughput on a busy desktop, too high stops preventing the freeze it
         exists to prevent.
+      '';
+    };
+
+    containerMemoryMax = lib.mkOption {
+      type = lib.types.str;
+      default = "60%";
+      description = ''
+        Hard memory ceiling for the user manager's `user.slice`, where rootless
+        Podman runs every container and pod. Over it the kernel kills inside
+        the slice; nothing outside it is touched. Swap is denied to the slice,
+        so a runaway reaches the ceiling quickly instead of thrashing toward it.
+
+        Every container shares it. Raise it when a model or a build legitimately
+        needs more, never to get a stuck container moving again.
       '';
     };
 
@@ -76,6 +97,14 @@ in
 
     systemd.user.slices.app.sliceConfig = {
       MemoryHigh = cfg.appMemoryHigh;
+      ManagedOOMMemoryPressure = "kill";
+      ManagedOOMMemoryPressureLimit = cfg.pressureLimit;
+    };
+
+    systemd.user.slices.user.sliceConfig = {
+      MemoryHigh = "50%";
+      MemoryMax = cfg.containerMemoryMax;
+      MemorySwapMax = "0";
       ManagedOOMMemoryPressure = "kill";
       ManagedOOMMemoryPressureLimit = cfg.pressureLimit;
     };
