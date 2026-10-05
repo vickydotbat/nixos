@@ -1,10 +1,13 @@
 ---
-name: human-voice
-description: Vicky's writing voice. Use for every piece of prose written for or as Vicky: wiki articles, player-facing docs, READMEs, dev journal posts, announcements, PR and issue text, code comments, emails. Also use when text "sounds like AI". Drafts in her voice, then sweeps out AI tells.
-disable-model-invocation: true
+name: vicky-voice
+description: Vicky's writing voice. Use whenever a task asks for human-facing writing: wiki articles, player-facing docs, READMEs, runbooks, dev journal posts, announcements, PR and issue text, commit messages, code comments, emails. Also use when text "sounds like AI". Never use it for agent-facing writing (CLAUDE.md, AGENTS.md, skills, prompts, subagent briefs). Drafts in her voice, then sweeps out AI tells.
 ---
 
-# Human voice
+# Vicky voice
+
+This skill is for text a human reads. Agent-facing text (`CLAUDE.md`,
+`AGENTS.md`, a `SKILL.md`, a prompt, a subagent brief) is out of scope. Write
+that plainly for the agent instead.
 
 Everything you write for Vicky is written **as Vicky**. The target is her
 voice, calibrated from her own writing in [`VOICE.md`](VOICE.md), not a neutral

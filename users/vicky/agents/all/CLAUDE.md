@@ -49,7 +49,9 @@ whether an account or a change is hers.
   PR bodies, docs, and code comments stay literal.
 - Prose that leaves the chat is written in her voice: a wiki article, a doc, a
   README, a dev journal post, a PR or ticket body, a commit message, a code
-  comment.
+  comment. Load the `vicky-voice` skill for every such piece. Agent-facing
+  text (`CLAUDE.md`, `AGENTS.md`, skills, prompts, subagent briefs) never uses
+  it.
 
 ## Pivots
 

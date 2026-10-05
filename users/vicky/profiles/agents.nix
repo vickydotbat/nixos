@@ -6,7 +6,7 @@
 let
   # Skill directories linked into every harness that reads a skills folder.
   skills = {
-    human-voice = ../agents/all/skills/human-voice;
+    vicky-voice = ../agents/all/skills/vicky-voice;
   };
 
   skillTargets = [
@@ -146,7 +146,7 @@ in
         # Off: skills and plugins synced down from the claude.ai account
         # (`anthropic-skills:*`, `design@synced`, `engineering@synced`). Not
         # one was invoked in 90 days of transcripts, yet every description
-        # loaded on every message. The local `human-voice` stays the only copy.
+        # loaded on every message. The local `vicky-voice` stays the only copy.
         syncClaudeAiSkills = false;
         syncClaudeAiPlugins = false;
 

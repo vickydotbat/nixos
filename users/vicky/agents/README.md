@@ -10,7 +10,7 @@ configuration, not a shared theorem module.
   there is a read-only link into the Nix store.
 - Skills under `all/skills/` are installed into `~/.agents/skills/` and
   `~/.claude/skills/` only when listed in the `skills` set in
-  `users/vicky/profiles/agents.nix`. Today that is `human-voice` alone.
+  `users/vicky/profiles/agents.nix`. Today that is `vicky-voice` alone.
 - `codex/*` is installed into `~/.codex/` when Codex is enabled.
 - `claude/*` is installed into `~/.claude/` when Claude Code is enabled.
 - `opencode/*` is installed into `~/.config/opencode/` when OpenCode is
