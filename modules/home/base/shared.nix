@@ -79,60 +79,62 @@ in
     };
   };
 
-  config = lib.mkIf cfg.enable (lib.mkMerge [
-    # The owner just keeps a directory. Nothing mounts, nothing can hang.
-    (lib.mkIf isOwner {
-      # ponytail: a plain mkdir, not `home.file."...".keep`. That would put a
-      # /nix/store symlink inside the shared folder, and every client reading
-      # it over sshfs fails with "Operation not permitted" on `ls -l`.
-      home.activation.sharedDirectory = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-        $DRY_RUN_CMD ${pkgs.coreutils}/bin/mkdir -p ${lib.escapeShellArg mountPoint}
-      '';
+  config = lib.mkIf cfg.enable (
+    lib.mkMerge [
+      # The owner just keeps a directory. Nothing mounts, nothing can hang.
+      (lib.mkIf isOwner {
+        # ponytail: a plain mkdir, not `home.file."...".keep`. That would put a
+        # /nix/store symlink inside the shared folder, and every client reading
+        # it over sshfs fails with "Operation not permitted" on `ls -l`.
+        home.activation.sharedDirectory = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+          $DRY_RUN_CMD ${pkgs.coreutils}/bin/mkdir -p ${lib.escapeShellArg mountPoint}
+        '';
 
-      home.persistence = lib.mkIf (hasHomePersistence && persistenceEnabled) {
-        "/nix/persist".directories = [ cfg.directory ];
-      };
-    })
-
-    (lib.mkIf (!isOwner) {
-      home.packages = [ pkgs.sshfs ];
-
-      # `sshfs -f` stays in the foreground, so systemd can supervise it like any
-      # other service. That avoids a `.mount` unit, which would need a
-      # privileged `mount.fuse` helper this user does not have.
-      systemd.user.services.shared-folder = {
-        Unit = {
-          Description = "Shared folder from ${cfg.host}";
-          After = [ "network.target" ];
+        home.persistence = lib.mkIf (hasHomePersistence && persistenceEnabled) {
+          "/nix/persist".directories = [ cfg.directory ];
         };
+      })
 
-        Service = {
-          Type = "simple";
-          ExecStartPre = "${pkgs.coreutils}/bin/mkdir -p ${lib.escapeShellArg mountPoint}";
-          ExecStart = lib.concatStringsSep " " [
-            "${lib.getExe pkgs.sshfs}"
-            "-f"
-            "-o ${sshfsOptions}"
-            (lib.escapeShellArg remote)
-            (lib.escapeShellArg mountPoint)
-          ];
-          # Unmount on stop, otherwise the mount point is left as a stale FUSE
-          # endpoint that reports "Transport endpoint is not connected".
-          #
-          # sshfs is FUSE 3, so this must be `fusermount3`; the FUSE 2
-          # `fusermount` fails with "Operation not permitted" and leaves the
-          # mount behind. It has to be the setuid wrapper rather than the store
-          # path for the same reason: unmounting as a normal user needs it.
-          # `programs.fuse.enable` provides the wrapper.
-          ExecStopPost = "-/run/wrappers/bin/fusermount3 -u ${lib.escapeShellArg mountPoint}";
-          # The peer is a laptop and is often simply off. Keep retrying quietly
-          # rather than failing the unit for the rest of the session.
-          Restart = "always";
-          RestartSec = 30;
+      (lib.mkIf (!isOwner) {
+        home.packages = [ pkgs.sshfs ];
+
+        # `sshfs -f` stays in the foreground, so systemd can supervise it like any
+        # other service. That avoids a `.mount` unit, which would need a
+        # privileged `mount.fuse` helper this user does not have.
+        systemd.user.services.shared-folder = {
+          Unit = {
+            Description = "Shared folder from ${cfg.host}";
+            After = [ "network.target" ];
+          };
+
+          Service = {
+            Type = "simple";
+            ExecStartPre = "${pkgs.coreutils}/bin/mkdir -p ${lib.escapeShellArg mountPoint}";
+            ExecStart = lib.concatStringsSep " " [
+              "${lib.getExe pkgs.sshfs}"
+              "-f"
+              "-o ${sshfsOptions}"
+              (lib.escapeShellArg remote)
+              (lib.escapeShellArg mountPoint)
+            ];
+            # Unmount on stop, otherwise the mount point is left as a stale FUSE
+            # endpoint that reports "Transport endpoint is not connected".
+            #
+            # sshfs is FUSE 3, so this must be `fusermount3`; the FUSE 2
+            # `fusermount` fails with "Operation not permitted" and leaves the
+            # mount behind. It has to be the setuid wrapper rather than the store
+            # path for the same reason: unmounting as a normal user needs it.
+            # `programs.fuse.enable` provides the wrapper.
+            ExecStopPost = "-/run/wrappers/bin/fusermount3 -u ${lib.escapeShellArg mountPoint}";
+            # The peer is a laptop and is often simply off. Keep retrying quietly
+            # rather than failing the unit for the rest of the session.
+            Restart = "always";
+            RestartSec = 30;
+          };
+
+          Install.WantedBy = [ "default.target" ];
         };
-
-        Install.WantedBy = [ "default.target" ];
-      };
-    })
-  ]);
+      })
+    ]
+  );
 }

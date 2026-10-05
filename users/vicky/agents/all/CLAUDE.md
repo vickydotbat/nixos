@@ -124,6 +124,14 @@ may have landed even when `tea` fails.
 
 Explain a technical term in plain words the first time you use it.
 
+## Diagnosing a bug report
+
+Vicky's builds, assets and data are current. When she reports a bug, trace it
+in the code. A stale build is a diagnosis like any other and needs proof before
+you state it. Check it yourself: compare the built artifact with its source,
+read the version or hash the running server logs, or read the built row. State
+it only with that proof in hand, quoted. Without proof, keep tracing the code.
+
 ## NixOS
 
 This machine runs NixOS, not FHS Linux.

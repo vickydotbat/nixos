@@ -41,7 +41,6 @@ in
     # through graft's own wrapper, so they need this to find the install. The
     # package patches upstream's habit of baking an absolute path into the shim,
     # which would put a /nix/store path in a file meant to be committed.
-    home.sessionVariables.GRAFT_DIST =
-      "${cfg.package}/lib/node_modules/@nanonets/graft/dist/claude";
+    home.sessionVariables.GRAFT_DIST = "${cfg.package}/lib/node_modules/@nanonets/graft/dist/claude";
   };
 }

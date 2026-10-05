@@ -24,11 +24,9 @@ in
     # the next activation dies on `mkdir: File exists` because Home Manager only
     # cleans links it can still trace to a generation it knows about. Drop dead
     # links under the profile directory first, so activation stays idempotent.
-    home.activation.pruneDanglingChromiumLinks =
-      lib.hm.dag.entryBefore [ "checkLinkTargets" ]
-        ''
-          run ${pkgs.findutils}/bin/find "${config.home.homeDirectory}/.config/chromium" \
-            -maxdepth 2 -xtype l -delete 2>/dev/null || true
-        '';
+    home.activation.pruneDanglingChromiumLinks = lib.hm.dag.entryBefore [ "checkLinkTargets" ] ''
+      run ${pkgs.findutils}/bin/find "${config.home.homeDirectory}/.config/chromium" \
+        -maxdepth 2 -xtype l -delete 2>/dev/null || true
+    '';
   };
 }

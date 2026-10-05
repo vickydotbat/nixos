@@ -63,34 +63,35 @@ buildGoModule (finalAttrs: {
     writableTmpDirAsHomeHook
   ];
 
-  postInstall = lib.optionalString (stdenv.buildPlatform.canExecute stdenv.hostPlatform) ''
-    installShellCompletion --cmd tea \
-      --bash <($out/bin/tea completion bash) \
-      --fish <($out/bin/tea completion fish) \
-      --zsh <($out/bin/tea completion zsh)
+  postInstall =
+    lib.optionalString (stdenv.buildPlatform.canExecute stdenv.hostPlatform) ''
+      installShellCompletion --cmd tea \
+        --bash <($out/bin/tea completion bash) \
+        --fish <($out/bin/tea completion fish) \
+        --zsh <($out/bin/tea completion zsh)
 
-    mkdir $out/share/powershell/ -p
-    $out/bin/tea completion pwsh > $out/share/powershell/tea.Completion.ps1
+      mkdir $out/share/powershell/ -p
+      $out/bin/tea completion pwsh > $out/share/powershell/tea.Completion.ps1
 
-    $out/bin/tea man --out $out/share/man/man1/tea.1
-  ''
-  # ponytail: 60 s covers every issue and PR call. A slow `tea clone` or a
-  # large `tea api` download can outrun it; raise TEA_TIMEOUT for that run.
-  + ''
-    mv $out/bin/tea $out/bin/.tea-real
-    cat > $out/bin/tea <<EOF
-    #!${runtimeShell}
-    [ -t 1 ] && exec $out/bin/.tea-real "\$@"
-    ${coreutils}/bin/timeout "\''${TEA_TIMEOUT:-60}" $out/bin/.tea-real "\$@"
-    rc=\$?
-    if [ \$rc -eq 124 ]; then
-      echo "tea: timed out after \''${TEA_TIMEOUT:-60}s. A write may have landed anyway." >&2
-      echo "tea: read the thread (tea issues <n> --comments) before you retry." >&2
-    fi
-    exit \$rc
-    EOF
-    chmod +x $out/bin/tea
-  '';
+      $out/bin/tea man --out $out/share/man/man1/tea.1
+    ''
+    # ponytail: 60 s covers every issue and PR call. A slow `tea clone` or a
+    # large `tea api` download can outrun it; raise TEA_TIMEOUT for that run.
+    + ''
+      mv $out/bin/tea $out/bin/.tea-real
+      cat > $out/bin/tea <<EOF
+      #!${runtimeShell}
+      [ -t 1 ] && exec $out/bin/.tea-real "\$@"
+      ${coreutils}/bin/timeout "\''${TEA_TIMEOUT:-60}" $out/bin/.tea-real "\$@"
+      rc=\$?
+      if [ \$rc -eq 124 ]; then
+        echo "tea: timed out after \''${TEA_TIMEOUT:-60}s. A write may have landed anyway." >&2
+        echo "tea: read the thread (tea issues <n> --comments) before you retry." >&2
+      fi
+      exit \$rc
+      EOF
+      chmod +x $out/bin/tea
+    '';
 
   doInstallCheck = true;
   installCheckPhase = ''
