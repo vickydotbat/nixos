@@ -30,6 +30,7 @@ let
       # than someone's interrupted afternoon.
       roots=(${lib.concatMapStringsSep " " lib.escapeShellArg cfg.roots})
       stash_age_days=${toString cfg.stashAge}
+      local_idle_hours=${toString cfg.localIdleHours}
 
       dry_run=0
       if [[ "''${1:-}" == "--dry-run" ]]; then
@@ -85,12 +86,37 @@ let
         return 1
       }
 
-      tidy_branches() {
-        local repo=$1 trunk=$2 trunk_ref=$3 current branch track tip
-        current=$(git symbolic-ref --quiet --short HEAD || true)
+      # When a branch last moved, as seconds since the epoch. The branch's own
+      # reflog is the honest witness: it records the creation of a branch made
+      # a minute ago from an old commit. A branch with no reflog (one a tool
+      # wrote with `update-ref`, or one whose reflog expired) falls back to its
+      # tip's commit date.
+      last_moved() {
+        local branch=$1 when
+        when=$(git reflog show --format=%ct -n 1 "refs/heads/$branch" 2>/dev/null || true)
+        [[ -n "$when" ]] || when=$(git log -1 --format=%ct "$branch")
+        printf '%s\n' "$when"
+      }
 
-        while read -r branch track; do
-          [[ "$track" == "[gone]" ]] || continue
+      tidy_branches() {
+        local repo=$1 trunk=$2 trunk_ref=$3 current branch upstream track tip idle_cutoff
+        current=$(git symbolic-ref --quiet --short HEAD || true)
+        idle_cutoff=$(( $(date +%s) - local_idle_hours * 3600 ))
+
+        # Two kinds of branch are candidates. A pushed branch whose remote head
+        # is gone: the forge deleted it when the pull request merged. And a
+        # branch that was never pushed at all, which no forge will ever clean
+        # up: an agent's worktree branch, a replayed prototype. The second kind
+        # carries one more guard. A branch created from the trunk a moment ago
+        # holds no commits of its own, so the trunk "carries" it trivially, and
+        # deleting it would take the operator's fresh branch out from under
+        # them. It must sit idle first.
+        while read -r branch upstream track; do
+          if [[ -z "$upstream" ]]; then
+            (( $(last_moved "$branch") < idle_cutoff )) || continue
+          else
+            [[ "$track" == "[gone]" ]] || continue
+          fi
           [[ "$branch" != "$current" ]] || continue
           [[ "$branch" != "$trunk" ]] || continue
 
@@ -129,7 +155,7 @@ let
 
           printf '%s: deleted %s (recover with: git branch %s refs/tidy/branches/%s)\n' \
             "$repo" "$branch" "$branch" "$branch"
-        done < <(git for-each-ref --format='%(refname:short) %(upstream:track)' refs/heads)
+        done < <(git for-each-ref --format='%(refname:short) %(upstream) %(upstream:track)' refs/heads)
       }
 
       # Only entries git itself wrote during a rebase, and only once they are
@@ -194,6 +220,13 @@ let
         # dangerous, so an offline run simply does less.
         timeout 30 git fetch --prune --quiet 2>/dev/null || true
 
+        # A worktree whose directory is gone (an agent's scratch folder, a
+        # cleared /tmp) still pins its branch: git refuses to delete a branch
+        # it believes is checked out. Pruning removes only that bookkeeping,
+        # and only for directories that no longer exist; a live worktree, and
+        # any uncommitted work in it, is untouched.
+        git worktree prune 2>/dev/null || true
+
         if ! read -r trunk trunk_ref < <(trunk_of); then
           printf '%s: no trunk branch to compare against, skipped\n' "$repo" >&2
           return 0
@@ -236,6 +269,17 @@ in
       '';
     };
 
+    localIdleHours = lib.mkOption {
+      type = lib.types.ints.positive;
+      default = 24;
+      description = ''
+        Hours a never-pushed branch must sit untouched before it is a
+        candidate. Its content must still be proved to be in the trunk; this
+        only keeps a branch created a moment ago, which has no commits yet,
+        from being taken out from under the operator.
+      '';
+    };
+
     stashAge = lib.mkOption {
       type = lib.types.ints.positive;
       default = 14;
@@ -260,13 +304,15 @@ in
     };
 
     systemd.user.timers.git-tidy = {
-      Unit.Description = "Run the git tidying rite daily";
+      # Hourly, so a branch merged this afternoon is gone this afternoon. One
+      # bounded fetch per repository is the whole cost of a run.
+      Unit.Description = "Run the git tidying rite hourly";
 
       Timer = {
         OnBootSec = "5min";
-        OnCalendar = "daily";
+        OnCalendar = "hourly";
         Persistent = true;
-        RandomizedDelaySec = "30min";
+        RandomizedDelaySec = "5min";
         Unit = "git-tidy.service";
       };
 

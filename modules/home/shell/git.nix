@@ -133,8 +133,9 @@ in
               wide rule: a missing upstream is the whole of its evidence.
 
               The narrow rule runs unattended. `theorem.home.shell.git-tidy`
-              schedules `git-tidy`, which deletes a gone branch only once it
-              has proved the trunk already carries its content — including
+              schedules `git-tidy` hourly. It deletes a gone branch, or a
+              never-pushed one that has sat idle a day, only once it has
+              proved the trunk already carries its content — including
               through a squash merge, which leaves the branch no ancestor of
               anything — and writes a recovery ref under `refs/tidy/` before
               every deletion. Keep the two apart: the alias below is faster and
