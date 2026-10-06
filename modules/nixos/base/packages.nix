@@ -10,6 +10,23 @@
 # modules or host profiles.
 let
   cfg = config.theorem.nixos.base.packages;
+
+  # Terminals a Home Manager user enables through `theorem.home.shell.*`.
+  # Add a terminal here when it gains a module of its own.
+  terminals = {
+    kitty = homeConfig: homeConfig.programs.kitty.package;
+    ghostty = homeConfig: homeConfig.programs.ghostty.package;
+  };
+
+  enabledTerminfo = lib.concatMap (
+    homeConfig:
+    lib.concatLists (
+      lib.mapAttrsToList (
+        name: package:
+        lib.optional (homeConfig.theorem.home.shell.${name}.enable or false) (package homeConfig).terminfo
+      ) terminals
+    )
+  ) (lib.attrValues (config.home-manager.users or { }));
 in
 {
   options.theorem.nixos.base.packages.enable = lib.mkOption {
@@ -22,18 +39,20 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    # Repair shells may cross user boundaries through sudo/run0. Keep common
-    # terminal descriptions available system-wide so root-side tools do not
-    # fail when a modern terminal exports its precise TERM name.
-    environment.enableAllTerminfo = true;
-
-    environment.systemPackages = with pkgs; [
-      git
-      nano
-      vim
-      unzip
-      zip
-      python3
-    ];
+    # Repair shells may cross user boundaries through sudo/run0, and the root
+    # side does not inherit a user's TERMINFO_DIRS. Install system-wide only
+    # the terminfo of terminals a user actually enables. ncurses covers the
+    # rest. `environment.enableAllTerminfo` builds every terminal it lists, so
+    # one broken emulator upstream blocks every rebuild.
+    environment.systemPackages =
+      (with pkgs; [
+        git
+        nano
+        vim
+        unzip
+        zip
+        python3
+      ])
+      ++ enabledTerminfo;
   };
 }
