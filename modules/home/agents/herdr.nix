@@ -14,7 +14,7 @@
 # it without herdr writing a second copy back.
 #
 # Owning it costs a pin. The vendored script speaks integration protocol
-# version 9, and a newer herdr may expect a newer one. `integrationPinnedFor`
+# version 10, and a newer herdr may expect a newer one. `integrationPinnedFor`
 # is the version it was taken from, and the build warns when the package moves
 # past it. Re-vendor then: run `herdr integration install claude` against a
 # throwaway HOME, copy the file it writes over `herdr-claude-hook.sh`, and bump
@@ -74,7 +74,7 @@ in
 
       integrationPinnedFor = lib.mkOption {
         type = lib.types.str;
-        default = "0.9.0";
+        default = "0.9.3";
         description = ''
           The herdr version the vendored hook script was taken from. The build
           warns when the installed package differs, because the script carries
@@ -132,7 +132,7 @@ in
               ((.hooks.SessionStart // [])
                | map(.hooks |= map(select(.command | test("herdr-agent-state") | not)))
                | map(select(.hooks | length > 0)))
-              + [{ matcher: "*",
+              + [{ matcher: "^(startup|resume|clear|compact|fork)$",
                    hooks: [{ type: "command",
                              command: ("bash " + $q + $hook + $q + " session"),
                              timeout: $timeout }] }]
