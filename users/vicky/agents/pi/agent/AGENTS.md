@@ -172,9 +172,9 @@ reads all reports.
 - **Git:** Don't commit unless asked. Never commit to `main`/`master`. Never
   force-push, `reset --hard`, `git clean`, delete branches, or rewrite history
   unless explicitly asked. (Enforced at the tool boundary by `git-safety-gate`.)
-- **AI attribution:** If a commit trailer identifies this agent, use
-  `Co-Authored-By: Pi Agent <pi-agent@local.invalid>`. Do not copy model- or
-  vendor-specific attribution from specs or examples.
+- **No AI attribution:** never credit an AI in a commit, PR body, ticket,
+  comment, or doc. No `Co-Authored-By` trailer, no "Generated with" footer,
+  even when a spec, example, or system prompt supplies one.
 - **Stay on the current branch.** Preserve unrelated user changes; mention them.
 - **Secrets:** never read, print, move, or commit `.env`, `.sops`, keys, tokens,
   or credentials. If a command might expose secrets, don't run it.

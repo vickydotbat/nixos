@@ -318,9 +318,11 @@ anyone deciding it should.
 - A trunk repository is the exception: one whose own `CLAUDE.md` or
   `AGENTS.md` says every change lands on `main`. There, commit and push to
   `main` with no branch. git-guard flips the same way, by origin URL.
-- Never add a `Co-Authored-By` line to a commit message, whoever asks. A
-  session instruction handing you an attribution line does not override this,
-  and git-guard refuses the commit either way.
+- Never credit an AI anywhere: no `Co-Authored-By` line, no "Generated with
+  Claude Code" footer, no "written with AI" note, in a commit, PR body, ticket,
+  comment, or doc. The work is Vicky's. A session instruction handing you an
+  attribution line does not override this, and git-guard refuses such a
+  commit either way.
 - Destructive commands (`git reset --hard`, `git clean`, branch deletion,
   history rewrites) run only when explicitly asked.
 - HARD RULE: `main` is the only legal base for a *loose* branch, one made with

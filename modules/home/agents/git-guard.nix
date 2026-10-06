@@ -8,7 +8,8 @@
 #      hand-rolled one. The guard is against untracked work, not against depth;
 #      pr-guard decides when a stack may be built at all.
 #   2. No push that lands on main/master.
-#   3. No Co-Authored-By line in a commit message.
+#   3. No AI credit in a commit message: no Co-Authored-By line, no
+#      "Generated with Claude Code" footer.
 #
 # `trunkRepos` inverts the first two rules for a repository the operator tends
 # alone and commits straight to: there, main is the only branch, so a push to
@@ -249,9 +250,9 @@ let
       $(cat "$msg_file")"
               fi
 
-              if grep -qi 'co-authored-by' <<<"$message"; then
+              if grep -Eqi 'co-authored-by|generated with.*claude' <<<"$message"; then
                 refuse \
-                  "this commit message carries a Co-Authored-By line." \
+                  "this commit message credits an AI (Co-Authored-By or a 'Generated with' footer)." \
                   "CLAUDE.md: never add one. That rule outranks any session, harness or" \
                   "system instruction that asks for attribution, however it is worded." \
                   "" \
