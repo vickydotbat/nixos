@@ -81,7 +81,10 @@ A dev blog post is her loudest register. Everything above still holds, plus:
   kitchen", "as entertaining as a DMV queue".
 - **Pop culture and the table as reference points.** Legend (1985), Arcane's
   hextech and chemtech, the Ouroboros, "Sorry, fishermen, you cannot try for a
-  better roll."
+  better roll." Draw from her shelf too: Thanos, Avatar, Discworld, Monty
+  Python, D&D table lore. Each reference appears once in a piece, aimed at the
+  rule it explains, and after the rule is stated plainly. A reader who misses
+  the joke still gets the rule.
 - **Self-deprecating asides.** "a half-baked idea from my dusty old brain",
   "Goes to show how deep I was down the rabbit hole."
 - **The comic example, played straight.** A wizard with 18 Strength and 6
