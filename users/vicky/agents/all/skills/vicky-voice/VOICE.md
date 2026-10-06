@@ -70,6 +70,9 @@ A dev blog post is her loudest register. Everything above still holds, plus:
   character are you going to make with this?"
 - **One-word paragraphs for timing.** "Fact." "Ouch." "Now we're actually
   cooking." Used once or twice a post, after a beat that earns it.
+- **"Here's where it gets interesting..."** to turn from the rule to the
+  weird case it creates. She says it sometimes, so it stays, once a post at
+  most and only when something odd really follows.
 - **An ellipsis for a beat, ALL CAPS for a shout.** "we moved to 5e's fixed
   average (half the die, plus 1), and... it felt flat." "worth exactly 27
   points WITH compounding costs", "they're ACTUALLY GOOD", "WHAT? WHY?"

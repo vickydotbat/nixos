@@ -112,9 +112,10 @@ metaphor came from her record or from you.
   Stop on the last real point, and join with what actually happened: *but
   then*, *the problem was*, *so I tried something else*. Often no join is
   needed.
-- **Hook lines** — *But here's the kicker*, *Here's the thing*, *Here's where
-  it gets interesting*, *That's only half the story*, *Real talk*, *Why does
-  this matter?* followed by its own answer. Say the next fact.
+- **Hook lines** — *But here's the kicker*, *Here's the thing*, *That's only
+  half the story*, *Real talk*, *Why does this matter?* followed by its own
+  answer. Say the next fact. Her own *Here's where it gets interesting...* is
+  in `VOICE.md` and allowed once a post.
 - **Talking about the writing** — *In this article we will explore*, *Let's
   dive in*, *Let's break it down*, *I'm going to make three points*, *I hope
   this helps*, *what I'd leave you with*, notes about your training or cutoff
