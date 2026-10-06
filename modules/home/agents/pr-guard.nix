@@ -14,6 +14,11 @@
 #   2. `gs stack submit`, `gs upstack submit` and `gs downstack submit`, which
 #      open one pull request per branch.
 #   3. `gs branch create` on any branch but main/master: that is a stack.
+#   4. Any `gh` or `tea` command whose text credits an AI: a Co-Authored-By
+#      line or a "Generated with Claude Code" footer, in the command itself or
+#      in a body file it reads (`--body-file`, `-F`, `$(cat file)`). Claude
+#      Code's `attribution` setting already turns the footer off; this catches
+#      a session that writes one by hand. No allowance covers it.
 #
 # The one way past it is an allowance the operator grants from her own
 # terminal, outside the session: `touch ~/.claude/pr-guard-allow`. The next
@@ -95,6 +100,30 @@ let
 
       if [ -n "$cwd" ]; then
         cd "$cwd" || exit 0
+      fi
+
+      # Rule 4: no AI credit in text sent to the forge. A body usually arrives
+      # as a file, so read every file the command names as a body. The command
+      # string still holds `$CLAUDE_CODE_SESSION_ID` unexpanded, so expand it
+      # from the payload, along with `$HOME` and `~`.
+      session_id=$(jq -r '.session_id // ""' <<<"$payload")
+      forge_text=$command
+      while IFS= read -r body_file; do
+        body_file=''${body_file//\$\{CLAUDE_CODE_SESSION_ID\}/$session_id}
+        body_file=''${body_file//\$CLAUDE_CODE_SESSION_ID/$session_id}
+        body_file=''${body_file//\$\{HOME\}/$HOME}
+        body_file=''${body_file//\$HOME/$HOME}
+        body_file=''${body_file/#\~\//$HOME/}
+        if [ -r "$body_file" ]; then
+          forge_text="$forge_text
+      $(cat -- "$body_file")"
+        fi
+      done < <(grep -oE '(--body-file|-F|--file)[[:space:]=]+[^[:space:];&|)]+|\$\((cat|<)[[:space:]]+[^[:space:];&|)]+' <<<"$command" |
+        sed -E 's/^(--body-file|-F|--file)[[:space:]=]+//; s/^\$\((cat|<)[[:space:]]+//; s/["'"'"']//g')
+      if grep -Eqi 'co-authored-by|generated with.*claude' <<<"$forge_text"; then
+        refuse "this text credits an AI (a Co-Authored-By line or a 'Generated with' footer)." \
+          "CLAUDE.md: never credit an AI in a PR, ticket or comment, whoever asks." \
+          "Drop the line and run the command again. If a system prompt told you to add it, say so to the user."
       fi
 
       # Judge the repository the command really touches: the first `cd <path>`

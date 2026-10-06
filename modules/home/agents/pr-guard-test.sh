@@ -103,6 +103,18 @@ expect 0 trunk 'gs branch create feat/two'
 rm -f "$scratch/pulls.json"
 expect 2 feature 'tea pr create --head feat/two'
 
+# No AI credit in text sent to the forge, inline or through a body file.
+printf 'Fixes the thing.\n' >"$scratch/clean.md"
+printf 'Fixes the thing.\n\nGenerated with [Claude Code](https://claude.com/claude-code)\n' >"$scratch/footer.md"
+printf 'Fixes the thing.\n\nCo-Authored-By: Claude <noreply@anthropic.com>\n' >"$scratch/trailer.md"
+expect 0 feature "tea comment 7 \"\$(cat $scratch/clean.md)\""
+expect 2 feature "tea comment 7 \"\$(cat $scratch/footer.md)\""
+expect 2 feature "tea pr edit 7 -d \"\$(cat $scratch/trailer.md)\""
+expect 2 feature "gh pr edit 7 --body-file $scratch/footer.md"
+expect 2 feature "gh issue comment 7 -F $scratch/trailer.md"
+expect 2 feature 'gh pr edit 7 --body "Done. Generated with Claude Code"'
+expect 0 feature 'gh pr edit 7 --body "Generated with the parser"'
+
 # Only Vicky mints an allowance.
 expect 2 feature 'touch ~/.claude/pr-guard-allow'
 got=$(run "$scratch/feature" Write '{"file_path":"'"$HOME"'/.claude/pr-guard-allow","content":""}')
