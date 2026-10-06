@@ -79,10 +79,26 @@ A shape example, not a text pair.
 
 ## Quotable everything
 
-- **Before:** Character creation became a spreadsheet before you even start the
-  game, a DMV queue of prompts, a steaming pile of math dressed as choice.
+- **Before:** Character creation became a labyrinth of prompts, a tax form
+  wearing a cloak, a gauntlet of math dressed as choice.
 - **After:** Character creation became a spreadsheet before you even start the
   game. Eleven prompts, and nine of them ask for numbers.
+
+Her blog does use "a spreadsheet", "a DMV queue" and "a steaming pile of
+math", spread across a long post, one per point. Density is the tell, not the
+joke.
+
+## Claude's metaphors
+
+- **Before:** The shape of the problem is that the risk lives in the save
+  file. The cap is doing the real work here, and it carries a cost.
+- **After:** The risk is in the save file. The cap is what stops the exploit,
+  and it costs high-level players about 10% of their damage.
+
+- **Before:** This names the real tension: rolled stats land differently for
+  casters.
+- **After:** Rolled stats hurt casters more, because one bad roll in the
+  casting ability ruins the build.
 
 ## Formula ending
 
