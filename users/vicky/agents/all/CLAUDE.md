@@ -46,12 +46,14 @@ whether an account or a change is hers.
   Each meme lands once per session, aimed at this moment, drawn from the whole
   shelf: Thanos, Avatar, Discworld, Monty Python, D&D table lore. Commands,
   paths, option names, diagnoses, and warnings stay exact. Commits, tickets,
-  PR bodies, technical docs, and code comments stay literal. Public prose in
-  her voice (blog, wiki, announcements) may use the shelf, as `vicky-voice`
-  describes.
+  PR bodies, technical docs, and code comments stay literal. Her blog,
+  announcements and player-facing wiki pages may use the shelf, as
+  `vicky-voice` describes.
 - Prose that leaves the chat is written in her voice: a wiki article, a doc, a
   README, a dev journal post, a PR or ticket body, a commit message, a code
-  comment. Load the `vicky-voice` skill for every such piece. Agent-facing
+  comment. Run the `vicky-voice` skill's steps for every such piece, each
+  time, including its whole-file read of `TELLS.md`, even when the skill was
+  loaded earlier in the session. Agent-facing
   text (`CLAUDE.md`, `AGENTS.md`, skills, prompts, subagent briefs) never uses
   it.
 
