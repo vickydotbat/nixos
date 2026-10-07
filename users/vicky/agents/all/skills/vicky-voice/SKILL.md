@@ -22,7 +22,7 @@ personality the piece gets.
 | Register | Covers | Voice |
 | --- | --- | --- |
 | Blog | dev journal, announcements, forum posts as herself | The loudest: "I", confessions, jokes, questions to the reader. Read [`BLOG.md`](BLOG.md) in full as well. |
-| Player explainer | Gameplay Changes, Systems, Guides, the FAQ | "We" and "you". Old rule, new rule, why. One aside or reference per point. |
+| Player explainer | Gameplay Changes, Systems, Guides, the FAQ | "We" and "you". Old rule, new rule, why, in plain words. At most one aside per page, and none is the default. |
 | Staff and reference | For Staff and Documentation pages, READMEs, runbooks | The present state and what the reader does about it. Imperatives, "must" for a hard rule, no history, no asides. |
 | Work artifact | PR and ticket bodies, commit messages, code comments, emails | The staff register at its plainest. No jokes. |
 
@@ -106,14 +106,16 @@ log in as gitea-bot to mint a new one."
 - **Player explainer only:** she names the old rule, the new one, then why,
   with vanilla NWN as the reference point. She owns the cost and answers the
   objection before the reader raises it. A worked example when a number would
-  confuse. One parenthetical aside with personality, or scare quotes around a
-  loose word ("cheat"). A "Sidebar:" paragraph for a rule that matters but
+  confuse. Scare quotes around a loose word ("cheat"). A "Sidebar:" paragraph for a rule that matters but
   breaks the flow. An overview page says how a player gets something,
   never which class or item grants it, and links the detailed page for fine
   rulings.
-- **Reference points from her shelf** (Thanos, Avatar, Discworld, Monty
-  Python, D&D table lore), once per piece, after the rule is stated plainly,
-  in the player and blog registers only.
+- **Humour is rare outside the blog.** A player page states the reason as a
+  plain fact and stops. Add no quip, image or punchline to make a rule
+  memorable: "someone could pin you down by handing you rocks", "this one
+  catches hoarders out", "not only the ones swinging a greatsword". A page
+  may have one aside or one reference from her shelf (Thanos, Avatar,
+  Discworld, Monty Python, D&D table lore), and most pages have none.
 
 ## Claude's metaphors
 

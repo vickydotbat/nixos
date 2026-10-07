@@ -69,6 +69,11 @@ metaphors are listed in `SKILL.md`.
   Scale it to what is true.
 - **Honesty tags** — *honestly*, *to be honest*, *I want to be careful here*.
   Cut them.
+- **Added colour** — a quip, a vivid image or a dramatised reason hung on a
+  plain rule, outside the blog. "A limit that froze you would let anyone pin
+  you down by handing you rocks" → "A refusal never roots you in place,
+  because anyone can give you an item without asking." Count the asides on
+  the page: more than one is the tell.
 - **Quietly** — cut it unless something was really done without notice.
 - **Drama words** — *settled* and *unsettled* for a decision, *wrecked* for a
   measured effect. Use the measured word: *open*, *decided*, *slowed by 20%*.
