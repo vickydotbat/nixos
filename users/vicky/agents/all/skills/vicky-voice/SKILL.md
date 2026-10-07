@@ -167,7 +167,8 @@ agent's sentence, then hers.
 - **Echo through "which means".** "The person who opened the pull request is
   in Owners or Platform, which means they could have approved it on `main`
   anyway." → "The person who opened the pull request must be of a reviewer
-  rank themselves."
+  rank themselves." The page named the two teams one section up, so the
+  short form lost nothing. A specific name the page gives nowhere else stays.
 - **Run-on.** "**A rejection blocks the merge** until the reviewer who asked
   for changes approves, and a review you've requested from an approver blocks
   it until they answer." → "**A rejection blocks the merge.** Satisfy any
