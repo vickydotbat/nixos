@@ -104,7 +104,12 @@ log in as gitea-bot to mint a new one."
   in the game: "EXP Pool".
 - **Ranges as "1-40".**
 - **Player explainer only:** she names the old rule, the new one, then why,
-  with vanilla NWN as the reference point. She owns the cost and answers the
+  with vanilla NWN as the reference point. She says what a system is the
+  first time she names it ("Bank credit, which lets you spend from your bank
+  at shops instead of out of pocket"). The why goes past the cause to what
+  the rule is meant to make players do ("so the NPC charges more than a
+  player would, to discourage taking the path of least resistance"). These
+  are additions: a draft that only cuts misses them. She owns the cost and answers the
   objection before the reader raises it. A worked example when a number would
   confuse. Scare quotes around a loose word ("cheat"). A "Sidebar:" paragraph for a rule that matters but
   breaks the flow. An overview page says how a player gets something,

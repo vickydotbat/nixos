@@ -74,6 +74,12 @@ metaphors are listed in `SKILL.md`.
   you down by handing you rocks" → "A refusal never roots you in place,
   because anyone can give you an item without asking." Count the asides on
   the page: more than one is the tell.
+- **Coy phrasing** — an epigram, or a hint where the plain noun belongs.
+  The reader has to decode it. Name the thing. "Every purse that stays at
+  home is one a thief never lifts, so spending from the bank has a limit and
+  costs you something your pocket doesn't" → "A thief can't lift your purse
+  if you're not carrying it, so it has a fairly restrictive limit and costs
+  an additional fee."
 - **Quietly** — cut it unless something was really done without notice.
 - **Drama words** — *settled* and *unsettled* for a decision, *wrecked* for a
   measured effect. Use the measured word: *open*, *decided*, *slowed by 20%*.
