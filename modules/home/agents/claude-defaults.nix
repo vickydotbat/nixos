@@ -20,6 +20,8 @@
 # `marketplaces` and `plugins` are the exception: those two keys are merged in
 # on every rebuild, so a plugin listed here is installed on every machine. They
 # merge instead of replace, so plugins added by hand with `/plugin` stay.
+# The permission lists in `settings` merge the same way, so a rule saved with
+# "don't ask again" survives the next rebuild.
 
 let
   cfg = config.theorem.home.agents.claudeDefaults;
@@ -102,8 +104,12 @@ in
       description = ''
         Settings re-applied on every rebuild, for the policy keys that should
         be the same on every machine — what is switched off, what is denied.
-        Merged recursively into `settings.json`, so untouched keys survive;
-        a list here replaces the list in the file rather than adding to it.
+        Merged recursively into `settings.json`, so untouched keys survive.
+        A list here replaces the list in the file, with one exception:
+        `permissions.allow`, `permissions.ask` and `permissions.deny` add
+        their entries to the file's list. A rule you save from the CLI
+        survives a rebuild. Removing a rule here does not remove it from a
+        machine that already has it; delete it from `settings.json` there.
 
         Anything you want to change from inside the CLI belongs in an option
         above instead, not here: this overwrites such an edit on next rebuild.
@@ -163,7 +169,15 @@ in
         --argjson plugins ${lib.escapeShellArg (builtins.toJSON cfg.plugins)} \
         --argjson settings ${lib.escapeShellArg (builtins.toJSON cfg.settings)} \
         '
+          . as $old |
           . * $settings |
+          reduce ("allow", "ask", "deny") as $k (.;
+            if ($settings.permissions[$k] // null) == null then .
+            else .permissions[$k] = (
+              ($old.permissions[$k] // []) as $kept
+              | $kept + ($settings.permissions[$k] - $kept)
+            ) end
+          ) |
           .extraKnownMarketplaces = ((.extraKnownMarketplaces // {}) + $marketplaces) |
           .enabledPlugins = ((.enabledPlugins // {}) + $plugins) |
           ${lib.optionalString cfg.statusLine ''
