@@ -191,11 +191,22 @@ in
         mattpocock = "mattpocock/skills";
         ponytail = "DietrichGebert/ponytail";
         caveman = "JuliusBrussee/caveman";
+        # HumanLayer's skill kit. The key matches the `name` in upstream's
+        # marketplace.json, which is the bare word "skills".
+        skills = "humanlayer/skills";
       };
 
       plugins = {
         "mattpocock-skills@mattpocock" = true;
         "ponytail@ponytail" = true;
+
+        # HumanLayer ships one plugin per skill; all six are on.
+        "improve-claude-md@skills" = true;
+        "narrow-react-prop-types@skills" = true;
+        "build-iterated-agentic-loop@skills" = true;
+        "design-control-loop@skills" = true;
+        "show-me@skills" = true;
+        "visual-pr@skills" = true;
 
         # Explicitly off, to match `caveman.enable = false` above: the plugin
         # would bring the SessionStart hook back on its own. The marketplace
