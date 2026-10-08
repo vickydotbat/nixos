@@ -107,13 +107,11 @@ in
       ];
     };
 
-    # Installed for its review skills, not as an always-on mode. `off` skips
-    # the SessionStart ruleset that loaded into every session; call
-    # `/ponytail-review` or `/ponytail-audit` to thin bloated code, or
-    # `/ponytail full` to turn the mode on for one session.
+    # Always on in full mode. Every new session loads the ruleset at start.
+    # Run `/ponytail off` to drop it for one session.
     ponytail = {
       enable = true;
-      level = "off";
+      level = "full";
     };
 
     # Off on purpose: caveman drops articles and filler, which fights the ELI5
