@@ -1,5 +1,5 @@
-# pr-guard, a PreToolUse hook that holds every repository to one open pull
-# request, and keeps stacks for the times the operator asks for one.
+# pr-guard, a PreToolUse hook that holds every effort to one open pull request,
+# and keeps stacks for the times the operator asks for one.
 #
 # The rule lived in CLAUDE.md as prose, with a fallback that let an agent stack
 # whenever its open pull request was "waiting on review". Agents read every
@@ -7,10 +7,20 @@
 # session opened a second pull request beside the first. Prose is not
 # enforcement, so this hook refuses, before the command runs:
 #
-#   1. A new pull request while the operator already has another one open in
-#      the same repository: `tea pr create`, `gh pr create`, `gs branch submit`,
-#      or a `tea api` POST to `pulls`. Re-submitting the branch that already
-#      owns the open pull request passes, because that only updates it.
+#   1. A second pull request for one effort: `tea pr create`, `gh pr create`,
+#      `gs branch submit`, or a `tea api` POST to `pulls`. An effort is a
+#      Claude Code session, so a session that already opened a pull request
+#      still open in the same repository is refused. A new pull request whose
+#      title or branch names a ticket an open one already names is refused
+#      from any session, because that effort is in flight. Re-submitting the
+#      branch that owns the open pull request passes, because that only
+#      updates it. A `depot/<user>` pull request, which the Westgate depot site
+#      opens, never counts. With no session ID, any other open pull request of
+#      the operator's in the repository counts.
+#
+#      One pull request per repository, the rule before this, made unrelated
+#      efforts queue behind each other, and every squash merge sent the next
+#      one back for a rebase.
 #   2. `gs stack submit`, `gs upstack submit` and `gs downstack submit`, which
 #      open one pull request per branch.
 #   3. `gs branch create` on any branch but main/master: that is a stack.
@@ -67,7 +77,7 @@ let
         exit 2
       }
 
-      allowance_hint="Each repository holds one open pull request, and a stack is opened only when Vicky asks for one in this conversation. Push to the open pull request instead. If Vicky asked for this one, ask her to run 'touch ~/.claude/pr-guard-allow' in her own terminal, then run the command again."
+      allowance_hint="Each effort holds one open pull request, and a stack is opened only when Vicky asks for one in this conversation. Push to the open pull request instead. If Vicky asked for this one, ask her to run 'touch ~/.claude/pr-guard-allow' in her own terminal, then run the command again."
 
       case "$tool" in
         Write | Edit | MultiEdit | NotebookEdit)
@@ -153,37 +163,108 @@ let
         done
       }
 
-      # Every open pull request of mine in this repository, one "index head"
-      # per line. Gitea's author field carries the full name when the account
-      # has one, so both names count as mine.
+      # Every open pull request of mine in this repository, one
+      # "index head title" per line. Gitea's author field carries the full name
+      # when the account has one, so both names count as mine.
+      #
+      # A `depot/<user>` branch is an asset pull request the Westgate depot site
+      # opens in her name, not an agent's effort, so it never counts.
       my_open_pulls() {
         local forge=$1 repo=$2 list me
         if [ "$forge" = gh ]; then
-          list=$(timeout 30 gh pr list --author @me --state open --json number,headRefName \
+          list=$(timeout 30 gh pr list --author @me --state open --json number,headRefName,title \
             ''${repo:+--repo "$repo"} </dev/null 2>&1) || { printf '%s' "$list"; return 1; }
-          jq -r '.[] | "\(.number) \(.headRefName)"' <<<"$list"
+          jq -r '.[] | select(.headRefName | startswith("depot/") | not)
+                 | "\(.number) \(.headRefName) \(.title)"' <<<"$list"
         else
           me=$(timeout 30 tea api user </dev/null 2>&1) || { printf '%s' "$me"; return 1; }
-          list=$(timeout 30 tea pulls list --state open --output json --fields index,head,author \
+          list=$(timeout 30 tea pulls list --state open --output json --fields index,head,author,title \
             ''${repo:+--repo "$repo"} </dev/null 2>&1) || { printf '%s' "$list"; return 1; }
           jq -r --argjson me "$me" \
             '.[] | select(.author == $me.login or (($me.full_name // "") != "" and .author == $me.full_name))
-                 | "\(.index) \(.head)"' <<<"$list"
+                 | select(.head | startswith("depot/") | not)
+                 | "\(.index) \(.head) \(.title // "")"' <<<"$list"
         fi
       }
 
+      # Ticket references (PLAT-372, GAME-12), upper-cased because branch names
+      # write them in lower case, one per line, sorted and unique.
+      tickets_in() {
+        grep -oiE '\b[a-z][a-z0-9]+-[0-9]+\b' <<<"$1" | tr '[:lower:]' '[:upper:]' | sort -u || true
+      }
+
+      # The title a segment passes with --title or -t, quoted or bare.
+      title_of() {
+        local segment=$1
+        if [[ $segment =~ (^|[[:space:]])(--title|-t)[[:space:]=]+\"([^\"]*)\" ]] ||
+           [[ $segment =~ (^|[[:space:]])(--title|-t)[[:space:]=]+\'([^\']*)\' ]] ||
+           [[ $segment =~ (^|[[:space:]])(--title|-t)[[:space:]=]+([^[:space:]]+) ]]; then
+          printf '%s' "''${BASH_REMATCH[3]}"
+        fi
+      }
+
+      # The pull requests this session opened, one "repo head" per line. The
+      # session ID stands for the effort: subagents share it, and a new effort
+      # is a new session. Entries for merged or closed pull requests stay and
+      # count for nothing, because only open pull requests are compared.
+      sessions_dir="$HOME/.claude/pr-guard-sessions"
+      session_file=""
+      [[ -n $session_id ]] && session_file="$sessions_dir/$session_id"
+
+      # One effort, one open pull request. Refuse when this session already has
+      # another open one in this repository, or when an open one already names
+      # a ticket the new one names. With no session ID (another harness), any
+      # other open pull request of mine counts, as the rule stood before.
       check_one_pull() {
-        local segment=$1 forge=$2 head=$3 repo=$4 pulls others
+        local segment=$1 forge=$2 head=$3 repo=$4 pulls others repo_key mine new_tickets shared index phead ptitle
         if ! pulls=$(my_open_pulls "$forge" "$repo"); then
           spend_allowance "pull request opened without the open-PR check"
           refuse "could not list this repository's open pull requests, so a second one cannot be ruled out." \
             "The forge said: $pulls" "$allowance_hint"
         fi
         others=$(awk -v head="$head" '$2 != head' <<<"$pulls")
-        if [ -n "$others" ]; then
-          spend_allowance "a second open pull request"
-          refuse "this repository already has your open pull request: $(tr '\n' ' ' <<<"$others")(index, branch)." \
-            "$allowance_hint"
+        repo_key=''${repo:-$(git remote get-url origin 2>/dev/null || pwd)}
+
+        if [[ -z $session_file ]]; then
+          if [ -n "$others" ]; then
+            spend_allowance "a second open pull request"
+            refuse "this repository already has your open pull request: $(cut -d' ' -f1,2 <<<"$others" | tr '\n' ' ')(index, branch)." \
+              "$allowance_hint"
+          fi
+          return 0
+        fi
+
+        mine=""
+        if [[ -f $session_file ]]; then
+          while read -r index phead _; do
+            [[ -n $index ]] || continue
+            if awk -v r="$repo_key" -v h="$phead" '$1 == r && $2 == h { found = 1 } END { exit !found }' "$session_file"; then
+              mine="$mine$index $phead "
+            fi
+          done <<<"$others"
+        fi
+        if [[ -n $mine ]]; then
+          spend_allowance "a second open pull request from one session"
+          refuse "this session already has an open pull request here: $mine(index, branch)." \
+            "One effort is one pull request. Commit on that branch and push to it." "$allowance_hint"
+        fi
+
+        new_tickets=$(tickets_in "$(title_of "$segment") $head")
+        if [[ -n $new_tickets ]]; then
+          while read -r index phead ptitle; do
+            [[ -n $index ]] || continue
+            shared=$(comm -12 <(printf '%s\n' "$new_tickets") <(tickets_in "$ptitle $phead"))
+            if [[ -n $shared ]]; then
+              spend_allowance "a pull request for a ticket another one already names"
+              refuse "open pull request $index ($phead) already names $(tr '\n' ' ' <<<"$shared")." \
+                "That effort is in flight. Push to its branch instead." "$allowance_hint"
+            fi
+          done <<<"$others"
+        fi
+
+        if [[ -n $head ]]; then
+          mkdir -p "$sessions_dir"
+          printf '%s %s\n' "$repo_key" "$head" >>"$session_file"
         fi
       }
 
@@ -235,7 +316,7 @@ let
 in
 {
   options.theorem.home.agents.prGuard = {
-    enable = lib.mkEnableOption "guard holding each repository to one open pull request, with stacks only on request";
+    enable = lib.mkEnableOption "guard holding each effort to one open pull request, with stacks only on request";
   };
 
   config = lib.mkIf cfg.enable {

@@ -344,10 +344,18 @@ anyone deciding it should.
   --abbrev-ref HEAD`. If it is not `main`/`master`, run `git branch --merged
   main`. If the current branch is not in the list, the work belongs on this
   branch and its open PR.
-- One open PR per repository. List the open PRs first (`tea pr list` /
-  `gh pr list`). When one of yours is open, the next commit goes on its branch
-  and into that PR, whatever the ticket, the effort or the review state. A new
-  PR opens only once it has merged or closed. pr-guard refuses a second one.
+- One open PR per effort. An effort is this session's work: every ticket the
+  ask names and every follow-up. List the open PRs first (`tea pr list` /
+  `gh pr list`).
+  - This session already has an open PR in the repository: the next commit
+    goes on its branch, whatever the ticket or the review state.
+  - Another open PR already names one of your tickets: that effort is in
+    flight. Push to its branch.
+  - Neither: branch from `main` and open a new PR.
+
+  pr-guard refuses a second open PR from one session, and a PR naming a
+  ticket that an open PR already names. Depot PRs (`depot/<user>`) don't
+  count.
 - Commit locally as you go. Push once, when the effort is finished and the
   checks pass. A push asks a reviewer to read.
 - Never reuse a branch whose remote was deleted (`git status` shows "upstream
@@ -360,7 +368,7 @@ A stack is built only when Vicky asks for one in the conversation. A PR
 waiting on review is a PR to push to: the next commit goes on its branch.
 
 pr-guard refuses `gs stack submit`, a `gs branch create` off anything but
-`main`, and a second PR. When Vicky asks for a stack, ask her to run
+`main`, and a second PR for one effort. When Vicky asks for a stack, ask her to run
 `touch ~/.claude/pr-guard-allow` in her own terminal before each refused
 step; one allowance lets one command through.
 

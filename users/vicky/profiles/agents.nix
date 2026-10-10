@@ -86,9 +86,10 @@ in
     # all.
     issueGuard.enable = true;
 
-    # Holds each repository to one open pull request. A second one, a stack
-    # submit, or a git-spice branch off anything but main is refused unless
-    # Vicky grants a one-shot allowance from her own terminal.
+    # Holds each effort to one open pull request. A second one from the same
+    # session, one naming a ticket an open one names, a stack submit, or a
+    # git-spice branch off anything but main is refused unless Vicky grants a
+    # one-shot allowance from her own terminal.
     prGuard.enable = true;
 
     # Matt Pocock's skills for Codex and pi only; Claude Code takes them from

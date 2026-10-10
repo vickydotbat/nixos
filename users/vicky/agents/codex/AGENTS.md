@@ -186,9 +186,10 @@ may have landed even when `tea` fails.
 - Commit only when asked. Never commit to `main` or `master`. Never force-push.
 - Destructive commands (`git reset --hard`, `git clean`, branch deletion,
   wiping files, history rewrites) run only when explicitly asked.
-- One open PR per repository. When one of yours is open, the next commit goes
-  on its branch and into that PR, whatever the effort or the review state.
-  Push once, after the work is finished.
+- One open PR per effort. While the PR for this effort is open, the next
+  commit goes on its branch, whatever the review state. When another open PR
+  already names one of your tickets, push to its branch. Push once, after the
+  work is finished.
 - A stack is built only when the user asks for one. Build it with `git-spice`
   (`gs branch create`, then `gs stack submit`), never with bare
   `git checkout -b`. Merge bottom-up, running `gs repo sync` after each merge.

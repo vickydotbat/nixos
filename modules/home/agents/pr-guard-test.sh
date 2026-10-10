@@ -45,9 +45,10 @@ repo trunk main
 
 failed=0
 
+# SESSION, when set, goes in the payload as the session ID.
 run() {
   local cwd=$1 tool=$2 input=$3
-  printf '{"tool_name":"%s","cwd":"%s","tool_input":%s}' "$tool" "$cwd" "$input" \
+  printf '{"tool_name":"%s","cwd":"%s","session_id":"%s","tool_input":%s}' "$tool" "$cwd" "${SESSION:-}" "$input" \
     | "$hook" >/dev/null 2>&1 && echo 0 || echo $?
 }
 cmd() { printf '{"command":%s}' "$(printf '%s' "$1" | jq -Rs .)"; }
@@ -98,6 +99,34 @@ expect 2 feature 'gs upstack submit'
 expect 2 feature 'gs branch create feat/two'
 expect 2 feature 'gs bc feat/two'
 expect 0 trunk 'gs branch create feat/two'
+
+# With a session ID, one effort is one open pull request. Session A opens
+# feat/a, so A's next pull request is refused while feat/a is open, and
+# session B, another effort, opens its own.
+echo '[{"index":"8","head":"theirs","author":"Someone Else"}]' >"$scratch/pulls.json"
+SESSION=A expect 0 feature 'tea pr create --base main --head feat/a --title "Fix the cache (PLAT-1)"'
+echo '[{"index":"10","head":"feat/a","author":"me","title":"Fix the cache (PLAT-1)"}]' >"$scratch/pulls.json"
+SESSION=A expect 0 feature 'tea pr create --base main --head feat/a'
+SESSION=A expect 2 feature 'tea pr create --base main --head feat/a2 --title "More (PLAT-9)"'
+SESSION=A expect 2 feature "tea api -X POST -d '{}' repos/o/r/pulls"
+SESSION=B expect 0 feature 'tea pr create --base main --head feat/b --title "Unrelated (GAME-2)"'
+
+# An open pull request that names a ticket refuses another one naming it, from
+# any session, whether the ticket is in the title or the branch name.
+SESSION=C expect 2 feature 'tea pr create --base main --head feat/c --title "Two tickets (GAME-3, PLAT-1)"'
+SESSION=C expect 2 feature 'tea pr create --base main --head plat-1-follow-up'
+SESSION=C expect 0 feature 'tea pr create --base main --head feat/c --title "Other (PLAT-11)"'
+
+# Once A's pull request is gone, A opens the next one.
+echo '[]' >"$scratch/pulls.json"
+SESSION=A expect 0 feature 'tea pr create --base main --head feat/a2 --title "More (PLAT-9)"'
+
+# A depot/<user> pull request never counts, with or without a session.
+echo '[{"index":"11","head":"depot/2","author":"me","title":"Depot changes (PLAT-1)"}]' >"$scratch/pulls.json"
+expect 0 feature 'tea pr create --base main --head feat/two'
+SESSION=D expect 0 feature 'tea pr create --base main --head feat/d --title "Fix (PLAT-1)"'
+echo '[{"number":12,"headRefName":"depot/2","title":"Depot"}]' >"$scratch/gh.json"
+expect 0 feature 'gh pr create --head feat/two'
 
 # A forge that cannot answer is not a forge that said "none".
 rm -f "$scratch/pulls.json"
