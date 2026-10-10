@@ -107,7 +107,11 @@ Any agent that understands this `AGENTS.md` convention should:
    - `monitoring.md` - health checks and alerting
    - `anti-patterns.md` - common mistakes
 3. Verify every NixOS option before suggesting it. The skill includes guidance for this, and `search.nixos.org/options` is always available.
-4. Ask the user about the execution context before suggesting commands: local NixOS host, remote deploy from Linux, remote deploy from macOS, or another crucible entirely.
+4. Reach for the general Nix skills installed beside it (`nix-language`,
+   `nixpkgs-development`, `home-manager`, `nixos-operations`, `nix-workflow`,
+   `nixos-wiki`) for language, packaging, and Home Manager questions. This
+   skill stays the authority on this theorem's own shape.
+5. Ask the user about the execution context before suggesting commands: local NixOS host, remote deploy from Linux, remote deploy from macOS, or another crucible entirely.
 
 Do not edit `docs/nixos-managing/` unless the user explicitly asks for skill maintenance. It is reference doctrine, and casual drift there can teach future agents the wrong repair.
 

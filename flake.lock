@@ -231,11 +231,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1791254003,
-        "narHash": "sha256-THCNWtawuMwTSrPv7+NW6IKwo4hGh8abHsBH+/KccLA=",
+        "lastModified": 1791521880,
+        "narHash": "sha256-WYtI4kdabEmBLeHS722CV0CNj845Z3N25icIao/Yjm4=",
         "owner": "jadzziaa",
         "repo": "moonglow-toolset",
-        "rev": "6b3d08b34a7964b8109f021e45747866bc174184",
+        "rev": "4a6cd23cc2571e541db0b505598b1c978b86fb64",
         "type": "github"
       },
       "original": {
@@ -261,6 +261,22 @@
       "original": {
         "owner": "nix-community",
         "repo": "nix-index-database",
+        "type": "github"
+      }
+    },
+    "nix-skills": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1790233682,
+        "narHash": "sha256-kpfzu06HYAMP/pmu3CRPQb+skIjZGByxvaUy7F08axw=",
+        "owner": "olafkfreund",
+        "repo": "nix-skills",
+        "rev": "f5c8e8b3b3255e323e5b84192d0b6ed2e79ef4f4",
+        "type": "github"
+      },
+      "original": {
+        "owner": "olafkfreund",
+        "repo": "nix-skills",
         "type": "github"
       }
     },
@@ -444,6 +460,7 @@
         "matt-skills": "matt-skills",
         "moonglow-toolset": "moonglow-toolset",
         "nix-index-database": "nix-index-database",
+        "nix-skills": "nix-skills",
         "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs",
         "nixpkgs-stable": "nixpkgs-stable",

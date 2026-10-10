@@ -96,6 +96,10 @@ in
     # the marketplace below.
     mattSkills.enable = true;
 
+    # Nix language, nixpkgs, Home Manager, and NixOS operations skills, for
+    # every harness including Claude Code.
+    nixSkills.enable = true;
+
     # Runs linters and turns each finding into a coaching guide the agent acts
     # on. Nothing happens in a project without a `.habit-hooks/config.toml`;
     # `habit-hooks init` writes one. The doctrine line lives in

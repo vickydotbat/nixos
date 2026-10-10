@@ -164,6 +164,12 @@ This machine runs NixOS, not FHS Linux.
   dev shell or `nix shell` wins on PATH and has no daemon behind it. A tool
   that wants a Docker socket takes
   `DOCKER_HOST=unix:///run/user/$(id -u)/podman/podman.sock`.
+- For Nix work, load the matching Nix skill before you answer or edit:
+  `nix-language` (expressions), `nixpkgs-development` (packages, overlays),
+  `home-manager`, `devenv-project`, `nixos-operations` (rebuilds, generations,
+  rollback, boot), `nix-workflow` (commands, store paths, dev shells),
+  `nixos-wiki`, `microvm-nix`, `nixos-coding-agents`. Each one checks its
+  answer against the project's own pin.
 
 ## Blender and NWN model tooling
 
@@ -179,6 +185,12 @@ This machine runs NixOS, not FHS Linux.
   PATH, so run it from the Nix store or add it back.
 - `cleanmodels` and `neverwinter-nim` are on PATH for ASCII `.mdl` cleanup and
   for packing HAK and ERF files.
+- `cleanmodels -d -i <in dir> -o <out dir>` decompiles compiled (binary) `.mdl`
+  files to ASCII and applies no fixes. It follows symlinks, so stage blobs as
+  `<name>.mdl` links in the input directory. It also writes `.wok` files and
+  two logs into the output directory. It fails to load some ASCII models that
+  the game accepts, so read an ASCII model as it is and decompile only the
+  compiled ones (first four bytes zero).
 
 Run Blender headless with a script:
 

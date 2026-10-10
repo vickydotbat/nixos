@@ -106,6 +106,13 @@
       url = "github:JuliusBrussee/caveman";
       flake = false;
     };
+
+    # Nix-focused skills for every harness; plain checkout, its own flake and
+    # Home Manager module are not needed for symlinks.
+    nix-skills = {
+      url = "github:olafkfreund/nix-skills";
+      flake = false;
+    };
   };
 
   outputs =
