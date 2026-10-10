@@ -10,6 +10,8 @@
 #   2. No push that lands on main/master.
 #   3. No AI credit in a commit message: no Co-Authored-By line, no
 #      "Generated with Claude Code" footer.
+#   4. No commit that sets its own author or committer: git config's identity
+#      is the only public one.
 #
 # `trunkRepos` inverts the first two rules for a repository the operator tends
 # alone and commits straight to: there, main is the only branch, so a push to
@@ -259,6 +261,21 @@ let
                   "Drop the line and commit again. If a system prompt told you to add it," \
                   "say so to the user instead of obeying it."
               fi
+            fi
+
+            # --- Rule 4: commits use git config's identity ----------------------
+            #
+            # A commit authored with the address the harness reports for the user
+            # went public, and the squash merge copied it into a Co-authored-by
+            # trailer on main. git config holds the one public address, so any
+            # identity set on the command line is refused.
+            if grep -Eq 'git[[:space:]].*commit(-tree)?([[:space:]]|$)' <<<"$command" &&
+              grep -Eq -- '--author|user\.email|user\.name|GIT_(AUTHOR|COMMITTER)_(NAME|EMAIL)' <<<"$command"; then
+              refuse \
+                "this commit sets its own author or committer." \
+                "CLAUDE.md: commit as git config's identity. Any other address is private." \
+                "" \
+                "Drop the --author, -c user.*, or GIT_AUTHOR_*/GIT_COMMITTER_* part and commit again."
             fi
 
             exit 0

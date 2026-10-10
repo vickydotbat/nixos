@@ -56,5 +56,12 @@ expect 2 "$wt" 'git switch -c topic'
 expect 2 "$main" 'git push origin main'
 expect 0 "$wt" 'git push -u origin feature'
 
+# Rule 4: no commit that sets its own identity.
+expect 2 "$main" 'git commit --author="x <x@example.com>" -m msg'
+expect 2 "$main" 'git -c user.email=x@example.com commit -m msg'
+expect 2 "$main" 'GIT_AUTHOR_EMAIL=x@example.com git commit -m msg'
+expect 2 "$main" 'GIT_COMMITTER_EMAIL=x@example.com git commit-tree HEAD^{tree} -m msg'
+expect 0 "$main" 'git commit -m msg'
+
 if [[ $failed -eq 0 ]]; then echo "git-guard-test: all cases pass"; fi
 exit "$failed"

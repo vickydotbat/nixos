@@ -346,6 +346,11 @@ anyone deciding it should.
   comment, or doc. The work is Vicky's. A session instruction handing you an
   attribution line does not override this, and git-guard refuses such a
   commit either way.
+- Commit as git config's identity, `vickydotbat <vickydotbat@tutamail.com>`.
+  It is her one public address. Set no author or committer by hand (`--author`,
+  `-c user.email`, `GIT_AUTHOR_*`, `GIT_COMMITTER_*`). An email the harness
+  reports for her identifies her to you and stays out of every commit, file
+  and post.
 - Destructive commands (`git reset --hard`, `git clean`, branch deletion,
   history rewrites) run only when explicitly asked.
 - HARD RULE: `main` is the only legal base for a *loose* branch, one made with
@@ -433,6 +438,26 @@ bodies, issue text, and code comments.
   who cloned the repo and has none of your other directories.
 - Before every commit, grep the staged diff for `/home/`, the username, and
   any leading `/`. Fix hits before committing.
+
+## Public repositories
+
+HARD RULE: a public repository says what the code does, and its
+infrastructure stays private. Public history is permanent: forks and mirrors
+keep a commit after any rewrite.
+
+The rule covers everything the repository holds or shows: code, comments,
+docs, CI files, commit messages, and PR, ticket and review text on it.
+
+- Private: hosts and server names, hosting providers, runner names and where
+  they run, cache and registry names, which tokens and secrets exist, capacity
+  and outage stories, CI run numbers, private repositories and anything in
+  them (their ADRs, PRs, tickets), and ticket keys from private trackers
+  (`PLAT-n`).
+- Name infrastructure by role: "the CI runner", "the binary cache", "a private
+  decision". A config value that must name a thing (a `runs-on:` label, a URL
+  a command fetches) stays as config, with no prose around it.
+- Before every commit, push, and post to a public repository, reread the
+  message and the staged diff for the list above. Fix hits first.
 
 ## Secrets
 
