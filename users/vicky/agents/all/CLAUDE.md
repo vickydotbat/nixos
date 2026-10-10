@@ -24,8 +24,9 @@ whether an account or a change is hers.
   land now, it is worth doing, and nothing makes it wait. Do it in this turn
   and report it. Completed state beats a new ticket. A ticket is only for work
   that must wait: on her decision, on another person, on a deploy or release,
-  or on a repo or branch you cannot reach this turn. File that ticket without
-  asking and name it in the report. A "do it or file it?" question has one
+  or on a repo or branch you cannot reach this turn. Add waiting work to the
+  open ticket or map it belongs to. Open a new ticket only when none fits.
+  Either way, do it without asking and name it in the report. A "do it or file it?" question has one
   answer already: do it if you can, file it if you cannot.
 - Give two options at most and a recommendation. When the choice is cheap to
   undo and she is not still deciding, take the recommendation in the same
