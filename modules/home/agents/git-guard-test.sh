@@ -5,7 +5,7 @@
 #   bash git-guard-test.sh [path to hook]
 #
 # Defaults to the installed hook, so the normal use is "rebuild, then run this".
-# Covers rule 4, the main-checkout switch, plus the two rules it sits beside.
+# Covers branch switches, which pass anywhere, plus rules 1 and 2.
 set -euo pipefail
 
 hook="${1:-$HOME/.claude/git-guard-hook}"
@@ -33,28 +33,26 @@ expect() {
 main="$scratch/repo"
 wt="$scratch/wt"
 
-# The main checkout: no switch to a branch or a commit, new or old.
-expect 2 "$main" 'git checkout feature'
-expect 2 "$main" 'git switch feature'
-expect 2 "$main" 'git checkout -b topic'
-expect 2 "$main" 'git switch -c topic'
-expect 2 "$main" "git checkout $(g rev-parse HEAD)"
-expect 2 "$scratch" "git -C $main switch feature"
-expect 2 "$scratch" "cd $main && git checkout feature"
-
-# The main checkout: back to main, file restores, and anything not a switch.
-expect 0 "$main" 'git checkout main'
-expect 0 "$main" 'git switch main'
+# The main checkout: a switch to a branch or a commit, new or old, passes.
+expect 0 "$main" 'git checkout feature'
+expect 0 "$main" 'git switch feature'
+expect 0 "$main" 'git checkout -b topic'
+expect 0 "$main" 'git switch -c topic'
+expect 0 "$main" "git checkout $(g rev-parse HEAD)"
+expect 0 "$scratch" "git -C $main switch feature"
 expect 0 "$main" 'git checkout -- file'
-expect 0 "$main" 'git checkout file'
 expect 0 "$main" 'git status'
-expect 0 "$main" 'git worktree add .claude/worktrees/topic -b topic origin/main'
 
-# A linked worktree belongs to one session and switches freely.
+# A linked worktree switches the same way.
 expect 0 "$wt" 'git switch main'
 expect 0 "$wt" 'git checkout feature'
 
-# Rule 2 still holds in either place.
+# Rule 1: no new branch from a branch that main has not merged.
+git -C "$wt" -c user.email=t@t -c user.name=t -c commit.gpgsign=false commit -q --allow-empty -m unmerged
+expect 2 "$wt" 'git checkout -b topic'
+expect 2 "$wt" 'git switch -c topic'
+
+# Rule 2: no push to main.
 expect 2 "$main" 'git push origin main'
 expect 0 "$wt" 'git push -u origin feature'
 
