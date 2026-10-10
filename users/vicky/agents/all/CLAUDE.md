@@ -358,6 +358,11 @@ anyone deciding it should.
   count.
 - Commit locally as you go. Push once, when the effort is finished and the
   checks pass. A push asks a reviewer to read.
+- Never switch branches in a repository's main checkout. Other sessions work
+  in the same folder. Work on a branch in a worktree of your own:
+  `git worktree add .claude/worktrees/<name> -b <branch> origin/main`, then run
+  every command for it there. git-guard refuses a switch in a main checkout,
+  except back to `main`/`master`.
 - Never reuse a branch whose remote was deleted (`git status` shows "upstream
   is gone"). Start fresh from freshly-pulled `main`.
 - Preserve unrelated user changes and mention them.

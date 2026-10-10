@@ -10,6 +10,9 @@
 #   2. No push that lands on main/master.
 #   3. No AI credit in a commit message: no Co-Authored-By line, no
 #      "Generated with Claude Code" footer.
+#   4. No branch switch in a repository's main checkout, which every session
+#      shares. A session switches branches in a worktree of its own. Switching
+#      back to main/master passes.
 #
 # `trunkRepos` inverts the first two rules for a repository the operator tends
 # alone and commits straight to: there, main is the only branch, so a push to
@@ -100,6 +103,61 @@ let
               printf '%s\n' "$@" >&2
               exit 2
             }
+
+            # --- Rule 4: no branch switch in a shared main checkout -------------
+            #
+            # A repository's main checkout is the folder every session opens. One
+            # session's `git checkout feature` moved the files under the others:
+            # Vicky's checkouts were left on merged branches, and a session found
+            # its branch changed mid-task. A linked worktree belongs to the one
+            # session that made it, so it may switch freely. Switching back to
+            # main/master passes, because that is the checkout's resting state.
+            #
+            # `git switch <anything>` is a switch. `git checkout` is one when it
+            # creates a branch, or when its first argument resolves to a commit
+            # and no `--` marks a file restore.
+            #
+            # ponytail: git-spice's branch checkout and branch create switch too,
+            # and git-spice stays invisible to the pre-filter. Add them if a
+            # session starts switching the main checkout that way.
+            git_dir=$(git rev-parse --path-format=absolute --git-dir 2>/dev/null) || git_dir=""
+            common_dir=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null) || common_dir=""
+            if [ "$trunk" -eq 0 ] && [ -n "$git_dir" ] && [ "$git_dir" = "$common_dir" ]; then
+              while IFS= read -r segment; do
+                switch_to=""
+                if [[ $segment =~ (^|[[:space:]])git([[:space:]]+-C[[:space:]]+[^[:space:]]+)?[[:space:]]+switch([[:space:]]+(.*))?$ ]]; then
+                  args=''${BASH_REMATCH[4]:-}
+                  switch_to=$(grep -oE '(^|[[:space:]])[^-[:space:]][^[:space:]]*' <<<"$args" | tail -1 | tr -d '[:space:]"'"'") || switch_to=""
+                  if grep -Eq '(^|[[:space:]])-([cC]|-create)([[:space:]]|$)' <<<"$args"; then
+                    switch_to="new branch"
+                  fi
+                  [ -n "$switch_to" ] || switch_to="another branch"
+                elif [[ $segment =~ (^|[[:space:]])git([[:space:]]+-C[[:space:]]+[^[:space:]]+)?[[:space:]]+checkout([[:space:]]+(.*))?$ ]]; then
+                  args=''${BASH_REMATCH[4]:-}
+                  if grep -Eq '(^|[[:space:]])-([bB]|-orphan)([[:space:]]|$)' <<<"$args"; then
+                    switch_to="new branch"
+                  elif ! grep -Eq '(^|[[:space:]])--([[:space:]]|$)' <<<"$args"; then
+                    first=$(grep -oE '(^|[[:space:]])[^-[:space:]][^[:space:]]*' <<<"$args" | head -1 | tr -d '[:space:]"'"'") || first=""
+                    if [ -n "$first" ] && git rev-parse --verify --quiet "$first^{commit}" >/dev/null; then
+                      switch_to=$first
+                    fi
+                  fi
+                fi
+                case "$switch_to" in
+                  "" | main | master | origin/main | origin/master) ;;
+                  *)
+                    refuse \
+                      "this is the main checkout of $(basename "$(dirname "$common_dir")"), which every session shares." \
+                      "A branch switch here moves the files under the other sessions." \
+                      "" \
+                      "Work in a worktree of your own instead:" \
+                      "  existing branch: git worktree add .claude/worktrees/<name> <branch>" \
+                      "  new branch:      git worktree add .claude/worktrees/<name> -b <branch> origin/main" \
+                      "Then run every command for that branch inside the worktree."
+                    ;;
+                esac
+              done < <(tr ';&|' '\n' <<<"$command")
+            fi
 
             # --- Rule 1: no new branch on top of unmerged work ------------------
             #
